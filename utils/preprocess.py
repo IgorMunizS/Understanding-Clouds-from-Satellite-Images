@@ -5,7 +5,7 @@ import numpy as np
 
 def get_data_preprocessed():
 
-    train_df = pd.read_csv('../dados/train.csv')
+    train_df = pd.read_csv('../../dados/train.csv')
     train_df['ImageId'] = train_df['Image_Label'].apply(lambda x: x.split('_')[0])
     train_df['ClassId'] = train_df['Image_Label'].apply(lambda x: x.split('_')[1])
     train_df['hasMask'] = ~ train_df['EncodedPixels'].isna()
