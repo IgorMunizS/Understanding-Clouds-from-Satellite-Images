@@ -9,6 +9,7 @@ from utils.lr import CyclicLR
 from models import get_model
 from utils.losses import dice_coef, dice_coef_loss_bce
 from keras.callbacks import ModelCheckpoint, EarlyStopping
+import gc
 
 
 def train(smmodel,backbone,batch_size,shape=(320,480)):
@@ -32,6 +33,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480)):
             n_classes=4,
             backbone=backbone
         )
+
 
         val_generator = DataGenerator(
             val_indices,
@@ -68,6 +70,9 @@ def train(smmodel,backbone,batch_size,shape=(320,480)):
             use_multiprocessing=True,
             workers=42
         )
+
+        del train_generator,val_generator,model
+        gc.collect()
 
 def parse_args(args):
     """ Parse the arguments.

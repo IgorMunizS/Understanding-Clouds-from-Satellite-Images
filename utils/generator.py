@@ -4,6 +4,7 @@ import albumentations as albu
 import segmentation_models as sm
 import cv2
 from utils.utils import build_masks,np_resize
+from skimage.exposure import adjust_gamma
 
 class DataGenerator(keras.utils.Sequence):
     'Generates data for Keras'
@@ -11,7 +12,7 @@ class DataGenerator(keras.utils.Sequence):
     def __init__(self, list_IDs, df, target_df=None, mode='fit',
                  base_path='../../dados/train_images',
                  batch_size=32, dim=(1400, 2100), n_channels=3, reshape=None,
-                 augment=False, n_classes=4, random_state=2019, shuffle=True, backbone='resnet34'):
+                 augment=False, n_classes=4, random_state=2019, shuffle=True, backbone='resnet34', gamma=None):
         self.dim = dim
         self.batch_size = batch_size
         self.df = df
@@ -23,14 +24,11 @@ class DataGenerator(keras.utils.Sequence):
         self.n_channels = n_channels
         self.augment = augment
         self.n_classes = n_classes
+        self.gamma = gamma
         self.shuffle = shuffle
         self.random_state = random_state
         self.preprocess_input = sm.get_preprocessing(backbone)
 
-        self.X = self.__generate_X()
-        self.X = self.preprocess_input(self.X)
-        if self.mode == 'fit':
-            self.y = self.__generate_y()
 
         self.on_epoch_end()
         np.random.seed(self.random_state)
@@ -45,44 +43,41 @@ class DataGenerator(keras.utils.Sequence):
         indexes = self.indexes[index * self.batch_size:(index + 1) * self.batch_size]
 
         # Find list of IDs
-        #         list_IDs_batch = [self.indexes[k] for k in indexes]
+        list_IDs_batch = [self.list_IDs[k] for k in indexes]
 
-        #         X = self.__generate_X(list_IDs_batch)
+        X = self.__generate_X(list_IDs_batch)
 
         if self.mode == 'fit':
-            #             y = self.__generate_y(list_IDs_batch)
+            y = self.__generate_y(list_IDs_batch)
 
             if self.augment:
-                X, y = self.__augment_batch(self.X[indexes], self.y[indexes])
-            else:
-                X = self.X[indexes]
-                y = self.y[indexes]
+                X, y = self.__augment_batch(X, y)
 
             return X, y
 
         elif self.mode == 'predict':
-            return self.X[indexes]
+            return X
 
         else:
             raise AttributeError('The mode parameter should be set to "fit" or "predict".')
 
     def on_epoch_end(self):
         'Updates indexes after each epoch'
-        self.indexes = np.arange(len(self.X))
+        self.indexes = np.arange(len(self.list_IDs))
         if self.shuffle == True:
             np.random.seed(self.random_state)
             np.random.shuffle(self.indexes)
 
-    def __generate_X(self):
+    def __generate_X(self, list_IDs_batch):
         'Generates data containing batch_size samples'
         # Initialization
         if self.reshape is None:
-            X = np.empty((len(self.list_IDs), *self.dim, self.n_channels))
+            X = np.empty((self.batch_size, *self.dim, self.n_channels))
         else:
-            X = np.empty((len(self.list_IDs), *self.reshape, self.n_channels))
+            X = np.empty((self.batch_size, *self.reshape, self.n_channels))
 
         # Generate data
-        for i, ID in enumerate(self.list_IDs):
+        for i, ID in enumerate(list_IDs_batch):
             im_name = self.df['ImageId'].iloc[ID]
             img_path = f"{self.base_path}/{im_name}"
             img = self.__load_rgb(img_path)
@@ -90,18 +85,24 @@ class DataGenerator(keras.utils.Sequence):
             if self.reshape is not None:
                 img = np_resize(img, self.reshape)
 
+            # Adjust gamma
+            if self.gamma is not None:
+                img = adjust_gamma(img, gamma=self.gamma)
+
             # Store samples
             X[i,] = img
 
+        X = self.preprocess_input(X)
+
         return X
 
-    def __generate_y(self):
+    def __generate_y(self, list_IDs_batch):
         if self.reshape is None:
-            y = np.empty((len(self.list_IDs), *self.dim, self.n_classes), dtype=int)
+            y = np.empty((self.batch_size, *self.dim, self.n_classes), dtype=int)
         else:
-            y = np.empty((len(self.list_IDs), *self.reshape, self.n_classes), dtype=int)
+            y = np.empty((self.batch_size, *self.reshape, self.n_classes), dtype=int)
 
-        for i, ID in enumerate(self.list_IDs):
+        for i, ID in enumerate(list_IDs_batch):
             im_name = self.df['ImageId'].iloc[ID]
             image_df = self.target_df[self.target_df['ImageId'] == im_name]
 
