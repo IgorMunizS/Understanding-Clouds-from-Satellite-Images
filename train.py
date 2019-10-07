@@ -21,6 +21,8 @@ def train(smmodel,backbone,batch_size,shape=(320,480)):
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index)):
 
+        print('Training fold number ',str(n_fold))
+
 
         train_generator = DataGenerator(
             train_indices,
@@ -56,7 +58,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480)):
         clr = CyclicLR(base_lr=0.0002, max_lr=0.001,
                        step_size=300, reduce_on_plateau=3, monitor='val_loss', reduce_factor=10)
 
-        filepath = '../models/best_' + str(model) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
+        filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
         checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min',
                                      save_weights_only=True)
         es = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=5, verbose=1, mode='min')
