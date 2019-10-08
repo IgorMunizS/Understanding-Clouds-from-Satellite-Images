@@ -17,7 +17,7 @@ def get_data_preprocessed():
 
 
 def get_test_data():
-    sub_df = pd.read_csv('../dados/sample_submission.csv')
+    sub_df = pd.read_csv('../../dados/sample_submission.csv')
     sub_df['ImageId'] = sub_df['Image_Label'].apply(lambda x: x.split('_')[0])
     test_imgs = pd.DataFrame(sub_df['ImageId'].unique(), columns=['ImageId'])
 
