@@ -11,6 +11,7 @@ import cv2
 import argparse
 import sys
 import gc
+from tta_wrapper import tta_segmentation
 
 def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
 
@@ -47,41 +48,21 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
                 backbone=backbone
             )
 
-            batch_pred_masks = model.predict_generator(
-                test_generator,
-                workers=40,
-                verbose=1
-            )
-
             if TTA:
-                print('Applying TTA')
-                tta_results = []
-                tta_results.append(batch_pred_masks)
-                test_generator = DataGenerator(
-                    batch_idx,
-                    df=test_imgs,
-                    shuffle=False,
-                    mode='predict',
-                    dim=(350, 525),
-                    reshape=shape,
-                    n_channels=3,
-                    base_path='../../dados/test_images/',
-                    target_df=sub_df,
-                    batch_size=43,
-                    n_classes=4,
-                    backbone=backbone,
-                    TTA=TTA
-                )
+                tta_model = tta_segmentation(model, h_flip=True, v_flip=True, merge='mean')
 
+
+                batch_pred_masks = tta_model.predict_generator(
+                    test_generator,
+                    workers=40,
+                    verbose=1
+                )
+            else:
                 batch_pred_masks = model.predict_generator(
                     test_generator,
                     workers=40,
                     verbose=1
                 )
-                batch_pred_masks = test_generator.do_tta(batch_pred_masks) #undo TTA (Horizontal and Vertical Flip)
-                tta_results.append(batch_pred_masks)
-
-                batch_pred_masks = sum(tta_results) / 2
 
             fold_result.append(batch_pred_masks)
             del test_generator, batch_pred_masks
