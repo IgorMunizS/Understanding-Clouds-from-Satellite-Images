@@ -103,7 +103,7 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
             pred_masks = cv2.resize(pred_masks, dsize=(525, 350), interpolation=cv2.INTER_LINEAR)
             arrt = np.array([])
             for t in range(4):
-                a, num_predict = post_process(sigmoid(pred_masks[:, :, t]), 0.4, minsizes[t])
+                a, num_predict = post_process(sigmoid(pred_masks[:, :, t]), 0.6, minsizes[t])
 
                 if (arrt.shape == (0,)):
                     arrt = a.reshape(350, 525, 1)
