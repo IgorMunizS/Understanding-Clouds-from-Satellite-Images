@@ -17,6 +17,7 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
     opt = Adam()
     model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, dice_coef)
     sub_df,test_imgs = get_test_data()
+    print(test_imgs.shape[0])
     batch_idx = list(range(test_imgs.shape[0]))
     fold_result=[]
     test_df = []
