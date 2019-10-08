@@ -118,7 +118,7 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
         test_df.append(image_df)
 
     submission_name = str(smmodel) + '_' + str(backbone) + '.csv'
-    generate_submission(submission_name)
+    generate_submission(test_df, submission_name)
 
 def generate_submission(test_df, name):
 
