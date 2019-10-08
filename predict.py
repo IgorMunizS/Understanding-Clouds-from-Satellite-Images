@@ -19,19 +19,18 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
     sub_df,test_imgs = get_test_data()
     print(test_imgs.shape[0])
     # batch_idx = list(range(test_imgs.shape[0]))
-    fold_result=[]
     test_df = []
 
     for i in range(0, test_imgs.shape[0], 430):
         batch_idx = list(
             range(i, min(test_imgs.shape[0], i + 430))
         )
+        fold_result = []
+
         for i in range(5):
             print('Predicting Fold ', str(i))
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(i) + '.h5'
             model.load_weights(filepath)
-            test_df = []
-
 
             test_generator = DataGenerator(
                 batch_idx,
