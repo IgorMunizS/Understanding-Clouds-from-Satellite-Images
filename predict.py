@@ -97,9 +97,9 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
         filename = test_imgs['ImageId'].iloc[b]
         image_df = sub_df[sub_df['ImageId'] == filename].copy()
 
-        pred_masks = batch_pred_masks[j, ].round().astype(int)
 
         if posprocess:
+            pred_masks = batch_pred_masks[j,]
             pred_masks = cv2.resize(pred_masks, dsize=(525, 350), interpolation=cv2.INTER_LINEAR)
             arrt = np.array([])
             for t in range(4):
@@ -111,6 +111,8 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
                     arrt = np.append(arrt, a.reshape(350, 525, 1), axis=2)
 
             pred_masks = arrt
+        else:
+            pred_masks = batch_pred_masks[j,].round().astype(int)
 
         pred_rles = build_rles(pred_masks, reshape=(350, 525))
 
