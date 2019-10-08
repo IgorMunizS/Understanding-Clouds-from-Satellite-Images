@@ -18,42 +18,21 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
     model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, dice_coef)
     sub_df,test_imgs = get_test_data()
     print(test_imgs.shape[0])
-    batch_idx = list(range(test_imgs.shape[0]))
+    # batch_idx = list(range(test_imgs.shape[0]))
     fold_result=[]
     test_df = []
 
-    for i in range(5):
-        print('Predicting Fold ', str(i))
-        filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(i) + '.h5'
-        model.load_weights(filepath)
-        test_df = []
-
-
-        test_generator = DataGenerator(
-            batch_idx,
-            df=test_imgs,
-            shuffle=False,
-            mode='predict',
-            dim=(350, 525),
-            reshape=shape,
-            n_channels=3,
-            base_path='../../dados/test_images/',
-            target_df=sub_df,
-            batch_size=43,
-            n_classes=4,
-            backbone=backbone
+    for i in range(0, test_imgs.shape[0], 430):
+        batch_idx = list(
+            range(i, min(test_imgs.shape[0], i + 430))
         )
+        for i in range(5):
+            print('Predicting Fold ', str(i))
+            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(i) + '.h5'
+            model.load_weights(filepath)
+            test_df = []
 
-        batch_pred_masks = model.predict_generator(
-            test_generator,
-            workers=40,
-            verbose=1
-        )
 
-        if TTA:
-            print('Applying TTA')
-            tta_results = []
-            tta_results.append(batch_pred_masks)
             test_generator = DataGenerator(
                 batch_idx,
                 df=test_imgs,
@@ -66,8 +45,7 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
                 target_df=sub_df,
                 batch_size=43,
                 n_classes=4,
-                backbone=backbone,
-                TTA=TTA
+                backbone=backbone
             )
 
             batch_pred_masks = model.predict_generator(
@@ -75,49 +53,75 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
                 workers=40,
                 verbose=1
             )
-            batch_pred_masks = test_generator.do_tta(batch_pred_masks) #undo TTA (Horizontal and Vertical Flip)
-            tta_results.append(batch_pred_masks)
 
-            batch_pred_masks = sum(tta_results) / 2
+            if TTA:
+                print('Applying TTA')
+                tta_results = []
+                tta_results.append(batch_pred_masks)
+                test_generator = DataGenerator(
+                    batch_idx,
+                    df=test_imgs,
+                    shuffle=False,
+                    mode='predict',
+                    dim=(350, 525),
+                    reshape=shape,
+                    n_channels=3,
+                    base_path='../../dados/test_images/',
+                    target_df=sub_df,
+                    batch_size=43,
+                    n_classes=4,
+                    backbone=backbone,
+                    TTA=TTA
+                )
 
-        fold_result.append(batch_pred_masks)
-        del test_generator, batch_pred_masks
+                batch_pred_masks = model.predict_generator(
+                    test_generator,
+                    workers=40,
+                    verbose=1
+                )
+                batch_pred_masks = test_generator.do_tta(batch_pred_masks) #undo TTA (Horizontal and Vertical Flip)
+                tta_results.append(batch_pred_masks)
+
+                batch_pred_masks = sum(tta_results) / 2
+
+            fold_result.append(batch_pred_masks)
+            del test_generator, batch_pred_masks
+            gc.collect()
+
+        batch_pred_masks = sum(fold_result) / 5
+
+        del fold_result
         gc.collect()
 
-    batch_pred_masks = sum(fold_result) / 5
+        minsizes = [20000, 20000, 22500, 10000]
 
-    del fold_result
-    gc.collect()
+        sigmoid = lambda x: 1 / (1 + np.exp(-x))
 
-    minsizes = [20000, 20000, 22500, 10000]
-
-    sigmoid = lambda x: 1 / (1 + np.exp(-x))
-
-    for j, b in enumerate(batch_idx):
-        filename = test_imgs['ImageId'].iloc[b]
-        image_df = sub_df[sub_df['ImageId'] == filename].copy()
+        for j, b in enumerate(batch_idx):
+            filename = test_imgs['ImageId'].iloc[b]
+            image_df = sub_df[sub_df['ImageId'] == filename].copy()
 
 
-        if posprocess:
-            pred_masks = batch_pred_masks[j,]
-            pred_masks = cv2.resize(pred_masks, dsize=(525, 350), interpolation=cv2.INTER_LINEAR)
-            arrt = np.array([])
-            for t in range(4):
-                a, num_predict = post_process(sigmoid(pred_masks[:, :, t]), 0.6, minsizes[t])
+            if posprocess:
+                pred_masks = batch_pred_masks[j,]
+                pred_masks = cv2.resize(pred_masks, dsize=(525, 350), interpolation=cv2.INTER_LINEAR)
+                arrt = np.array([])
+                for t in range(4):
+                    a, num_predict = post_process(sigmoid(pred_masks[:, :, t]), 0.6, minsizes[t])
 
-                if (arrt.shape == (0,)):
-                    arrt = a.reshape(350, 525, 1)
-                else:
-                    arrt = np.append(arrt, a.reshape(350, 525, 1), axis=2)
+                    if (arrt.shape == (0,)):
+                        arrt = a.reshape(350, 525, 1)
+                    else:
+                        arrt = np.append(arrt, a.reshape(350, 525, 1), axis=2)
 
-            pred_masks = arrt
-        else:
-            pred_masks = batch_pred_masks[j,].round().astype(int)
+                pred_masks = arrt
+            else:
+                pred_masks = batch_pred_masks[j,].round().astype(int)
 
-        pred_rles = build_rles(pred_masks, reshape=(350, 525))
+            pred_rles = build_rles(pred_masks, reshape=(350, 525))
 
-        image_df['EncodedPixels'] = pred_rles
-        test_df.append(image_df)
+            image_df['EncodedPixels'] = pred_rles
+            test_df.append(image_df)
 
     submission_name = str(smmodel) + '_' + str(backbone) + '.csv'
     generate_submission(test_df, submission_name)
