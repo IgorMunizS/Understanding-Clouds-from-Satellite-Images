@@ -5,7 +5,7 @@ from utils.preprocess import get_data_preprocessed
 from utils.generator import DataGenerator
 from keras_radam import RAdam
 from keras.optimizers import Adam, Nadam
-from utils.lr import CyclicLR
+from utils.lr import CyclicLR, Lookahead
 from models import get_model
 from utils.losses import dice_coef, dice_coef_loss_bce
 from keras.callbacks import ModelCheckpoint, EarlyStopping
@@ -50,8 +50,8 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
                 backbone=backbone
             )
 
-            # opt = RAdam(lr=1e-5)
-            opt = Nadam(lr=0.0002)
+            opt = RAdam(lr=0.0002)
+            # opt = Nadam(lr=0.0002)
 
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef)
 
@@ -64,6 +64,9 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
                                          save_weights_only=True)
             es = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=5, verbose=1, mode='min')
             # rlr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=2, verbose=1, mode='min', min_delta=0.0001)
+
+            lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
+            lookahead.inject(model)
 
             history = model.fit_generator(
                 train_generator,

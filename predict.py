@@ -58,6 +58,7 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
                     workers=40,
                     verbose=1
                 )
+                print(batch_pred_masks.shape)
             else:
                 batch_pred_masks = model.predict_generator(
                     test_generator,
@@ -66,6 +67,7 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
                 )
 
             fold_result.append(batch_pred_masks)
+            print(len(fold_result))
             del test_generator, batch_pred_masks
             gc.collect()
 
