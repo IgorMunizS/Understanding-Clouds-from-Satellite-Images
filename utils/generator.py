@@ -147,7 +147,6 @@ class DataGenerator(keras.utils.Sequence):
             albu.VerticalFlip(),
             albu.OneOf([
                 albu.RandomContrast(),
-                albu.RandomGamma(),
                 albu.RandomBrightness(),
             ], p=0.3),
             albu.OneOf([
