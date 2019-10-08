@@ -49,7 +49,8 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
             )
 
             if TTA:
-                tta_model = tta_segmentation(model, h_flip=True, v_flip=True, merge='mean')
+                tta_model = tta_segmentation(model, h_flip=True, v_flip=True,
+                                             input_shape=(320, 480, 3),merge='mean')
 
 
                 batch_pred_masks = tta_model.predict_generator(
