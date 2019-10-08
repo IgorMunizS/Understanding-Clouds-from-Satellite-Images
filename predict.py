@@ -43,12 +43,13 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
                 n_channels=3,
                 base_path='../../dados/test_images/',
                 target_df=sub_df,
-                batch_size=1,
+                batch_size=43,
                 n_classes=4,
                 backbone=backbone
             )
 
             if TTA:
+                test_generator.batch_size = 1
                 tta_model = tta_segmentation(model, h_flip=True, v_flip=True,
                                              input_shape=(320, 480, 3),merge='mean')
 
