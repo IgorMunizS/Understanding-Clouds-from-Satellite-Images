@@ -10,6 +10,7 @@ import pandas as pd
 import cv2
 import argparse
 import sys
+import gc
 
 def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
 
@@ -79,7 +80,8 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
             batch_pred_masks = np.mean(batch_pred_masks,axis=0)
 
         fold_result.append(batch_pred_masks)
-
+        del test_generator, batch_pred_masks
+        gc.collect()
 
     batch_pred_masks = np.mean(fold_result, axis=0)
     minsizes = [20000, 20000, 22500, 10000]
