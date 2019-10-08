@@ -78,7 +78,7 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
             batch_pred_masks = test_generator.do_tta(batch_pred_masks) #undo TTA (Horizontal and Vertical Flip)
             tta_results.append(batch_pred_masks)
 
-            batch_pred_masks = np.mean(tta_results,axis=0)
+            batch_pred_masks = sum(tta_results) / 2
 
         fold_result.append(batch_pred_masks)
         del test_generator, batch_pred_masks
