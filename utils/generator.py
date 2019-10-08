@@ -12,7 +12,8 @@ class DataGenerator(keras.utils.Sequence):
     def __init__(self, list_IDs, df, target_df=None, mode='fit',
                  base_path='../../dados/train_images',
                  batch_size=32, dim=(1400, 2100), n_channels=3, reshape=None,
-                 augment=False, n_classes=4, random_state=2019, shuffle=True, backbone='resnet34', gamma=None):
+                 augment=False, n_classes=4, random_state=2019, shuffle=True, backbone='resnet34',
+                 gamma=None, TTA=False):
         self.dim = dim
         self.batch_size = batch_size
         self.df = df
@@ -28,6 +29,7 @@ class DataGenerator(keras.utils.Sequence):
         self.shuffle = shuffle
         self.random_state = random_state
         self.preprocess_input = sm.get_preprocessing(backbone)
+        self.TTA = TTA
 
 
         self.on_epoch_end()
@@ -56,6 +58,8 @@ class DataGenerator(keras.utils.Sequence):
             return X, y
 
         elif self.mode == 'predict':
+            if self.TTA:
+                X  = self.do_tta(X)
             return X
 
         else:
@@ -151,8 +155,7 @@ class DataGenerator(keras.utils.Sequence):
                 albu.ElasticTransform(alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
                 albu.GridDistortion(),
                 albu.OpticalDistortion(distort_limit=2, shift_limit=0.5),
-            ], p=0.3),
-            albu.ToFloat(max_value=1)
+            ], p=0.3)
         ], p=1)
 
         composed = composition(image=img, mask=masks)
@@ -167,3 +170,15 @@ class DataGenerator(keras.utils.Sequence):
                 img_batch[i,], masks_batch[i,])
 
         return img_batch, masks_batch
+
+    def do_tta(self,img):
+
+        composition = albu.Compose([
+            albu.HorizontalFlip(p=1.),
+            albu.VerticalFlip(p=1.),
+        ])
+
+        composed = composition(image=img)
+        tta_img = composed['image']
+
+        return tta_img

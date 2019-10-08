@@ -74,3 +74,4 @@ def build_rles(masks, reshape=None):
         rles.append(rle)
 
     return rles
+
