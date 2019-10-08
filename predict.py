@@ -84,6 +84,10 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
         gc.collect()
 
     batch_pred_masks = sum(fold_result) / 5
+
+    del fold_result
+    gc.collect()
+
     minsizes = [20000, 20000, 22500, 10000]
 
     sigmoid = lambda x: 1 / (1 + np.exp(-x))
