@@ -43,7 +43,7 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
                 n_channels=3,
                 base_path='../../dados/test_images/',
                 target_df=sub_df,
-                batch_size=43,
+                batch_size=1,
                 n_classes=4,
                 backbone=backbone
             )
