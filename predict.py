@@ -22,9 +22,9 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
     # batch_idx = list(range(test_imgs.shape[0]))
     test_df = []
 
-    for i in range(0, test_imgs.shape[0], 430):
+    for i in range(0, test_imgs.shape[0], 860):
         batch_idx = list(
-            range(i, min(test_imgs.shape[0], i + 430))
+            range(i, min(test_imgs.shape[0], i + 860))
         )
         fold_result = []
 
