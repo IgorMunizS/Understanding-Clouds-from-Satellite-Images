@@ -143,19 +143,19 @@ class DataGenerator(keras.utils.Sequence):
         #         ])
 
         composition = albu.Compose([
-            albu.HorizontalFlip(p=0.5),
-            albu.VerticalFlip(),
-            albu.OneOf([
-                albu.RandomContrast(),
-                albu.RandomBrightness(),
-            ], p=0.3),
-            albu.OneOf([
-                albu.ShiftScaleRotate(rotate_limit=45, shift_limit=0.15, scale_limit=0.15),
-                albu.ElasticTransform(alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
-                albu.GridDistortion(),
-                albu.OpticalDistortion(distort_limit=2, shift_limit=0.5),
-            ], p=0.3)
-        ], p=1)
+                        albu.OneOf([albu.RandomSizedCrop(min_max_height=(self.reshape[0]//2, self.reshape[0]), height=self.reshape[0], width=self.reshape[1], p=0.5),
+                              albu.PadIfNeeded(min_height=self.reshape[0], min_width=self.reshape[1], p=0.5)], p=1),
+                        albu.VerticalFlip(p=0.5),
+                        albu.RandomRotate90(p=0.5),
+                        albu.OneOf([
+                            albu.ElasticTransform(p=0.5, alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
+                            albu.GridDistortion(p=0.5),
+                            albu.OpticalDistortion(p=1, distort_limit=2, shift_limit=0.5)
+                            ], p=0.8),
+                        albu.CLAHE(p=0.8),
+                        albu.RandomBrightnessContrast(p=0.8),
+                        albu.RandomGamma(p=0.8)])
+
 
         composed = composition(image=img, mask=masks)
         aug_img = composed['image']

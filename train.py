@@ -50,13 +50,13 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
                 backbone=backbone
             )
 
-            opt = RAdam(lr=0.0002)
-            # opt = Nadam(lr=0.0002)
+            # opt = RAdam(lr=0.0002)
+            opt = Nadam(lr=0.0002)
 
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef)
 
 
-            clr = CyclicLR(base_lr=0.0002, max_lr=0.001,
+            clr = CyclicLR(base_lr=0.0002, max_lr=0.005,
                            step_size=300, reduce_on_plateau=3, monitor='val_loss', reduce_factor=10)
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
@@ -65,8 +65,8 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             es = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=5, verbose=1, mode='min')
             # rlr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=2, verbose=1, mode='min', min_delta=0.0001)
 
-            lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
-            lookahead.inject(model)
+            # lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
+            # lookahead.inject(model)
 
             history = model.fit_generator(
                 train_generator,
