@@ -55,12 +55,10 @@ class DataGenerator(keras.utils.Sequence):
             if self.augment:
                 X, y = self.__augment_batch(X, y)
 
-            return X, y
+            return self.preprocess_input(X), y
 
         elif self.mode == 'predict':
-            if self.TTA:
-                X  = self.do_tta(X)
-            return X
+            return self.preprocess_input(X)
 
         else:
             raise AttributeError('The mode parameter should be set to "fit" or "predict".')
@@ -95,8 +93,6 @@ class DataGenerator(keras.utils.Sequence):
 
             # Store samples
             X[i,] = img
-
-        X = self.preprocess_input(X)
 
         return X
 
