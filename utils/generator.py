@@ -55,10 +55,10 @@ class DataGenerator(keras.utils.Sequence):
             if self.augment:
                 X, y = self.__augment_batch(X, y)
 
-            return self.preprocess_input(X), y
+            return X, y
 
         elif self.mode == 'predict':
-            return self.preprocess_input(X)
+            return X
 
         else:
             raise AttributeError('The mode parameter should be set to "fit" or "predict".')
@@ -143,16 +143,20 @@ class DataGenerator(keras.utils.Sequence):
                                                          height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
                                                          p=0.5),
                               albu.PadIfNeeded(min_height=self.reshape[0], min_width=self.reshape[1], p=0.5)], p=1),
-                        albu.VerticalFlip(p=0.5),
                         albu.HorizontalFlip(),
+                        albu.VerticalFlip(),
+                        albu.ShiftScaleRotate(rotate_limit=45, shift_limit=0.15, scale_limit=0.15),
                         albu.OneOf([
                             albu.ElasticTransform(p=0.5, alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
                             albu.GridDistortion(p=0.5),
                             albu.OpticalDistortion(p=1, distort_limit=2, shift_limit=0.5)
                             ], p=0.8),
-                        albu.RandomBrightnessContrast(p=0.8),
-                        albu.RandomGamma(p=0.8)])
-
+                        albu.OneOf([
+                            albu.RandomContrast(),
+                            albu.RandomGamma(),
+                            albu.RandomBrightness(),
+                        ], p=0.3)
+        ], p=1)
 
         composed = composition(image=img, mask=masks)
         aug_img = composed['image']
