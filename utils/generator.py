@@ -139,9 +139,10 @@ class DataGenerator(keras.utils.Sequence):
         #         ])
 
         composition = albu.Compose([
-                        # albu.RandomSizedCrop(min_max_height=(160, 320),
-                        #                                  height=320, width=480, w2h_ratio=1.5,
-                        #                                  p=0.5),
+                        albu.OneOf([albu.RandomSizedCrop(min_max_height=(self.reshape[0]//2, self.reshape[0]),
+                                                         height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
+                                                         p=0.5),
+                              albu.PadIfNeeded(min_height=self.reshape[1], min_width=self.reshape[0], p=0.5)], p=1),
                         albu.VerticalFlip(p=0.5),
                         albu.HorizontalFlip(),
                         albu.OneOf([
