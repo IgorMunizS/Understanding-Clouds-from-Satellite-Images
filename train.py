@@ -56,7 +56,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef)
 
 
-            clr = CyclicLR(base_lr=0.0002, max_lr=0.001,
+            clr = CyclicLR(base_lr=0.0001, max_lr=0.0005,
                            step_size=300, reduce_on_plateau=3, monitor='val_loss', reduce_factor=10)
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
