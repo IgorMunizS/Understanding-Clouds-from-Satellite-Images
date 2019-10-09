@@ -8,7 +8,7 @@ from keras.optimizers import Adam, Nadam
 from utils.lr import CyclicLR, Lookahead
 from models import get_model
 from utils.losses import dice_coef, dice_coef_loss_bce
-from keras.callbacks import ModelCheckpoint, EarlyStopping
+from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
 
 
@@ -56,14 +56,14 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef)
 
 
-            clr = CyclicLR(base_lr=0.0001, max_lr=0.0005,
-                           step_size=300, reduce_on_plateau=3, monitor='val_loss', reduce_factor=10)
+            # clr = CyclicLR(base_lr=0.0001, max_lr=0.0005,
+            #                step_size=300, reduce_on_plateau=3, monitor='val_loss', reduce_factor=10)
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
             checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min',
                                          save_weights_only=True)
             es = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=5, verbose=1, mode='min')
-            # rlr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=2, verbose=1, mode='min', min_delta=0.0001)
+            rlr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=2, verbose=1, mode='min', min_delta=0.0001)
 
             # lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
             # lookahead.inject(model)
@@ -71,7 +71,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             history = model.fit_generator(
                 train_generator,
                 validation_data=val_generator,
-                callbacks=[checkpoint, es, clr],
+                callbacks=[checkpoint, es, rlr],
                 epochs=30,
                 use_multiprocessing=True,
                 workers=42
