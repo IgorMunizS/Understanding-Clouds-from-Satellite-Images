@@ -148,7 +148,6 @@ class DataGenerator(keras.utils.Sequence):
                             albu.GridDistortion(p=0.5),
                             albu.OpticalDistortion(p=1, distort_limit=2, shift_limit=0.5)
                             ], p=0.8),
-                        albu.CLAHE(p=0.8),
                         albu.RandomBrightnessContrast(p=0.8),
                         albu.RandomGamma(p=0.8)])
 
