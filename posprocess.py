@@ -3,13 +3,13 @@ from tqdm import tqdm
 import cv2
 import numpy as np
 import pandas as pd
-from utils.utils import make_mask,mask2rle
+from utils.utils import make_mask,mask2rle, np_resize
 from utils.posprocess import post_process_minsize,draw_convex_hull
 import sys
 import argparse
 
 
-def posprocess(file,mode,shape=(320,480)):
+def posprocess(file,mode):
     sub = pd.read_csv(file)
     name = file.split('/')[-1].split('.')[0]
 
@@ -26,6 +26,7 @@ def posprocess(file,mode,shape=(320,480)):
             path = os.path.join('../../dados/test_images/', test_img)
             img = cv2.imread(path).astype(np.float32)  # use already-resized ryches' dataset
             img = img / 255.
+            img = np_resize(img, (350, 525))
             img2 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
             img_label_list.append(f'{test_img}_{class_name}')
@@ -64,4 +65,4 @@ if __name__ == '__main__':
     args = parse_args(args)
 
 
-    posprocess(args.file,args.mode,args.shape)
+    posprocess(args.file,args.mode)
