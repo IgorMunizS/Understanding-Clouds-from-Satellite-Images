@@ -142,7 +142,7 @@ class DataGenerator(keras.utils.Sequence):
                         albu.OneOf([albu.RandomSizedCrop(min_max_height=(self.reshape[0]//2, self.reshape[0]),
                                                          height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
                                                          p=0.5),
-                              albu.PadIfNeeded(min_height=self.reshape[1], min_width=self.reshape[0], p=0.5)], p=1),
+                              albu.PadIfNeeded(min_height=self.reshape[0], min_width=self.reshape[1], p=0.5)], p=1),
                         albu.VerticalFlip(p=0.5),
                         albu.HorizontalFlip(),
                         albu.OneOf([
