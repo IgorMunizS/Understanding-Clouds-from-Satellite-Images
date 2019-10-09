@@ -75,3 +75,37 @@ def build_rles(masks, reshape=None):
 
     return rles
 
+
+def rle_decode(mask_rle: str = '', shape=(1400, 2100)):
+    '''
+    Decode rle encoded mask.
+
+    :param mask_rle: run-length as string formatted (start length)
+    :param shape: (height, width) of array to return
+    Returns numpy array, 1 - mask, 0 - background
+    '''
+    s = mask_rle.split()
+    starts, lengths = [np.asarray(x, dtype=int) for x in (s[0:][::2], s[1:][::2])]
+    starts -= 1
+    ends = starts + lengths
+    img = np.zeros(shape[0] * shape[1], dtype=np.uint8)
+    for lo, hi in zip(starts, ends):
+        img[lo:hi] = 1
+
+    return img.reshape(shape, order='F')
+
+
+def make_mask(df, image_label, shape=(1400, 2100), cv_shape=(525, 350), debug=False):
+    """
+    Create mask based on df, image name and shape.
+    """
+    if debug:
+        print(shape, cv_shape)
+    df = df.set_index('Image_Label')
+    encoded_mask = df.loc[image_label, 'EncodedPixels']
+    #     print('encode: ',encoded_mask[:10])
+    mask = np.zeros((shape[0], shape[1]), dtype=np.float32)
+    if encoded_mask is not np.nan:
+        mask = rle_decode(encoded_mask, shape=shape)  # original size
+
+    return cv2.resize(mask, cv_shape)
