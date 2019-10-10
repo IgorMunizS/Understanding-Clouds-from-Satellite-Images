@@ -50,7 +50,7 @@ def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
 
             if TTA:
                 test_generator.batch_size = 1
-                tta_model = tta_segmentation(model, h_flip=True, v_flip=True,
+                tta_model = tta_segmentation(model, h_flip=True, h_shift=(-10, 10),
                                              input_shape=(320, 480, 3),merge='mean')
 
 
