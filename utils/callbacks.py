@@ -40,8 +40,8 @@ class ValPosprocess(callbacks.Callback):
         batches = len(self.validation_data)
         total = batches * self.batch_size
 
-        val_pred = np.zeros((total, 1))
-        val_true = np.zeros((total))
+        val_pred = np.zeros((total, self.shape[0],self.shape[1],4))
+        val_true = np.zeros((total,self.shape[0],self.shape[1],4))
 
         for batch in range(batches):
             xVal, yVal = self.validation_data.__getitem__(batch)
