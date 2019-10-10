@@ -54,7 +54,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             # opt = RAdam(lr=0.0002)
             opt = Nadam(lr=0.0002)
 
-            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef)
+            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
 
 
             # clr = CyclicLR(base_lr=0.0001, max_lr=0.0005,
