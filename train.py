@@ -8,6 +8,7 @@ from keras.optimizers import Adam, Nadam
 from utils.lr import CyclicLR, Lookahead
 from models import get_model
 from utils.losses import dice_coef, dice_coef_loss_bce
+from utils.callbacks import ValPosprocess
 from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
 
@@ -65,13 +66,14 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             es = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=5, verbose=1, mode='min')
             rlr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=2, verbose=1, mode='min', min_delta=0.0001)
 
+            vl_posprocess = ValPosprocess(shape=shape)
             # lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
             # lookahead.inject(model)
 
             history = model.fit_generator(
                 train_generator,
                 validation_data=val_generator,
-                callbacks=[checkpoint, es, rlr],
+                callbacks=[checkpoint, es, rlr,vl_posprocess],
                 epochs=30,
                 use_multiprocessing=True,
                 workers=42
@@ -89,7 +91,7 @@ def parse_args(args):
     parser.add_argument('--model', help='Segmentation model', default='unet')
     parser.add_argument('--backbone', help='Model backbone', default='resnet34', type=str)
     parser.add_argument('--batch_size', default=12, type=int)
-    parser.add_argument('--shape', help='Shape of resized images', default=(320,480), type=tuple)
+    parser.add_argument('--shape', help='Shape of resized images', default=(384,576), type=tuple)
     parser.add_argument('--n_fold', help='Number of fold to start training', default=0, type=int)
 
     return parser.parse_args(args)
