@@ -1,6 +1,6 @@
 from keras import callbacks
 import numpy as np
-from utils.losses import dice
+from utils.losses import dice_coef
 import cv2
 from utils.posprocess import post_process
 
@@ -39,19 +39,25 @@ class ValPosprocess(callbacks.Callback):
 
         batches = len(self.validation_data)
         total = batches * self.batch_size
+        dice_coef_batchs = []
 
-        val_pred = np.zeros((total, self.shape[0],self.shape[1],4))
-        val_true = np.zeros((total,self.shape[0],self.shape[1],4))
+        # val_pred = np.zeros((total, self.shape[0],self.shape[1],4))
+        # val_true = np.zeros((total,self.shape[0],self.shape[1],4))
 
         for batch in range(batches):
             xVal, yVal = self.validation_data.__getitem__(batch)
-            val_pred[batch * self.batch_size: (batch + 1) * self.batch_size] = np.asarray(
+            val_pred = np.asarray(
                 self.model.predict(xVal)).round()
-            val_true[batch * self.batch_size: (batch + 1) * self.batch_size] = yVal
+
+
+            val_predict_posprocess = post_process_callback(val_pred, self.shape)
+
+            dice_coef_batchs.append(round(dice_coef(val_predict_posprocess, yVal), 4))
+
+        dice_coef_posprocess = np.mean(dice_coef_batchs,axis=0)
 
         # val_pred = np.squeeze(val_pred)
-        print(val_pred.shape)
-        print(val_true.shape)
+
 
 
         # # 5.4.1 For each validation batch
@@ -69,10 +75,7 @@ class ValPosprocess(callbacks.Callback):
         #         val_targ = np.vstack((val_targ, temp_targ))
         #         val_predict = np.vstack((val_predict, temp_predict))
 
-        val_predict_posprocess = post_process_callback(val_pred,self.shape)
 
-
-        dice_coef_posprocess = round(dice(val_predict_posprocess, val_true), 4)
 
         print("val_dice_coef_posprocess: {}".format(
                  dice_coef_posprocess))
