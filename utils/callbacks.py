@@ -1,6 +1,6 @@
 from keras import callbacks
 import numpy as np
-from utils.losses import dice_coef
+from utils.losses import dice
 import cv2
 from utils.posprocess import post_process
 
@@ -72,7 +72,7 @@ class ValPosprocess(callbacks.Callback):
         val_predict_posprocess = post_process_callback(val_pred,self.shape)
 
 
-        dice_coef_posprocess = round(dice_coef(val_predict_posprocess, val_true), 4)
+        dice_coef_posprocess = round(dice(val_predict_posprocess, val_true), 4)
 
         print("val_dice_coef_posprocess: {}".format(
                  dice_coef_posprocess))
