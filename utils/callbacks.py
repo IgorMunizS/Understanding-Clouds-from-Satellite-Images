@@ -3,6 +3,7 @@ import numpy as np
 from utils.losses import dice_coef
 import cv2
 from utils.posprocess import post_process
+import keras.backend as K
 
 def post_process_callback(val_predict,shape):
     minsizes = [20000, 20000, 22500, 10000]
@@ -52,7 +53,7 @@ class ValPosprocess(callbacks.Callback):
 
             val_predict_posprocess = post_process_callback(val_pred, self.shape)
 
-            dice_coef_batchs.append(round(dice_coef(yVal.astype('float32'),val_predict_posprocess.astype('float32')), 4))
+            dice_coef_batchs.append(round(K.eval(dice_coef(yVal.astype('float32'),val_predict_posprocess.astype('float32'))), 4))
 
         dice_coef_posprocess = np.mean(dice_coef_batchs,axis=0)
 
