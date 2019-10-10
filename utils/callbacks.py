@@ -6,12 +6,12 @@ from utils.posprocess import post_process
 
 def post_process_callback(val_predict,shape):
     minsizes = [20000, 20000, 22500, 10000]
+    val_predict_posprocess = np.zeros(shape=val_predict.shape)
 
     sigmoid = lambda x: 1 / (1 + np.exp(-x))
 
-    for j, b in enumerate(len(val_predict)):
+    for j, pred_masks in enumerate(val_predict):
 
-        pred_masks = val_predict[j,]
         arrt = np.array([])
         for t in range(4):
             a, num_predict = post_process(sigmoid(pred_masks[:, :, t]), 0.6, minsizes[t], shape)
@@ -21,9 +21,9 @@ def post_process_callback(val_predict,shape):
             else:
                 arrt = np.append(arrt, a.reshape(shape[0], shape[1], 1), axis=2)
 
-        pred_masks = arrt
+        val_predict_posprocess[j,] = arrt
 
-        return pred_masks
+        return val_predict_posprocess
 
 
 class ValPosprocess(callbacks.Callback):
