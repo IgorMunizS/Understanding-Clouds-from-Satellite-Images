@@ -54,7 +54,7 @@ class ValPosprocess(callbacks.Callback):
             val_predict_posprocess = post_process_callback(val_pred, self.shape)
 
             dice_coef_score = round(K.eval(dice_coef(yVal.astype('float32'),val_predict_posprocess.astype('float32'))), 4)
-            print(dice_coef_score)
+            # print(dice_coef_score)
 
             dice_coef_batchs.append(dice_coef_score)
 
