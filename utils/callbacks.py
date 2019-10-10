@@ -47,8 +47,7 @@ class ValPosprocess(callbacks.Callback):
 
         for batch in range(batches):
             xVal, yVal = self.validation_data.__getitem__(batch)
-            val_pred = np.asarray(
-                self.model.predict(xVal)).round()
+            val_pred = self.model.predict(xVal)
 
 
             val_predict_posprocess = post_process_callback(val_pred, self.shape)
