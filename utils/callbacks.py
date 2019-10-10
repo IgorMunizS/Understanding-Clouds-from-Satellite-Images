@@ -52,7 +52,7 @@ class ValPosprocess(callbacks.Callback):
 
             val_predict_posprocess = post_process_callback(val_pred, self.shape)
 
-            dice_coef_batchs.append(round(dice_coef(val_predict_posprocess, yVal), 4))
+            dice_coef_batchs.append(round(dice_coef(yVal.astype('float32'),val_predict_posprocess.astype('float32')), 4))
 
         dice_coef_posprocess = np.mean(dice_coef_batchs,axis=0)
 
