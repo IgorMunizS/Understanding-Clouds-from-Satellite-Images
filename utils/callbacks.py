@@ -44,7 +44,7 @@ class ValPosprocess(callbacks.Callback):
         val_true = np.zeros((total))
 
         for batch in range(batches):
-            xVal, yVal = next(self.validation_data)
+            xVal, yVal = self.validation_data.__getitem__(batch)
             val_pred[batch * self.batch_size: (batch + 1) * self.batch_size] = np.asarray(
                 self.model.predict(xVal)).round()
             val_true[batch * self.batch_size: (batch + 1) * self.batch_size] = yVal
