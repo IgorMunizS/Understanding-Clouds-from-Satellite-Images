@@ -49,8 +49,9 @@ class ValPosprocess(callbacks.Callback):
                 self.model.predict(xVal)).round()
             val_true[batch * self.batch_size: (batch + 1) * self.batch_size] = yVal
 
-        val_pred = np.squeeze(val_pred)
-
+        # val_pred = np.squeeze(val_pred)
+        print(val_pred.shape)
+        print(val_true.shape)
 
 
         # # 5.4.1 For each validation batch
@@ -71,7 +72,7 @@ class ValPosprocess(callbacks.Callback):
         val_predict_posprocess = post_process_callback(val_pred,self.shape)
 
 
-        dice_coef_posprocess = round(dice_coef(val_predict_posprocess, val_predict), 4)
+        dice_coef_posprocess = round(dice_coef(val_predict_posprocess, val_true), 4)
 
         print("val_dice_coef_posprocess: {}".format(
                  dice_coef_posprocess))
