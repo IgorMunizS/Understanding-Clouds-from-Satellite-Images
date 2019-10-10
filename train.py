@@ -52,7 +52,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             )
 
             # opt = RAdam(lr=0.0002)
-            opt = Nadam(lr=0.0002)
+            opt = Adam(lr=0.0002)
 
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
 
@@ -92,8 +92,8 @@ def parse_args(args):
 
     parser.add_argument('--model', help='Segmentation model', default='unet')
     parser.add_argument('--backbone', help='Model backbone', default='resnet34', type=str)
-    parser.add_argument('--batch_size', default=12, type=int)
-    parser.add_argument('--shape', help='Shape of resized images', default=(320,480), type=tuple)
+    parser.add_argument('--batch_size', default=8, type=int)
+    parser.add_argument('--shape', help='Shape of resized images', default=(640,960), type=tuple)
     parser.add_argument('--n_fold', help='Number of fold to start training', default=0, type=int)
 
     return parser.parse_args(args)
