@@ -51,8 +51,8 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
                 backbone=backbone
             )
 
-            opt = RAdam(lr=0.0002)
-            # opt = Nadam(lr=0.0002)
+            # opt = RAdam(lr=0.0002)
+            opt = Nadam(lr=0.0002)
 
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
 
@@ -67,8 +67,8 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             rlr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=2, verbose=1, mode='min', min_delta=0.0001)
 
             # vl_posprocess = ValPosprocess(val_generator,batch_size,shape)
-            lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
-            lookahead.inject(model)
+            # lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
+            # lookahead.inject(model)
 
 
 
