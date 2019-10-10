@@ -66,7 +66,8 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             es = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=5, verbose=1, mode='min')
             rlr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=2, verbose=1, mode='min', min_delta=0.0001)
 
-            vl_posprocess = ValPosprocess(shape=shape)
+            vl_posprocess = ValPosprocess()
+            vl_posprocess.set_shape(shape)
             # lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
             # lookahead.inject(model)
 

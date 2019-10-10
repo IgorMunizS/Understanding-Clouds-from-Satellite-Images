@@ -28,13 +28,8 @@ def post_process_callback(val_predict,shape):
 
 class ValPosprocess(callbacks.Callback):
 
-    def __init__(self,shape):
+    def set_shape(self,shape):
         self.shape = shape
-
-    def on_train_begin(self, logs={}):
-        self.val_f1s = []
-        self.val_recalls = []
-        self.val_precisions = []
 
     def on_epoch_end(self, epoch, logs={}):
         val_targ = 0
