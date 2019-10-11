@@ -36,7 +36,7 @@ def posprocess(file,mode):
                 # if class_name == 'Flower' or class_name =='Sugar': # you can decide to post-process for some certain classes
                 mask = draw_convex_hull(mask.astype(np.uint8), mode=mode)
             mask[img2 <= 2 / 255.] = 0
-            mask = post_process_minsize(mask, min_size[class_i])
+            # mask = post_process_minsize(mask, min_size[class_i])
 
             if mask.sum() == 0:
                 enc_pixels_list.append(np.nan)

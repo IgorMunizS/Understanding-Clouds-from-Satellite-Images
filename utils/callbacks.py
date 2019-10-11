@@ -1,9 +1,8 @@
 from keras import callbacks
 import numpy as np
-from utils.losses import dice_coef
+from utils.losses import dice
 import cv2
 from utils.posprocess import post_process
-import keras.backend as K
 
 def post_process_callback(val_predict,shape):
     minsizes = [20000, 20000, 22500, 10000]
@@ -24,7 +23,6 @@ def post_process_callback(val_predict,shape):
 
         val_predict_posprocess[j,] = arrt
 
-
     return val_predict_posprocess
 
 
@@ -41,27 +39,19 @@ class ValPosprocess(callbacks.Callback):
 
         batches = len(self.validation_data)
         total = batches * self.batch_size
-        dice_coef_batchs = []
 
-        # val_pred = np.zeros((total, self.shape[0],self.shape[1],4))
-        # val_true = np.zeros((total,self.shape[0],self.shape[1],4))
+        val_pred = np.zeros((total, self.shape[0],self.shape[1],4))
+        val_true = np.zeros((total,self.shape[0],self.shape[1],4))
 
         for batch in range(batches):
             xVal, yVal = self.validation_data.__getitem__(batch)
-            val_pred = self.model.predict(xVal)
-
-
-            val_predict_posprocess = post_process_callback(val_pred, self.shape)
-
-            dice_coef_score = round(K.eval(dice_coef(yVal.astype('float32'),val_predict_posprocess.astype('float32'))), 4)
-            # print(dice_coef_score)
-
-            dice_coef_batchs.append(dice_coef_score)
-
-        dice_coef_posprocess = np.mean(dice_coef_batchs,axis=0)
+            val_pred[batch * self.batch_size: (batch + 1) * self.batch_size] = np.asarray(
+                self.model.predict(xVal)).round()
+            val_true[batch * self.batch_size: (batch + 1) * self.batch_size] = yVal
 
         # val_pred = np.squeeze(val_pred)
-
+        print(val_pred.shape)
+        print(val_true.shape)
 
 
         # # 5.4.1 For each validation batch
@@ -79,7 +69,10 @@ class ValPosprocess(callbacks.Callback):
         #         val_targ = np.vstack((val_targ, temp_targ))
         #         val_predict = np.vstack((val_predict, temp_predict))
 
+        val_predict_posprocess = post_process_callback(val_pred,self.shape)
 
+
+        dice_coef_posprocess = round(dice(val_predict_posprocess, val_true), 4)
 
         print("val_dice_coef_posprocess: {}".format(
                  dice_coef_posprocess))
