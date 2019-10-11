@@ -52,7 +52,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             )
 
             # opt = RAdam(lr=0.0002)
-            opt = Adam(lr=0.0002)
+            opt = Nadam(lr=0.0002)
 
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
 
@@ -66,7 +66,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             es = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=5, verbose=1, mode='min')
             rlr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=2, verbose=1, mode='min', min_delta=0.0001)
 
-            # vl_posprocess = ValPosprocess(val_generator,batch_size,shape)
+            vl_postprocess = ValPosprocess(val_generator,batch_size,shape)
             # lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
             # lookahead.inject(model)
 
@@ -75,7 +75,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             history = model.fit_generator(
                 train_generator,
                 validation_data=val_generator,
-                callbacks=[checkpoint, es, rlr],
+                callbacks=[checkpoint, es, rlr, vl_postprocess],
                 epochs=30,
                 use_multiprocessing=True,
                 workers=42
