@@ -31,7 +31,7 @@ def dice_coef_loss_bce(y_true, y_pred, dice=0.3, bce=0.7):
     return binary_crossentropy(y_true, y_pred) * bce + dice_coef_loss(y_true, y_pred) * dice
 
 
-def dice(im1, im2):
+def dice(im1, im2, empty_score=1.0):
     """
     Computes the Dice coefficient, a measure of set similarity.
     Parameters
@@ -46,6 +46,7 @@ def dice(im1, im2):
         Dice coefficient as a float on range [0,1].
         Maximum similarity = 1
         No similarity = 0
+        Both are empty (sum eq to zero) = empty_score
 
     Notes
     -----
@@ -58,7 +59,11 @@ def dice(im1, im2):
     if im1.shape != im2.shape:
         raise ValueError("Shape mismatch: im1 and im2 must have the same shape.")
 
+    im_sum = im1.sum() + im2.sum()
+    if im_sum == 0:
+        return empty_score
+
     # Compute Dice coefficient
     intersection = np.logical_and(im1, im2)
 
-    return 2. * intersection.sum() / (im1.sum() + im2.sum())
+    return 2. * intersection.sum() / im_sum
