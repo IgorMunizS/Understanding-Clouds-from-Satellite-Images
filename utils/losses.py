@@ -1,6 +1,7 @@
 import keras.backend as K
 from keras.losses import binary_crossentropy
 import numpy as np
+import tensorflow as tf
 
 def dice_coef(y_true, y_pred):
     y_true_f = K.flatten(y_true)
@@ -18,6 +19,15 @@ def dice_coef_loss(y_true, y_pred):
     score = (2. * K.sum(intersection) + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
     return 1. - score
 
+def binary_crossentropy_smoothed(y_true, y_pred):
+    loss =  tf.keras.losses.binary_crossentropy(
+        y_true,
+        y_pred,
+        from_logits=False,
+        label_smoothing=0.2
+    )
+    return loss
+
 # def bce_dice_loss(y_true, y_pred):
 #     return binary_crossentropy(y_true, y_pred) + dice_loss(y_true, y_pred)
 
@@ -28,7 +38,7 @@ def dice_coef_loss(y_true, y_pred):
 #     return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
 
 def dice_coef_loss_bce(y_true, y_pred, dice=0.3, bce=0.7):
-    return binary_crossentropy(y_true, y_pred) * bce + dice_coef_loss(y_true, y_pred) * dice
+    return binary_crossentropy_smoothed(y_true, y_pred) * bce + dice_coef_loss(y_true, y_pred) * dice
 
 
 def dice(im1, im2, empty_score=1.0):

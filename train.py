@@ -66,7 +66,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             es = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=5, verbose=1, mode='min')
             rlr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=2, verbose=1, mode='min', min_delta=0.0001)
 
-            vl_postprocess = ValPosprocess(val_generator,batch_size,shape)
+            # vl_postprocess = ValPosprocess(val_generator,batch_size,shape)
             # lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
             # lookahead.inject(model)
 
@@ -75,7 +75,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             history = model.fit_generator(
                 train_generator,
                 validation_data=val_generator,
-                callbacks=[checkpoint, es, rlr, vl_postprocess],
+                callbacks=[checkpoint, es, rlr],
                 epochs=30,
                 use_multiprocessing=True,
                 workers=42
