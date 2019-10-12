@@ -175,9 +175,9 @@ if __name__ == '__main__':
         folds = [args.fold]
 
     if args.emsemble:
-        models = [{'unet','efficientnetb4'},{'unet','efficientnetb3'}]
+        models = [['unet','efficientnetb4'],['unet','efficientnetb3']]
     else:
-        models = [{args.model, args.backbone}]
+        models = [[args.model, args.backbone]]
 
 
     final_predict(models,folds,args.shape,args.tta,args.posprocess)
