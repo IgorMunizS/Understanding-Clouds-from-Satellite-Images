@@ -175,7 +175,7 @@ if __name__ == '__main__':
         folds = [args.fold]
 
     if args.emsemble:
-        models = [{'unet','resnet34'},{'unet','efficientnetb3'}]
+        models = [{'unet','efficientnetb4'},{'unet','efficientnetb3'}]
     else:
         models = [{args.model, args.backbone}]
 
