@@ -40,11 +40,11 @@ def binary_crossentropy_smoothed(y_true, y_pred):
 def dice_coef_loss_bce(y_true, y_pred, dice=0.5, bce=0.5):
     return binary_crossentropy_smoothed(y_true, y_pred) * bce + dice_coef_loss(y_true, y_pred) * dice
 
-def lovasz_loss(y_true, y_pred):
-    y_true, y_pred = K.cast(K.squeeze(y_true, -1), 'int32'), K.cast(K.squeeze(y_pred, -1), 'float32')
-    logits = K.log(y_pred / (1. - y_pred))
-    loss = lovasz_hinge(logits, y_true, per_image=True, ignore=None)
-    return loss
+# def lovasz_loss(y_true, y_pred):
+#     y_true, y_pred = K.cast(K.squeeze(y_true, -1), 'int32'), K.cast(K.squeeze(y_pred, -1), 'float32')
+#     logits = K.log(y_pred / (1. - y_pred))
+#     loss = lovasz_hinge(logits, y_true, per_image=True, ignore=None)
+#     return loss
 
 
 def lovasz_grad(gt_sorted):
@@ -126,6 +126,9 @@ def flatten_binary_scores(scores, labels, ignore=None):
     vscores = tf.boolean_mask(scores, valid, name='valid_scores')
     vlabels = tf.boolean_mask(labels, valid, name='valid_labels')
     return vscores, vlabels
+
+def lovasz_loss(y_true, y_pred):
+    return lovasz_hinge(y_pred, y_true, per_image=True, ignore=None)
 
 
 def dice(im1, im2, empty_score=1.0):
