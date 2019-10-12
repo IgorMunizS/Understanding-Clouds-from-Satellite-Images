@@ -105,6 +105,7 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
     submission_name = ''
 
     for smmodel,backbone in models:
+        print('Predicting {} {}'.format(smmodel,backbone))
         opt = Adam()
         model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, dice_coef, shape)
         model_masks=[]
@@ -174,8 +175,7 @@ if __name__ == '__main__':
         folds = [args.fold]
 
     if args.emsemble:
-        models = [{'unet','resnet34'},{'unet','efficientnetb3'},{'unet','efficientnetb4'},{'unet','seresnet34'},
-                  {'unet','seresnext50'},{'fpn','resnet34'}]
+        models = [{'unet','resnet34'},{'unet','efficientnetb3'}]
     else:
         models = [{args.model, args.backbone}]
 
