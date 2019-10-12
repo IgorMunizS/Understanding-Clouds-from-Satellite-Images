@@ -75,7 +75,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
                 workers=42
             )
 
-            opt = SGD(lr=1e-5, nesterov=True)
+            opt = RAdam(lr=0.00001)
 
             model.compile(optimizer=opt, loss=lovasz_loss, metrics=[dice_coef])
 
