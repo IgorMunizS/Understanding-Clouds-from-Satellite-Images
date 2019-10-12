@@ -13,100 +13,133 @@ import sys
 import gc
 from tta_wrapper import tta_segmentation
 
-def predict_fold(smmodel,backbone,shape,TTA=False,posprocess=False):
+def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
 
-    opt = Adam()
-    model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, dice_coef,shape)
+    test_generator = DataGenerator(
+        batch_idx,
+        df=test_imgs,
+        shuffle=False,
+        mode='predict',
+        dim=(350, 525),
+        reshape=shape,
+        n_channels=3,
+        base_path='../../dados/test_images/',
+        target_df=sub_df,
+        batch_size=43,
+        n_classes=4,
+        backbone=backbone
+    )
+
+    if TTA:
+        test_generator.batch_size = 1
+        tta_model = tta_segmentation(model, h_flip=True, h_shift=(-10, 10),
+                                     input_shape=(320, 480, 3), merge='mean')
+
+        batch_pred_masks = tta_model.predict_generator(
+            test_generator,
+            workers=40,
+            verbose=1
+        )
+    else:
+        batch_pred_masks = model.predict_generator(
+            test_generator,
+            workers=40,
+            verbose=1
+        )
+
+    return batch_pred_masks
+
+def predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_masks):
+    minsizes = [20000, 20000, 22500, 10000]
+
+    sigmoid = lambda x: 1 / (1 + np.exp(-x))
+
+    test_df =[]
+
+    for j, b in enumerate(batch_idx):
+        filename = test_imgs['ImageId'].iloc[b]
+        image_df = sub_df[sub_df['ImageId'] == filename].copy()
+
+        if posprocess:
+            pred_masks = batch_pred_masks[j,]
+            pred_masks = cv2.resize(pred_masks, dsize=(525, 350), interpolation=cv2.INTER_LINEAR)
+            arrt = np.array([])
+            for t in range(4):
+                a, num_predict = post_process(sigmoid(pred_masks[:, :, t]), 0.6, minsizes[t])
+
+                if (arrt.shape == (0,)):
+                    arrt = a.reshape(350, 525, 1)
+                else:
+                    arrt = np.append(arrt, a.reshape(350, 525, 1), axis=2)
+
+            pred_masks = arrt
+        else:
+            pred_masks = batch_pred_masks[j,].round().astype(int)
+
+        pred_rles = build_rles(pred_masks, reshape=(350, 525))
+
+        image_df['EncodedPixels'] = pred_rles
+        test_df.append(image_df)
+
+    return test_df
+
+
+def predict_fold(fold_number,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA):
+
+    print('Predicting Fold ', str(fold_number))
+    filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(fold_number) + '.h5'
+    model.load_weights(filepath)
+
+    batch_pred_masks = predict(batch_idx, test_imgs, shape, sub_df, backbone, TTA, model)
+
+    return batch_pred_masks
+
+
+def final_predict(models,folds,shape,TTA=False,posprocess=False):
+
     sub_df,test_imgs = get_test_data()
     print(test_imgs.shape[0])
     # batch_idx = list(range(test_imgs.shape[0]))
     test_df = []
+    batch_pred_emsemble=[]
+    submission_name = ''
 
-    for i in range(0, test_imgs.shape[0], 860):
-        batch_idx = list(
-            range(i, min(test_imgs.shape[0], i + 860))
-        )
-        fold_result = []
+    for smmodel,backbone in models:
+        opt = Adam()
+        model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, dice_coef, shape)
+        model_masks=[]
+        submission_name = submission_name + str(smmodel) + '_' + str(backbone) + '_'
 
-        for i in range(5):
-            print('Predicting Fold ', str(i))
-            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(i) + '.h5'
-            model.load_weights(filepath)
-
-            test_generator = DataGenerator(
-                batch_idx,
-                df=test_imgs,
-                shuffle=False,
-                mode='predict',
-                dim=(350, 525),
-                reshape=shape,
-                n_channels=3,
-                base_path='../../dados/test_images/',
-                target_df=sub_df,
-                batch_size=43,
-                n_classes=4,
-                backbone=backbone
+        for i in range(0, test_imgs.shape[0], 860):
+            batch_idx = list(
+                range(i, min(test_imgs.shape[0], i + 860))
             )
+            fold_result = []
 
-            if TTA:
-                test_generator.batch_size = 1
-                tta_model = tta_segmentation(model, h_flip=True, h_shift=(-10, 10),
-                                             input_shape=(320, 480, 3),merge='mean')
+            for i in folds:
 
+                batch_pred_masks = predict_fold(i,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA)
+                fold_result.append(batch_pred_masks)
 
-                batch_pred_masks = tta_model.predict_generator(
-                    test_generator,
-                    workers=40,
-                    verbose=1
-                )
-            else:
-                batch_pred_masks = model.predict_generator(
-                    test_generator,
-                    workers=40,
-                    verbose=1
-                )
+            batch_pred_masks = np.mean(fold_result, axis=0)
+            model_masks.extend(batch_pred_masks)
 
-            fold_result.append(batch_pred_masks)
-            del test_generator, batch_pred_masks
-            gc.collect()
+        batch_pred_emsemble.append(model_masks)
 
-        batch_pred_masks = np.mean(fold_result, axis=0)
-
-        del fold_result
+        del model, model_masks,batch_pred_masks,fold_result
         gc.collect()
 
-        minsizes = [20000, 20000, 22500, 10000]
 
-        sigmoid = lambda x: 1 / (1 + np.exp(-x))
+    batch_pred_emsemble = np.mean(batch_pred_emsemble, axis=0)
 
-        for j, b in enumerate(batch_idx):
-            filename = test_imgs['ImageId'].iloc[b]
-            image_df = sub_df[sub_df['ImageId'] == filename].copy()
+    batch_idx = list(range(test_imgs.shape[0]))
+    batch_postprocessed = predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_emsemble)
 
+    test_df.extend(batch_postprocessed)
 
-            if posprocess:
-                pred_masks = batch_pred_masks[j,]
-                pred_masks = cv2.resize(pred_masks, dsize=(525, 350), interpolation=cv2.INTER_LINEAR)
-                arrt = np.array([])
-                for t in range(4):
-                    a, num_predict = post_process(sigmoid(pred_masks[:, :, t]), 0.6, minsizes[t])
-
-                    if (arrt.shape == (0,)):
-                        arrt = a.reshape(350, 525, 1)
-                    else:
-                        arrt = np.append(arrt, a.reshape(350, 525, 1), axis=2)
-
-                pred_masks = arrt
-            else:
-                pred_masks = batch_pred_masks[j,].round().astype(int)
-
-            pred_rles = build_rles(pred_masks, reshape=(350, 525))
-
-            image_df['EncodedPixels'] = pred_rles
-            test_df.append(image_df)
-
-    submission_name = str(smmodel) + '_' + str(backbone) + '.csv'
+    submission_name = submission_name + '.csv'
     generate_submission(test_df, submission_name)
+
 
 def generate_submission(test_df, name):
 
@@ -125,6 +158,9 @@ def parse_args(args):
     parser.add_argument('--shape', help='Shape of resized images', default=(320, 480), type=tuple)
     parser.add_argument('--tta', help='Shape of resized images', default=False, type=bool)
     parser.add_argument('--posprocess', help='Shape of resized images', default=False, type=bool)
+    parser.add_argument('--fold', help='Fold number to predict', default=None, type=int)
+    parser.add_argument('--emsemble', help='Do model emsemble', default=False, type=bool)
+
 
     return parser.parse_args(args)
 
@@ -132,5 +168,16 @@ if __name__ == '__main__':
     args = sys.argv[1:]
     args = parse_args(args)
 
+    if args.fold is None:
+        folds = [0,1,2,3,4]
+    else:
+        folds = [args.fold]
 
-    predict_fold(args.model,args.backbone,args.shape,args.tta,args.posprocess)
+    if args.emsemble:
+        models = [{'unet','resnet34'},{'unet','efficientnetb3'},{'unet','efficientnetb4'},{'unet','seresnet34'},
+                  {'unet','seresnext50'},{'fpn','resnet34'}]
+    else:
+        models = [{args.model, args.backbone}]
+
+
+    final_predict(models,folds,args.shape,args.tta,args.posprocess)
