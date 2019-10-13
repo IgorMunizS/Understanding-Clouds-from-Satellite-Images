@@ -5,7 +5,7 @@ from utils.preprocess import get_data_preprocessed
 from utils.generator import DataGenerator
 from keras_radam import RAdam
 from keras.optimizers import Adam, Nadam, SGD
-from utils.lr import CyclicLR, Lookahead
+from utils.lr import CyclicLR, Lookahead, AdamAccumulate
 from models import get_model
 from utils.losses import dice_coef, dice_coef_loss_bce, lovasz_loss, combo_loss
 from utils.callbacks import ValPosprocess
@@ -52,7 +52,8 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             )
 
             # opt = RAdam(lr=0.0002)
-            opt = Nadam(lr=0.0001)
+            # opt = Nadam(lr=0.0001)
+            opt = AdamAccumulate(lr=0.0001, accum_iters=5)
 
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
 
