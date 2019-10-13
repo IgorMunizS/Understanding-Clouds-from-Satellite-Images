@@ -52,9 +52,9 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             )
 
             # opt = RAdam(lr=0.0002)
-            opt = Nadam(lr=0.0002)
+            opt = Nadam(lr=0.0001)
 
-            model = get_model(smmodel,backbone,opt,bce_jaccard_loss,dice_coef,shape)
+            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
 
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
