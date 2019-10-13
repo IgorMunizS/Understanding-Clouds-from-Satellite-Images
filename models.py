@@ -25,6 +25,7 @@ def get_model(model,BACKBONE,opt,loss,metric,shape):
     elif model == 'xnet':
         model = smx.Xnet(
             BACKBONE,
+            decoder_block_type='transpose',
             classes=4,
             input_shape=(h, w, 3),
             activation='sigmoid'

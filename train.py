@@ -53,7 +53,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             # opt = RAdam(lr=0.0002)
             opt = Nadam(lr=0.0002)
 
-            model = get_model(smmodel,backbone,opt,combo_loss,dice_coef,shape)
+            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
 
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
@@ -75,24 +75,24 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
                 workers=42
             )
 
-            opt = RAdam(lr=0.00001)
-            checkpoint = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
-                                         save_weights_only=True)
-            es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=5, verbose=1, mode='max')
-
-            model.compile(optimizer=opt, loss=combo_loss, metrics=[dice_coef])
-
-            clr = CyclicLR(base_lr=0.000001, max_lr=0.00001,
-                           step_size=150, reduce_on_plateau=3, monitor='val_dice_coef', reduce_factor=10, mode='exp_range')
-
-            history = model.fit_generator(
-                train_generator,
-                validation_data=val_generator,
-                callbacks=[checkpoint, es, clr],
-                epochs=30,
-                use_multiprocessing=True,
-                workers=42
-            )
+            # opt = RAdam(lr=0.00001)
+            # checkpoint = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
+            #                              save_weights_only=True)
+            # es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=5, verbose=1, mode='max')
+            #
+            # model.compile(optimizer=opt, loss=combo_loss, metrics=[dice_coef])
+            #
+            # clr = CyclicLR(base_lr=0.000001, max_lr=0.00001,
+            #                step_size=150, reduce_on_plateau=3, monitor='val_dice_coef', reduce_factor=10, mode='exp_range')
+            #
+            # history = model.fit_generator(
+            #     train_generator,
+            #     validation_data=val_generator,
+            #     callbacks=[checkpoint, es, clr],
+            #     epochs=30,
+            #     use_multiprocessing=True,
+            #     workers=42
+            # )
 
             del train_generator,val_generator,model
             gc.collect()
