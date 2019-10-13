@@ -159,7 +159,7 @@ def parse_args(args):
     parser.add_argument('--shape', help='Shape of resized images', default=(320, 480), type=tuple)
     parser.add_argument('--tta', help='Shape of resized images', default=False, type=bool)
     parser.add_argument('--posprocess', help='Shape of resized images', default=False, type=bool)
-    parser.add_argument('--fold', help='Fold number to predict', default=None, type=int)
+    parser.add_argument('--fold', help='Fold number to predict', default=None, nargs='+', type=int)
     parser.add_argument('--emsemble', help='Do model emsemble', default=False, type=bool)
 
 
@@ -172,7 +172,8 @@ if __name__ == '__main__':
     if args.fold is None:
         folds = [0,1,2,3,4]
     else:
-        folds = [args.fold]
+        folds = args.fold
+
 
     if args.emsemble:
         models = [['unet','efficientnetb4'],['unet','efficientnetb3']]
