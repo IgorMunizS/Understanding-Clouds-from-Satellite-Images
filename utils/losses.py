@@ -60,7 +60,7 @@ def focal_loss(y_true, y_pred):
     return -K.mean(alpha * K.pow(1. - pt_1, gamma) * K.log(pt_1)) - K.mean((1 - alpha) * K.pow(pt_0, gamma) * K.log(1. - pt_0))
 
 
-def combo_loss(y_true, y_pred,dice=0.2, bce=0.4, focal=0.4):
+def combo_loss(y_true, y_pred,dice=0.6, bce=0.3, focal=0.1):
     return binary_crossentropy_smoothed(y_true, y_pred) * bce + \
            dice_coef_loss(y_true, y_pred) * dice + \
            focal_loss(y_true,y_pred) * focal
