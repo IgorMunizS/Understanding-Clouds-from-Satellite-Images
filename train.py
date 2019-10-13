@@ -11,6 +11,7 @@ from utils.losses import dice_coef, dice_coef_loss_bce, lovasz_loss, combo_loss
 from utils.callbacks import ValPosprocess
 from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
+from segmentation_models.losses import bce_jaccard_loss
 
 
 def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
@@ -53,7 +54,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
             # opt = RAdam(lr=0.0002)
             opt = Nadam(lr=0.0002)
 
-            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
+            model = get_model(smmodel,backbone,opt,bce_jaccard_loss,dice_coef,shape)
 
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'

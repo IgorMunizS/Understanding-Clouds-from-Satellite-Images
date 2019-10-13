@@ -55,10 +55,10 @@ class DataGenerator(keras.utils.Sequence):
             if self.augment:
                 X, y = self.__augment_batch(X, y)
 
-            return X, y
+            return self.preprocess_input(X), y
 
         elif self.mode == 'predict':
-            return X
+            return self.preprocess_input(X)
 
         else:
             raise AttributeError('The mode parameter should be set to "fit" or "predict".')
@@ -119,7 +119,7 @@ class DataGenerator(keras.utils.Sequence):
 
     def __load_grayscale(self, img_path):
         img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-        img = img.astype(np.float32) / 255.
+        # img = img.astype(np.float32) / 255.
         img = np.expand_dims(img, axis=-1)
 
         return img
@@ -127,7 +127,7 @@ class DataGenerator(keras.utils.Sequence):
     def __load_rgb(self, img_path):
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = img.astype(np.float32) / 255.
+        # img = img.astype(np.float32) / 255.
 
         return img
 
