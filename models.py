@@ -1,5 +1,6 @@
 import segmentation_models as sm
 import UNetPlusPlus.segmentation_models as smx
+from utils.jpu import JPU_DeepLab
 
 def get_model(model,BACKBONE,opt,loss,metric,shape):
     h,w = shape
@@ -30,6 +31,9 @@ def get_model(model,BACKBONE,opt,loss,metric,shape):
             input_shape=(h, w, 3),
             activation='sigmoid'
         )
+        model.compile(optimizer=opt, loss=loss, metrics=[metric])
+    elif model == 'jpu':
+        model = JPU_DeepLab(h,w,4)
         model.compile(optimizer=opt, loss=loss, metrics=[metric])
     else:
         raise ValueError('Unknown network ' + model)
