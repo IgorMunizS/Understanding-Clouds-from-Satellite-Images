@@ -35,7 +35,7 @@ def get_model(model,BACKBONE,opt,loss,metric,shape):
         model.compile(optimizer=opt, loss=loss, metrics=[metric])
     elif model == 'jpu':
         model = JPU_DeepLab(h,w,4)
-        model.compile(optimizer=Nadam(learning_rate=1e-4), loss=loss, metrics=[metric])
+        model.compile(optimizer=opt, loss=loss, metrics=[metric])
     else:
         raise ValueError('Unknown network ' + model)
 
