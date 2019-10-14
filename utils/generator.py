@@ -84,8 +84,8 @@ class DataGenerator(keras.utils.Sequence):
             img_path = f"{self.base_path}/{im_name}"
             img = self.__load_rgb(img_path)
 
-            # if self.reshape is not None:
-            #     img = np_resize(img, self.reshape)
+            if self.reshape is not None:
+                img = np_resize(img, self.reshape)
 
             # Adjust gamma
             if self.gamma is not None:
@@ -109,7 +109,7 @@ class DataGenerator(keras.utils.Sequence):
             rles = image_df['EncodedPixels'].values
 
             if self.reshape is not None:
-                masks = build_masks(rles, input_shape=self.dim)
+                masks = build_masks(rles, input_shape=self.dim, reshape=self.reshape)
             else:
                 masks = build_masks(rles, input_shape=self.dim)
 
@@ -143,7 +143,7 @@ class DataGenerator(keras.utils.Sequence):
                         #                                  height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
                         #                                  p=0.5),
                         #       albu.PadIfNeeded(min_height=self.reshape[0], min_width=self.reshape[1], p=0.5)], p=0.3),
-                        albu.RandomCrop(height=320,width=480,always_apply=True,p=1.),
+                        albu.RandomCrop(height=320,width=480,always_apply=True, p=1.),
                         albu.Solarize(p=0.3),
                         albu.HorizontalFlip(),
                         albu.VerticalFlip(),
