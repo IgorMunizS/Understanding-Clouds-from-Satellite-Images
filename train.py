@@ -48,7 +48,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
                 target_df=train_df,
                 batch_size=batch_size,
                 reshape=None,
-                augment=False,
+                augment=True,
                 n_channels=3,
                 n_classes=4,
                 backbone=backbone
