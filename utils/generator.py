@@ -13,7 +13,7 @@ class DataGenerator(keras.utils.Sequence):
                  base_path='../../dados/train_images',
                  batch_size=32, dim=(1400, 2100), n_channels=3, reshape=None,
                  augment=False, n_classes=4, random_state=2019, shuffle=True, backbone='resnet34',
-                 gamma=None, TTA=False):
+                 gamma=None, TTA=False, randomcrop=False):
         self.dim = dim
         self.batch_size = batch_size
         self.df = df
@@ -30,7 +30,7 @@ class DataGenerator(keras.utils.Sequence):
         self.random_state = random_state
         self.preprocess_input = sm.get_preprocessing(backbone)
         self.TTA = TTA
-
+        self.randomcrop = randomcrop
 
         self.on_epoch_end()
         np.random.seed(self.random_state)
@@ -75,6 +75,8 @@ class DataGenerator(keras.utils.Sequence):
         # Initialization
         if self.reshape is None:
             X = np.empty((self.batch_size, *self.dim, self.n_channels))
+        elif self.reshape is not None and self.randomcrop is True:
+            X = np.empty((self.batch_size, *self.dim, self.n_channels))
         else:
             X = np.empty((self.batch_size, *self.reshape, self.n_channels))
 
@@ -84,7 +86,7 @@ class DataGenerator(keras.utils.Sequence):
             img_path = f"{self.base_path}/{im_name}"
             img = self.__load_rgb(img_path)
 
-            if self.reshape is not None:
+            if self.reshape is not None and self.randomcrop is False:
                 img = np_resize(img, self.reshape)
 
             # Adjust gamma
@@ -99,6 +101,9 @@ class DataGenerator(keras.utils.Sequence):
     def __generate_y(self, list_IDs_batch):
         if self.reshape is None:
             y = np.empty((self.batch_size, *self.dim, self.n_classes), dtype=int)
+
+        elif self.reshape is not None and self.randomcrop is True:
+            y = np.empty((self.batch_size, *self.dim, self.n_classes), dtype=int)
         else:
             y = np.empty((self.batch_size, *self.reshape, self.n_classes), dtype=int)
 
@@ -108,7 +113,7 @@ class DataGenerator(keras.utils.Sequence):
 
             rles = image_df['EncodedPixels'].values
 
-            if self.reshape is not None:
+            if self.reshape is not None and self.randomcrop is False:
                 masks = build_masks(rles, input_shape=self.dim, reshape=self.reshape)
             else:
                 masks = build_masks(rles, input_shape=self.dim)
@@ -167,11 +172,22 @@ class DataGenerator(keras.utils.Sequence):
         return aug_img, aug_masks
 
     def __augment_batch(self, img_batch, masks_batch):
-        for i in range(img_batch.shape[0]):
-            img_batch[i,], masks_batch[i,] = self.__random_transform(
-                img_batch[i,], masks_batch[i,])
+        if self.randomcrop:
+            img_batch_crop = np.empty((self.batch_size, *self.reshape, self.n_channels))
+            masks_batch_crop = np.empty((self.batch_size, *self.reshape, self.n_classes), dtype=int)
 
-        return img_batch, masks_batch
+        for i in range(img_batch.shape[0]):
+            if self.randomcrop:
+                img_batch_crop[i,], masks_batch_crop[i,] = self.__random_transform(
+                    img_batch[i,], masks_batch[i,])
+            else:
+                img_batch[i,], masks_batch[i,] = self.__random_transform(
+                    img_batch[i,], masks_batch[i,])
+
+        if self.randomcrop:
+            return img_batch_crop, masks_batch_crop
+        else:
+            return img_batch, masks_batch
 
     def do_tta(self,img):
 

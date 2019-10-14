@@ -35,11 +35,12 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
                 df=mask_count_df,
                 target_df=train_df,
                 batch_size=batch_size,
-                reshape=(1400, 2100),
+                reshape=shape,
                 augment=True,
                 n_channels=3,
                 n_classes=4,
-                backbone=backbone
+                backbone=backbone,
+                randomcrop=True
             )
 
             val_generator = DataGenerator(
@@ -47,7 +48,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
                 df=mask_count_df,
                 target_df=train_df,
                 batch_size=batch_size,
-                reshape=(1400, 2100),
+                reshape=shape,
                 augment=False,
                 n_channels=3,
                 n_classes=4,
