@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import pandas as pd
 from utils.utils import make_mask,mask2rle, np_resize
-from utils.posprocess import post_process_minsize,draw_convex_hull
+from utils.posprocess import post_process_minsize,draw_convex_hull, post_process
 import sys
 import argparse
 
@@ -15,7 +15,7 @@ def posprocess(file,mode):
 
     mode = 'convex'  # choose from 'rect', 'min', 'convex' and 'approx'
     model_class_names = ['Fish', 'Flower', 'Gravel', 'Sugar']
-    min_size = [10000, 10000, 10000, 10000]
+    min_size = [20000, 20000, 22500, 10000]
 
     img_label_list = []
     enc_pixels_list = []
@@ -36,7 +36,7 @@ def posprocess(file,mode):
                 # if class_name == 'Flower' or class_name =='Sugar': # you can decide to post-process for some certain classes
                 mask = draw_convex_hull(mask.astype(np.uint8), mode=mode)
             mask[img2 <= 2 / 255.] = 0
-            # mask = post_process_minsize(mask, min_size[class_i])
+            mask = post_process(mask, min_size[class_i])
 
             if mask.sum() == 0:
                 enc_pixels_list.append(np.nan)
