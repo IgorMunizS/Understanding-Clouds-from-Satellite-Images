@@ -1,5 +1,6 @@
 import tensorflow as tf
 from utils.resnet import ResNet101
+from keras.models import Model
 
 
 def conv_block(tensor, num_filters, kernel_size, padding='same', strides=1, dilation_rate=1, w_init='he_normal'):
@@ -98,5 +99,5 @@ def JPU_DeepLab(img_height=1024, img_width=1024, nclasses=19):
     x = tf.keras.layers.UpSampling2D(size=scale, interpolation='bilinear')(x)
 
     x = tf.keras.layers.Conv2D(nclasses, (1, 1), name='output_layer')(x)
-    model = tf.keras.Model(inputs=base_model.input, outputs=x, name='JPU')
+    model = Model(inputs=base_model.input, outputs=x, name='JPU')
     return model
