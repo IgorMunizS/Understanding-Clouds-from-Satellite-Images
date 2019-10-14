@@ -84,8 +84,8 @@ class DataGenerator(keras.utils.Sequence):
             img_path = f"{self.base_path}/{im_name}"
             img = self.__load_rgb(img_path)
 
-            if self.reshape is not None:
-                img = np_resize(img, self.reshape)
+            # if self.reshape is not None:
+            #     img = np_resize(img, self.reshape)
 
             # Adjust gamma
             if self.gamma is not None:
@@ -109,7 +109,7 @@ class DataGenerator(keras.utils.Sequence):
             rles = image_df['EncodedPixels'].values
 
             if self.reshape is not None:
-                masks = build_masks(rles, input_shape=self.dim, reshape=self.reshape)
+                masks = build_masks(rles, input_shape=self.dim)
             else:
                 masks = build_masks(rles, input_shape=self.dim)
 
