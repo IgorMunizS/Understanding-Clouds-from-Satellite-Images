@@ -16,8 +16,8 @@ from segmentation_models.losses import bce_jaccard_loss
 
 def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
 
-    if shape is None:
-        shape = (1400,2100)
+    # if shape is None:
+    #     shape = (1400,2100)
 
 
     train_df, mask_count_df = get_data_preprocessed()
