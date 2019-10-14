@@ -143,10 +143,12 @@ class DataGenerator(keras.utils.Sequence):
                         #                                  height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
                         #                                  p=0.5),
                         #       albu.PadIfNeeded(min_height=self.reshape[0], min_width=self.reshape[1], p=0.5)], p=0.3),
+                        albu.Solarize(p=0.3),
                         albu.RandomSizedCrop(min_max_height=(self.reshape[0] // 2, self.reshape[0]),
                                              height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,p=0.3),
                         albu.HorizontalFlip(p=0.3),
                         albu.VerticalFlip(p=0.3),
+                        albu.Solarize(p=0.3),
                         albu.ShiftScaleRotate(rotate_limit=45, shift_limit=0.15, scale_limit=0.15),
                         albu.OneOf([
                             albu.ElasticTransform(p=0.5, alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
