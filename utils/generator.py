@@ -152,7 +152,7 @@ class DataGenerator(keras.utils.Sequence):
                         #                                            height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
                         #                                            p=0.5),
                         albu.Solarize(p=0.3),
-                        albu.HorizontalFlip(),
+                        albu.HorizontalFlip(p=0.3),
                         albu.VerticalFlip(),
                         albu.ShiftScaleRotate(rotate_limit=45, shift_limit=0.15, scale_limit=0.15),
                         albu.OneOf([
