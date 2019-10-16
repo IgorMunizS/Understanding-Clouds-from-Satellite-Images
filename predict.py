@@ -74,7 +74,7 @@ def predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_masks):
         else:
             pred_masks = batch_pred_masks[j,].round().astype(int)
 
-        all_masks.extend(pred_masks)
+        all_masks.append(pred_masks)
 
     return all_masks
 
