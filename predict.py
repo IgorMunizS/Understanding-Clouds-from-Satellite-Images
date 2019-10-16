@@ -74,7 +74,7 @@ def predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_masks):
         else:
             pred_masks = batch_pred_masks[j,].round().astype(int)
 
-        all_masks.append(pred_masks)
+        all_masks.extend(pred_masks)
 
     return all_masks
 
@@ -130,7 +130,9 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
             for i in folds:
 
                 batch_pred_masks = predict_fold(i,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA)
+                print(np.array(batch_pred_masks).shape)
                 batch_pred_masks = predict_postprocess(batch_idx, test_imgs, sub_df, posprocess, batch_pred_masks)
+                print(np.array(batch_pred_masks).shape)
                 fold_result.append(batch_pred_masks)
 
             batch_pred_masks = np.mean(fold_result, axis=0)
