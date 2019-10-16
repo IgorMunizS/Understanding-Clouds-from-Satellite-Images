@@ -130,9 +130,16 @@ class DataGenerator(keras.utils.Sequence):
         return img
 
     def __load_rgb(self, img_path):
-        img = cv2.imread(img_path)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        try:
+            img = cv2.imread(img_path)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         # img = img.astype(np.float32) / 255.
+
+        except:
+            img_name = img_path.split('/')[1]
+            img_path = '../../dados/test_images/' + img_name
+            img = cv2.imread(img_path)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         return img
 
