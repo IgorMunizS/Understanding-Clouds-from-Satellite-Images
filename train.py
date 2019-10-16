@@ -1,6 +1,6 @@
 import argparse
 import sys
-from sklearn.model_selection import ShuffleSplit
+from sklearn.model_selection import StratifiedShuffleSplit
 from utils.preprocess import get_data_preprocessed
 from utils.generator import DataGenerator
 from keras_radam import RAdam
@@ -11,6 +11,9 @@ from utils.losses import dice_coef, dice_coef_loss_bce, lovasz_loss, combo_loss
 from utils.callbacks import ValPosprocess
 from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
+from imblearn.over_sampling import RandomOverSampler
+import itertools
+
 from segmentation_models.losses import bce_jaccard_loss
 
 
@@ -21,11 +24,15 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
 
 
     train_df, mask_count_df = get_data_preprocessed(pseudo_label)
+    ros = RandomOverSampler(random_state=133)
 
-    skf = ShuffleSplit(n_splits=5, test_size=0.15, random_state=133)
+    skf = StratifiedShuffleSplit(n_splits=5, test_size=0.15, random_state=133)
 
-    for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index)):
+    for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
+        train_indices, _ = ros.fit_resample(train_indices.reshape(-1, 1),
+                                                   mask_count_df[mask_count_df.index.isin(train_indices)]['hasMask'])
 
+        train_indices = list(itertools.chain.from_iterable(train_indices))
         if n_fold >= nfold:
             print('Training fold number ',str(n_fold))
 
