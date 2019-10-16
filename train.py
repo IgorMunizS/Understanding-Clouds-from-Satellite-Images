@@ -14,13 +14,13 @@ import gc
 from segmentation_models.losses import bce_jaccard_loss
 
 
-def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0):
+def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None):
 
     # if shape is None:
     #     shape = (1400,2100)
 
 
-    train_df, mask_count_df = get_data_preprocessed()
+    train_df, mask_count_df = get_data_preprocessed(pseudo_label)
 
     skf = ShuffleSplit(n_splits=5, test_size=0.15, random_state=133)
 
@@ -113,7 +113,7 @@ def parse_args(args):
     parser.add_argument('--batch_size', default=12, type=int)
     parser.add_argument('--shape', help='Shape of resized images', default=(320,480), type=tuple)
     parser.add_argument('--n_fold', help='Number of fold to start training', default=0, type=int)
-
+    parser.add_argument('--pseudo_label', help='Add extra data from test', default=None, type=str)
     return parser.parse_args(args)
 
 if __name__ == '__main__':
@@ -121,4 +121,4 @@ if __name__ == '__main__':
     args = parse_args(args)
 
 
-    train(args.model,args.backbone,args.batch_size,args.shape,args.n_fold)
+    train(args.model,args.backbone,args.batch_size,args.shape,args.n_fold,args.pseudo_label)
