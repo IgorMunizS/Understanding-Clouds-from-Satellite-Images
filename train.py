@@ -33,6 +33,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                                                    mask_count_df[mask_count_df.index.isin(train_indices)]['hasMask'])
 
         train_indices = list(itertools.chain.from_iterable(train_indices))
+
         if n_fold >= nfold:
             print('Training fold number ',str(n_fold))
 
