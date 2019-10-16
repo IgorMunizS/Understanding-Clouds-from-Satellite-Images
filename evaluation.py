@@ -2,6 +2,7 @@ import argparse
 import sys
 from sklearn.model_selection import StratifiedShuffleSplit
 from utils.preprocess import get_data_preprocessed
+from sklearn.metrics import f1_score
 from utils.generator import DataGenerator
 from keras_radam import RAdam
 from keras.optimizers import Adam, Nadam, SGD
@@ -60,7 +61,7 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
             print(y_true.shape)
             print(y_pred.shape)
 
-            print("Dice: ", dice(y_true,y_pred))
+            print("Dice: ", f1_score(y_true,y_pred))
 
 
 def parse_args(args):
