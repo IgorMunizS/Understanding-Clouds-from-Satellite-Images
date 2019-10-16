@@ -84,7 +84,7 @@ def convert_masks_for_submission(batch_idx,test_imgs,sub_df,prediction):
         filename = test_imgs['ImageId'].iloc[b]
         image_df = sub_df[sub_df['ImageId'] == filename].copy()
 
-        pred_rles = build_rles(prediction, reshape=(350, 525))
+        pred_rles = build_rles(prediction[j,], reshape=(350, 525))
 
         image_df['EncodedPixels'] = pred_rles
         test_df.append(image_df)
