@@ -54,11 +54,9 @@ def predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_masks):
 
     sigmoid = lambda x: 1 / (1 + np.exp(-x))
 
-    test_df =[]
+    all_masks =[]
 
     for j, b in enumerate(batch_idx):
-        filename = test_imgs['ImageId'].iloc[b]
-        image_df = sub_df[sub_df['ImageId'] == filename].copy()
 
         if posprocess:
             pred_masks = batch_pred_masks[j,]
@@ -76,12 +74,24 @@ def predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_masks):
         else:
             pred_masks = batch_pred_masks[j,].round().astype(int)
 
-        pred_rles = build_rles(pred_masks, reshape=(350, 525))
+        all_masks.append(pred_masks)
+
+    return all_masks
+
+def convert_masks_for_submission(batch_idx,test_imgs,sub_df,prediction):
+    test_df = []
+    for j, b in enumerate(batch_idx):
+        filename = test_imgs['ImageId'].iloc[b]
+        image_df = sub_df[sub_df['ImageId'] == filename].copy()
+
+        pred_rles = build_rles(prediction, reshape=(350, 525))
 
         image_df['EncodedPixels'] = pred_rles
         test_df.append(image_df)
 
+
     return test_df
+
 
 
 def predict_fold(fold_number,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA):
@@ -120,6 +130,7 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
             for i in folds:
 
                 batch_pred_masks = predict_fold(i,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA)
+                batch_pred_masks = predict_postprocess(batch_idx, test_imgs, sub_df, posprocess, batch_pred_masks)
                 fold_result.append(batch_pred_masks)
 
             batch_pred_masks = np.mean(fold_result, axis=0)
@@ -131,13 +142,12 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
         gc.collect()
 
 
-    batch_pred_emsemble = np.mean(batch_pred_emsemble, axis=0)
+    pred_emsemble = np.mean(batch_pred_emsemble, axis=0)
 
     batch_idx = list(range(test_imgs.shape[0]))
-    batch_postprocessed = predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_emsemble)
+    # masks_posprocessed = predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_emsemble)
 
-    test_df.extend(batch_postprocessed)
-
+    test_df = convert_masks_for_submission(batch_idx,test_imgs,sub_df,pred_emsemble)
     submission_name = submission_name + '.csv'
     generate_submission(test_df, submission_name)
 
