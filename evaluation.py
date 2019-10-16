@@ -57,6 +57,8 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
                 workers=40,
                 verbose=1
             )
+            print(y_true.shape)
+            print(y_pred.shape)
 
             print("Dice: ", dice(y_true,y_pred))
 
