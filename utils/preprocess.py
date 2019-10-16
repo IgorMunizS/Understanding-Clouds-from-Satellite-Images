@@ -93,7 +93,7 @@ def get_data_preprocessed(pseudo_label=None):
 
     mask_count_df = train_df.groupby('ImageId').agg(np.sum).reset_index()
     mask_count_df.sort_values('hasMask', ascending=False, inplace=True)
-    mask_count_df = mask_count_df[[mask_count_df.hasMask == 1.0]]
+    mask_count_df = mask_count_df[mask_count_df.hasMask == 1.0]
 
     return train_df, mask_count_df
 
