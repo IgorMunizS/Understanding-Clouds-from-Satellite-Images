@@ -49,7 +49,7 @@ def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
 
     return batch_pred_masks
 
-def predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_masks):
+def predict_postprocess(batch_idx,posprocess,batch_pred_masks):
     minsizes = [20000, 20000, 22500, 10000]
 
     sigmoid = lambda x: 1 / (1 + np.exp(-x))
@@ -131,7 +131,7 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
 
                 batch_pred_masks = predict_fold(i,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA)
                 print(np.array(batch_pred_masks).shape)
-                batch_pred_masks = predict_postprocess(batch_idx, test_imgs, sub_df, posprocess, batch_pred_masks)
+                batch_pred_masks = predict_postprocess(batch_idx, posprocess, batch_pred_masks)
                 print(np.array(batch_pred_masks).shape)
                 fold_result.append(batch_pred_masks)
 

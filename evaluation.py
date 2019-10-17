@@ -14,6 +14,7 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
 from imblearn.over_sampling import RandomOverSampler
 import itertools
+from predict import predict_postprocess
 
 def evaluate(smmodel,backbone,model_path,shape=(320,480)):
 
@@ -53,12 +54,12 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
             model.load_weights(model_path)
 
-            results = model.evaluate_generator(
-                val_generator,
-                workers=40,
-                verbose=1
-            )
-            print(results)
+            # results = model.evaluate_generator(
+            #     val_generator,
+            #     workers=40,
+            #     verbose=1
+            # )
+            # print(results)
 
             y_pred = model.predict_generator(
                 val_generator,
@@ -69,7 +70,9 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
             print(y_pred.shape)
 
             print("Dice: ", np_dice_coef(y_true,y_pred))
-
+            batch_idx = list(range(y_true.shape[0]))
+            batch_pred_masks = predict_postprocess(batch_idx, True, y_pred)
+            print("Dice with post process: ", np_dice_coef(y_true, batch_pred_masks))
 
 def parse_args(args):
     """ Parse the arguments.
