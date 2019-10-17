@@ -47,7 +47,7 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
             )
 
             _ ,y_true = val_generator.__getitem__(0)
-            val_generator.batch_size = 64
+            val_generator.batch_size = 8
             # opt = RAdam(lr=0.0002)
             opt = Nadam(lr=0.0002)
             # opt = AdamAccumulate(lr=0.0002, accum_iters=8)
