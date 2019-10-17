@@ -8,7 +8,7 @@ from keras_radam import RAdam
 from keras.optimizers import Adam, Nadam, SGD
 from utils.lr import CyclicLR, Lookahead, AdamAccumulate
 from models import get_model
-from utils.losses import dice_coef, dice_coef_loss_bce, lovasz_loss, combo_loss, dice
+from utils.losses import dice_coef, dice_coef_loss_bce, lovasz_loss, combo_loss, np_dice_coef
 from utils.callbacks import ValPosprocess
 from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
@@ -61,7 +61,7 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
             print(y_true.shape)
             print(y_pred.shape)
 
-            print("Dice: ", f1_score(y_true,y_pred))
+            print("Dice: ", np_dice_coef(y_true,y_pred))
 
 
 def parse_args(args):
