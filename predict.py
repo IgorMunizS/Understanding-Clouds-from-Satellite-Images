@@ -171,7 +171,7 @@ def parse_args(args):
 
     parser.add_argument('--model', help='Segmentation model', default='unet')
     parser.add_argument('--backbone', help='Model backbone', default='resnet34', type=str)
-    parser.add_argument('--shape', help='Shape of resized images', default=(320, 480), type=tuple)
+    parser.add_argument('--shape', help='Shape of resized images', default=(384, 576), type=tuple)
     parser.add_argument('--tta', help='Shape of resized images', default=False, type=bool)
     parser.add_argument('--posprocess', help='Shape of resized images', default=False, type=bool)
     parser.add_argument('--fold', help='Fold number to predict', default=None, nargs='+', type=int)
