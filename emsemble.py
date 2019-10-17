@@ -7,7 +7,7 @@ import os
 list_submissions = []
 for i,file in enumerate(os.listdir('../best_submissions/')):
     sub = pd.read_csv('../best_submissions/' + file)
-    sub.columns = ['Image_Label', 'enc' + str(i)]
+    sub.columns = ['Image_Label', 'enc' + str(i+1)]
     list_submissions.append(sub)
 
 final_sub = pd.merge(left = list_submissions[0], right = list_submissions[1], on = 'Image_Label', how = 'inner')
