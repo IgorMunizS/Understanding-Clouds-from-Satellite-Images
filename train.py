@@ -1,6 +1,6 @@
 import argparse
 import sys
-from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.model_selection import ShuffleSplit
 from utils.preprocess import get_data_preprocessed
 from utils.generator import DataGenerator
 from keras_radam import RAdam
@@ -26,13 +26,13 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
     train_df, mask_count_df = get_data_preprocessed(pseudo_label)
     ros = RandomOverSampler(random_state=133)
 
-    skf = StratifiedShuffleSplit(n_splits=5, test_size=0.15, random_state=133)
+    skf = ShuffleSplit(n_splits=5, test_size=0.15, random_state=133)
 
-    for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
-        train_indices, _ = ros.fit_resample(train_indices.reshape(-1, 1),
-                                                   mask_count_df[mask_count_df.index.isin(train_indices)]['hasMask'])
-
-        train_indices = list(itertools.chain.from_iterable(train_indices))
+    for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index)):
+        # train_indices, _ = ros.fit_resample(train_indices.reshape(-1, 1),
+        #                                            mask_count_df[mask_count_df.index.isin(train_indices)]['hasMask'])
+        #
+        # train_indices = list(itertools.chain.from_iterable(train_indices))
 
         if n_fold >= nfold:
             print('Training fold number ',str(n_fold))
@@ -118,8 +118,8 @@ def parse_args(args):
 
     parser.add_argument('--model', help='Segmentation model', default='unet')
     parser.add_argument('--backbone', help='Model backbone', default='resnet34', type=str)
-    parser.add_argument('--batch_size', default=6, type=int)
-    parser.add_argument('--shape', help='Shape of resized images', default=(384,576), type=tuple)
+    parser.add_argument('--batch_size', default=12, type=int)
+    parser.add_argument('--shape', help='Shape of resized images', default=(320,480), type=tuple)
     parser.add_argument('--n_fold', help='Number of fold to start training', default=0, type=int)
     parser.add_argument('--pseudo_label', help='Add extra data from test', default=None, type=str)
     return parser.parse_args(args)
