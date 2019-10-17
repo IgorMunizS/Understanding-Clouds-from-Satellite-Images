@@ -51,7 +51,7 @@ def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
 
 def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),minsize=None):
     if minsize is None:
-        minsizes = [20000, 20000, 22500, 10000]
+        minsizes = [10000, 10000, 10000, 10000]
     else:
         minsizes = minsize
 
@@ -134,9 +134,7 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
             for i in folds:
 
                 batch_pred_masks = predict_fold(i,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA)
-                print(np.array(batch_pred_masks).shape)
-                batch_pred_masks = predict_postprocess(batch_idx, posprocess, batch_pred_masks)
-                print(np.array(batch_pred_masks).shape)
+                # print(np.array(batch_pred_masks).shape)
                 fold_result.append(batch_pred_masks)
 
             batch_pred_masks = np.mean(fold_result, axis=0)
@@ -152,6 +150,7 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
 
     batch_idx = list(range(test_imgs.shape[0]))
     # masks_posprocessed = predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_emsemble)
+    pred_emsemble = predict_postprocess(batch_idx, posprocess, pred_emsemble)
 
     test_df = convert_masks_for_submission(batch_idx,test_imgs,sub_df,pred_emsemble)
     submission_name = submission_name + '.csv'
