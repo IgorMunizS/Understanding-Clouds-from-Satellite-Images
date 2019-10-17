@@ -30,7 +30,7 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
 
 
-        if n_fold >= 4:
+        if n_fold >= 3:
             print('Evaluating fold number ',str(n_fold))
 
 
@@ -97,7 +97,7 @@ def parse_args(args):
 
     parser.add_argument('--model', help='Segmentation model', default='unet')
     parser.add_argument('--backbone', help='Model backbone', default='resnet34', type=str)
-    parser.add_argument('--shape', help='Shape of resized images', default=(320, 480), type=tuple)
+    parser.add_argument('--shape', help='Shape of resized images', default=(384, 576), type=tuple)
     parser.add_argument('--model_path', help='model weight path', default=None, type=str)
 
 
