@@ -76,7 +76,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             # vl_postprocess = ValPosprocess(val_generator,batch_size,shape)
             # lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
             # lookahead.inject(model)
-            snapshot = SnapshotCallbackBuilder(nb_epochs=15, nb_snapshots=1, init_lr=1e-3)
+            snapshot = SnapshotCallbackBuilder(nb_epochs=15, nb_snapshots=3, init_lr=1e-5)
             callbacks_list = snapshot.get_callbacks(filepath)
             swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', 12)
             callbacks_list.append(swa)
