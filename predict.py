@@ -49,8 +49,12 @@ def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
 
     return batch_pred_masks
 
-def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525)):
-    minsizes = [20000, 20000, 22500, 10000]
+def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),minsize=None):
+    if minsize is None:
+        minsizes = [20000, 20000, 22500, 10000]
+    else:
+        minsizes = minsize
+
     h,w = shape
     sigmoid = lambda x: 1 / (1 + np.exp(-x))
 

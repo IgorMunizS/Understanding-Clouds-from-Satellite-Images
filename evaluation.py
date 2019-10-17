@@ -72,9 +72,22 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
 
             print("Dice: ", np_dice_coef(y_true,y_pred))
             batch_idx = list(range(y_true.shape[0]))
-            batch_pred_masks = np.array(predict_postprocess(batch_idx, True, y_pred, shape))
-            print(batch_pred_masks.shape)
-            print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
+            minsizes = [[20000, 20000, 22500, 10000],
+                        [10000, 10000, 10000, 10000],
+                        [15000, 15000, 15000, 15000],
+                        [20000, 20000, 20000, 20000],
+                        [25000, 25000, 25000, 25000],
+                        [15000, 15000, 10000, 10000],
+                        [20000, 15000, 10000, 10000],
+                        [20000, 20000, 10000, 10000],
+                        [20000, 20000, 15000, 10000],
+                        [10000, 20000, 15000, 20000],
+                        [10000, 10000, 15000, 15000]]
+
+            for minsize in minsizes:
+                batch_pred_masks = np.array(predict_postprocess(batch_idx, True, y_pred, shape,minsize))
+                print(minsize)
+                print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
 
 def parse_args(args):
     """ Parse the arguments.
