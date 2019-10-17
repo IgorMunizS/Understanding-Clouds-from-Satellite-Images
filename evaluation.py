@@ -53,6 +53,13 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
             model.load_weights(model_path)
 
+            results = model.evaluate_generator(
+                val_generator,
+                workers=40,
+                verbose=1
+            )
+            print(results)
+
             y_pred = model.predict_generator(
                 val_generator,
                 workers=40,
