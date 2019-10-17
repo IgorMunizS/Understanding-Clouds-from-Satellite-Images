@@ -72,7 +72,8 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
 
             print("Dice: ", np_dice_coef(y_true,y_pred))
             batch_idx = list(range(y_true.shape[0]))
-            batch_pred_masks = predict_postprocess(batch_idx, True, y_pred)
+            batch_pred_masks = np.array(predict_postprocess(batch_idx, True, y_pred, shape))
+            print(batch_pred_masks.shape)
             print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
 
 def parse_args(args):
