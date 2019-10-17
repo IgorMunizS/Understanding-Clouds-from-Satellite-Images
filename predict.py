@@ -150,8 +150,9 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
 
     batch_idx = list(range(test_imgs.shape[0]))
     # masks_posprocessed = predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_emsemble)
-    pred_emsemble = predict_postprocess(batch_idx, posprocess, pred_emsemble)
+    pred_emsemble = np.array(predict_postprocess(batch_idx, posprocess, pred_emsemble))
 
+    print(pred_emsemble.shape)
     test_df = convert_masks_for_submission(batch_idx,test_imgs,sub_df,pred_emsemble)
     submission_name = submission_name + '.csv'
     generate_submission(test_df, submission_name)
