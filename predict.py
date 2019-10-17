@@ -14,7 +14,7 @@ import gc
 from tta_wrapper import tta_segmentation
 
 def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
-
+    h,w = shape
     test_generator = DataGenerator(
         batch_idx,
         df=test_imgs,
@@ -33,7 +33,7 @@ def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
     if TTA:
         test_generator.batch_size = 1
         tta_model = tta_segmentation(model, v_flip=True, h_flip=True,
-                                     input_shape=(320, 480, 3), merge='mean')
+                                     input_shape=(h, w, 3), merge='mean')
 
         batch_pred_masks = tta_model.predict_generator(
             test_generator,
