@@ -15,6 +15,7 @@ import gc
 from imblearn.over_sampling import RandomOverSampler
 import itertools
 from predict import predict_postprocess
+import numpy as np
 
 def evaluate(smmodel,backbone,model_path,shape=(320,480)):
 
@@ -72,7 +73,7 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
             print("Dice: ", np_dice_coef(y_true,y_pred))
             batch_idx = list(range(y_true.shape[0]))
             batch_pred_masks = predict_postprocess(batch_idx, True, y_pred)
-            print("Dice with post process: ", np_dice_coef(y_true, batch_pred_masks))
+            print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
 
 def parse_args(args):
     """ Parse the arguments.
