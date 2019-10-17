@@ -61,7 +61,7 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
             print(y_true.shape)
             print(y_pred.shape)
 
-            print("Dice: ", np_dice_coef(y_true,y_pred))
+            print("Dice: ", dice_coef(y_true,y_pred))
 
 
 def parse_args(args):
