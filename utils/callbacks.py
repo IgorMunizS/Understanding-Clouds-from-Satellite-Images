@@ -1,6 +1,6 @@
 from keras import callbacks
 import numpy as np
-from utils.losses import dice
+from utils.losses import np_dice_coef
 import cv2
 from utils.posprocess import post_process
 
