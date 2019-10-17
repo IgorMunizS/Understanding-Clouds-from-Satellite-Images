@@ -21,8 +21,10 @@ idx = np.intersect1d(id1, id2)
 final_sub['EncodedPixels'] = final_sub['enc1']
 final_sub['EncodedPixels'][idx] = final_sub['enc2'][idx]
 
-final_sub[['Image_Label', 'EncodedPixels']].to_csv('emsemble_sub.csv', index=False)
+
 
 # if len(list_submissions) > 2:
 #     for i in range(2,len(list_submissions)):
 #         final_sub = pd.merge(left=final_sub, right=list_submissions[i], on = 'Image_Label', how = 'inner')
+
+final_sub[['Image_Label', 'EncodedPixels']].to_csv('emsemble_sub.csv', index=False)

@@ -8,7 +8,7 @@ from keras.optimizers import Adam, Nadam, SGD
 from utils.lr import CyclicLR, Lookahead, AdamAccumulate
 from models import get_model
 from utils.losses import dice_coef, dice_coef_loss_bce, lovasz_loss, combo_loss
-from utils.callbacks import ValPosprocess
+from utils.callbacks import ValPosprocess, SnapshotCallbackBuilder, SWA
 from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
 from imblearn.over_sampling import RandomOverSampler
@@ -70,20 +70,21 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
 
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
-            checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min',
-                                         save_weights_only=True)
-            es = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=5, verbose=1, mode='min')
-            rlr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=2, verbose=1, mode='min', min_delta=0.0001)
 
+            # es = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=5, verbose=1, mode='min')
+            # rlr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=2, verbose=1, mode='min', min_delta=0.0001)
             # vl_postprocess = ValPosprocess(val_generator,batch_size,shape)
             # lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
             # lookahead.inject(model)
-
+            snapshot = SnapshotCallbackBuilder(nb_epochs=15, nb_snapshots=1, init_lr=1e-3)
+            callbacks_list = snapshot.get_callbacks(filepath)
+            swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', 12)
+            callbacks_list.append(swa)
             history = model.fit_generator(
                 train_generator,
                 validation_data=val_generator,
-                callbacks=[checkpoint, es, rlr],
-                epochs=30,
+                callbacks=callbacks_list,
+                epochs=15,
                 use_multiprocessing=True,
                 workers=42
             )
