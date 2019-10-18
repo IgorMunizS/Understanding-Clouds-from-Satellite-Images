@@ -97,7 +97,7 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
                 for mask in y_pred:
                     class_masks=np.zeros((mask.shape[0], mask.shape[1], 4))
                     for i in range(4):
-                        class_pred_masks = np.array(draw_convex_hull(mask[:,:,i], mode)*255.)
+                        class_pred_masks = np.array(draw_convex_hull((mask[:,:,i]*255).astype(np.uint8), mode))
                         class_pred_masks = post_process_minsize(class_pred_masks, 5000)
                         class_masks[:,:,i] = class_pred_masks
                     pred_masks.append(class_masks)
