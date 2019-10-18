@@ -17,6 +17,7 @@ import itertools
 from predict import predict_postprocess
 import numpy as np
 from utils.posprocess import draw_convex_hull
+import os
 
 def evaluate(smmodel,backbone,model_path,shape=(320,480)):
 
@@ -107,6 +108,7 @@ def parse_args(args):
     parser.add_argument('--backbone', help='Model backbone', default='resnet34', type=str)
     parser.add_argument('--shape', help='Shape of resized images', default=(320, 480), type=tuple)
     parser.add_argument('--model_path', help='model weight path', default=None, type=str)
+    parser.add_argument("--cpu", default=False, type=bool)
 
 
 
@@ -115,6 +117,10 @@ def parse_args(args):
 if __name__ == '__main__':
     args = sys.argv[1:]
     args = parse_args(args)
+
+    if args.cpu:
+        os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 
     evaluate(args.model,args.backbone,args.model_path,args.shape)
