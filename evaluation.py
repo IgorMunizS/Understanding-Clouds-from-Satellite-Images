@@ -72,22 +72,23 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
             )
             print(y_true.shape)
             print(y_pred.shape)
+            print(y_pred)
 
             print("Dice: ", np_dice_coef(y_true,y_pred))
             batch_idx = list(range(y_true.shape[0]))
-            minsizes = [[1000, 1000, 1000, 1000],
-                        [2000, 2000, 2000, 2000],
-                        [3000, 3000, 3000, 3000],
-                        [4000, 4000, 4000, 4000],
-                        [5000, 5000, 5000, 5000],
-                        [6000, 6000, 6000, 6000]]
-            thresholds = [0.58,0.59,0.6,0.61,0.62]
-            for minsize in minsizes:
-                for threshold in thresholds:
-                    batch_pred_masks = np.array(predict_postprocess(batch_idx, True, y_pred, shape,minsize, threshold))
-                    print(minsize)
-                    print(threshold)
-                    print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
+            # minsizes = [[1000, 1000, 1000, 1000],
+            #             [2000, 2000, 2000, 2000],
+            #             [3000, 3000, 3000, 3000],
+            #             [4000, 4000, 4000, 4000],
+            #             [5000, 5000, 5000, 5000],
+            #             [6000, 6000, 6000, 6000]]
+            # thresholds = [0.58,0.59,0.6,0.61,0.62]
+            # for minsize in minsizes:
+            #     for threshold in thresholds:
+            #         batch_pred_masks = np.array(predict_postprocess(batch_idx, True, y_pred, shape,minsize, threshold))
+            #         print(minsize)
+            #         print(threshold)
+            #         print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
 
             shape_posprocess_list = ['rect', 'min', 'convex', 'approx']
 
