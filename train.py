@@ -73,7 +73,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             ckp = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
                                          save_weights_only=True)
             # es = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=5, verbose=1, mode='min')
-            rlr = ReduceLROnPlateau(monitor='val_acc', factor=0.2, patience=2, verbose=1, mode='max', min_delta=0.0001)
+            rlr = ReduceLROnPlateau(monitor='val_dice_coef', factor=0.2, patience=2, verbose=1, mode='max', min_delta=0.0001)
             # vl_postprocess = ValPosprocess(val_generator,batch_size,shape)
             # lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
             # lookahead.inject(model)
