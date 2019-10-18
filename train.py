@@ -62,29 +62,30 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 backbone=backbone
             )
 
-            # opt = RAdam(lr=0.0002)
-            opt = Nadam(lr=0.0002)
+            opt = RAdam(lr=0.0001)
+            # opt = Nadam(lr=0.0001)
             # opt = AdamAccumulate(lr=0.0002, accum_iters=8)
 
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
 
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
-
+            ckp = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
+                                         save_weights_only=True)
             # es = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=5, verbose=1, mode='min')
-            # rlr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=2, verbose=1, mode='min', min_delta=0.0001)
+            rlr = ReduceLROnPlateau(monitor='val_acc', factor=0.2, patience=2, verbose=1, mode='max', min_delta=0.0001)
             # vl_postprocess = ValPosprocess(val_generator,batch_size,shape)
             # lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
             # lookahead.inject(model)
-            snapshot = SnapshotCallbackBuilder(nb_epochs=15, nb_snapshots=3, init_lr=1e-5)
-            callbacks_list = snapshot.get_callbacks(filepath)
-            swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', 12)
-            callbacks_list.append(swa)
+            # snapshot = SnapshotCallbackBuilder(nb_epochs=15, nb_snapshots=3, init_lr=1e-5)
+            # callbacks_list = snapshot.get_callbacks(filepath)
+            swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', 17)
+            # callbacks_list.append(swa)
             history = model.fit_generator(
                 train_generator,
                 validation_data=val_generator,
-                callbacks=callbacks_list,
-                epochs=15,
+                callbacks=[ckp,rlr,swa],
+                epochs=20,
                 use_multiprocessing=True,
                 workers=42
             )
