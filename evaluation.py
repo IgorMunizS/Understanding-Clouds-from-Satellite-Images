@@ -74,7 +74,9 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
 
             print("Dice: ", np_dice_coef(y_true,y_pred))
             batch_idx = list(range(y_true.shape[0]))
-            minsizes = [[20000, 20000, 22500, 10000],
+            minsizes = [[5000, 5000, 5000, 5000],
+                        [8000, 8000, 8000, 8000],
+                        [20000, 20000, 22500, 10000],
                         [10000, 10000, 10000, 10000],
                         [15000, 15000, 15000, 15000],
                         [20000, 20000, 20000, 20000],
