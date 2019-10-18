@@ -12,6 +12,7 @@ import argparse
 import sys
 import gc
 from tta_wrapper import tta_segmentation
+import pickle
 
 def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
     h,w = shape
@@ -49,7 +50,7 @@ def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
 
     return batch_pred_masks
 
-def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),minsize=None,threshold=0.59):
+def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),minsize=None,threshold=0.6):
     if minsize is None:
         minsizes = [20000, 20000, 22500, 10000]
     else:
@@ -108,6 +109,10 @@ def predict_fold(fold_number,smmodel, backbone,model,batch_idx,test_imgs,shape,s
 
     return batch_pred_masks
 
+def save_prediction(prediction, name):
+    with open('predictions/' + name +'_.pickle', 'wb') as handle:
+        pickle.dump(prediction, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 def final_predict(models,folds,shape,TTA=False,posprocess=False):
 
@@ -147,6 +152,8 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
 
 
     pred_emsemble = np.mean(batch_pred_emsemble, axis=0)
+
+    save_prediction(pred_emsemble, submission_name)
 
     batch_idx = list(range(test_imgs.shape[0]))
     # masks_posprocessed = predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_emsemble)
