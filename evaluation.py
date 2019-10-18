@@ -16,7 +16,8 @@ from imblearn.over_sampling import RandomOverSampler
 import itertools
 from predict import predict_postprocess
 import numpy as np
-from utils.posprocess import draw_convex_hull
+from utils.posprocess import draw_convex_hull, post_process_minsize
+from utils.utils import mask2rle
 import os
 
 def evaluate(smmodel,backbone,model_path,shape=(320,480)):
@@ -87,7 +88,7 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
                         [20000, 20000, 15000, 10000],
                         [10000, 20000, 15000, 20000],
                         [10000, 10000, 15000, 15000]]
-            thresholds = [0.4,0.45,0.5,0.55,0.6,0.65,0.7]
+            thresholds = [0.58,0.59,0.6,0.61,0.62]
             for minsize in minsizes:
                 for threshold in thresholds:
                     batch_pred_masks = np.array(predict_postprocess(batch_idx, True, y_pred, shape,minsize, threshold))
@@ -95,12 +96,19 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
                     print(threshold)
                     print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
 
-            # shape_posprocess_list = ['rect', 'min', 'convex', 'approx']
-            #
-            # for mode in shape_posprocess_list:
-            #     for mask in y_pred:
-            #         batch_pred_masks = np.array(draw_convex_hull(mask, mode))
-            #         print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
+            shape_posprocess_list = ['rect', 'min', 'convex', 'approx']
+
+            for mode in shape_posprocess_list:
+                pred_masks=[]
+                for mask in y_pred:
+                    class_masks=np.zeros((mask.shape[0], mask.shape[1], 4))
+                    for i in range(4):
+                        class_pred_masks = np.array(draw_convex_hull(mask[:,:,i].astype(np.uint8), mode))
+                        class_pred_masks = post_process_minsize(class_pred_masks, 5000)
+                        class_masks[:,:,i] = class_pred_masks
+                    pred_masks.append(class_masks)
+                print(mode)
+                print("Dice with shape process: ", np_dice_coef(y_true, np.array(pred_masks)))
 
 def parse_args(args):
     """ Parse the arguments.
