@@ -150,6 +150,8 @@ def flatten_binary_scores(scores, labels, ignore=None):
 def lovasz_loss(y_true, y_pred):
     return lovasz_hinge(y_pred, y_true, per_image=True, ignore=None)
 
+def bce_lovasz_loss(y_true, y_pred):
+    return binary_crossentropy(y_true,y_pred) + lovasz_hinge(y_pred, y_true, per_image=True, ignore=None)
 
 def np_dice_coef(y_true, y_pred):
     smooth = 1.

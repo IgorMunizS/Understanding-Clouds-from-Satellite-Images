@@ -1,6 +1,6 @@
 import argparse
 import sys
-from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.model_selection import ShuffleSplit
 from utils.preprocess import get_data_preprocessed
 from sklearn.metrics import f1_score
 from utils.generator import DataGenerator
@@ -16,6 +16,7 @@ from imblearn.over_sampling import RandomOverSampler
 import itertools
 from predict import predict_postprocess
 import numpy as np
+from utils.posprocess import draw_convex_hull
 
 def evaluate(smmodel,backbone,model_path,shape=(320,480)):
 
@@ -25,12 +26,12 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
 
     train_df, mask_count_df = get_data_preprocessed()
 
-    skf = StratifiedShuffleSplit(n_splits=5, test_size=0.15, random_state=133)
+    skf = ShuffleSplit(n_splits=5, test_size=0.15, random_state=133)
 
-    for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
+    for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index)):
 
 
-        if n_fold >= 3:
+        if n_fold >= 4:
             print('Evaluating fold number ',str(n_fold))
 
 
@@ -89,6 +90,13 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
                 print(minsize)
                 print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
 
+            # shape_posprocess_list = ['rect', 'min', 'convex', 'approx']
+            #
+            # for mode in shape_posprocess_list:
+            #     for mask in y_pred:
+            #         batch_pred_masks = np.array(draw_convex_hull(mask, mode))
+            #         print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
+
 def parse_args(args):
     """ Parse the arguments.
     """
@@ -97,7 +105,7 @@ def parse_args(args):
 
     parser.add_argument('--model', help='Segmentation model', default='unet')
     parser.add_argument('--backbone', help='Model backbone', default='resnet34', type=str)
-    parser.add_argument('--shape', help='Shape of resized images', default=(384, 576), type=tuple)
+    parser.add_argument('--shape', help='Shape of resized images', default=(320, 480), type=tuple)
     parser.add_argument('--model_path', help='model weight path', default=None, type=str)
 
 
