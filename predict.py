@@ -110,7 +110,7 @@ def predict_fold(fold_number,smmodel, backbone,model,batch_idx,test_imgs,shape,s
     return batch_pred_masks
 
 def save_prediction(prediction, name):
-    with open('predictions/' + name +'_.pickle', 'wb') as handle:
+    with open('../predictions/' + name +'_.pickle', 'wb') as handle:
         pickle.dump(prediction, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
