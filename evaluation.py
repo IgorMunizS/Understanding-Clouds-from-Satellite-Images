@@ -40,6 +40,7 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
             val_generator = DataGenerator(
                 val_indices,
                 df=mask_count_df,
+                shuffle=False,
                 target_df=train_df,
                 batch_size=len(val_indices),
                 reshape=shape,
