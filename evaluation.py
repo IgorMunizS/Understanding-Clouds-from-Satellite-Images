@@ -87,11 +87,13 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
                         [20000, 20000, 15000, 10000],
                         [10000, 20000, 15000, 20000],
                         [10000, 10000, 15000, 15000]]
-
+            thresholds = [0.4,0.45,0.5,0.55,0.6,0.65,0.7]
             for minsize in minsizes:
-                batch_pred_masks = np.array(predict_postprocess(batch_idx, True, y_pred, shape,minsize))
-                print(minsize)
-                print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
+                for threshold in thresholds:
+                    batch_pred_masks = np.array(predict_postprocess(batch_idx, True, y_pred, shape,minsize, threshold))
+                    print(minsize)
+                    print(threshold)
+                    print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
 
             # shape_posprocess_list = ['rect', 'min', 'convex', 'approx']
             #

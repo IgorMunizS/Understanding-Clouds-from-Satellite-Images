@@ -49,7 +49,7 @@ def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
 
     return batch_pred_masks
 
-def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),minsize=None):
+def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),minsize=None,threshold=0.6):
     if minsize is None:
         minsizes = [10000, 10000, 10000, 10000]
     else:
@@ -67,7 +67,7 @@ def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),mi
             pred_masks = cv2.resize(pred_masks, dsize=(w, h), interpolation=cv2.INTER_LINEAR)
             arrt = np.array([])
             for t in range(4):
-                a, num_predict = post_process(sigmoid(pred_masks[:, :, t]), 0.6, minsizes[t], shape)
+                a, num_predict = post_process(sigmoid(pred_masks[:, :, t]),threshold, minsizes[t], shape)
 
                 if (arrt.shape == (0,)):
                     arrt = a.reshape(h, w, 1)
