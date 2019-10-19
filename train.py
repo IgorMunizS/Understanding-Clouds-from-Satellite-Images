@@ -67,7 +67,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             # opt = AdamAccumulate(lr=0.0002, accum_iters=8)
 
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
-            swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', 7)
+            swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', 22)
 
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
