@@ -197,7 +197,7 @@ def parse_args(args):
 
     parser.add_argument('--model', help='Segmentation model', default='unet')
     parser.add_argument('--backbone', help='Model backbone', default='resnet34', type=str)
-    parser.add_argument('--shape', help='Shape of resized images', default=(384, 576), type=tuple)
+    parser.add_argument('--shape', help='Shape of resized images', nargs='+', default=[384, 576], type=int)
     parser.add_argument('--tta', help='Shape of resized images', default=False, type=bool)
     parser.add_argument('--posprocess', help='Shape of resized images', default=False, type=bool)
     parser.add_argument('--fold', help='Fold number to predict', default=None, nargs='+', type=int)
@@ -221,7 +221,8 @@ if __name__ == '__main__':
     else:
         models = [[args.model, args.backbone]]
 
+    h,w = args.shape
     if args.prediction is not None:
         postprocess_pickle(args.prediction)
     else:
-        final_predict(models,folds,args.shape,args.tta,args.posprocess)
+        final_predict(models,folds,(h,w),args.tta,args.posprocess)
