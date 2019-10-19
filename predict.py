@@ -151,7 +151,7 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
         gc.collect()
 
 
-    pred_emsemble = np.mean(batch_pred_emsemble, axis=0)
+    pred_emsemble = sum(batch_pred_emsemble) / len(batch_pred_emsemble)
 
     save_prediction(pred_emsemble, submission_name)
 
