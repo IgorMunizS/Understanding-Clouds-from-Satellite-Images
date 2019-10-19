@@ -63,8 +63,8 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             )
 
             # opt = RAdam(lr=0.0001)
-            opt = Nadam(lr=0.0003)
-            # opt = AdamAccumulate(lr=0.0002, accum_iters=8)
+            # opt = Nadam(lr=0.0003)
+            opt = AdamAccumulate(lr=0.0003, accum_iters=8)
 
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
             swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', 22)
@@ -132,7 +132,7 @@ def parse_args(args):
 
     parser.add_argument('--model', help='Segmentation model', default='unet')
     parser.add_argument('--backbone', help='Model backbone', default='resnet34', type=str)
-    parser.add_argument('--batch_size', default=2, type=int)
+    parser.add_argument('--batch_size', default=4, type=int)
     parser.add_argument('--shape', help='Shape of resized images', default=(768,768), type=tuple)
     parser.add_argument('--n_fold', help='Number of fold to start training', default=0, type=int)
     parser.add_argument('--pseudo_label', help='Add extra data from test', default=None, type=str)
