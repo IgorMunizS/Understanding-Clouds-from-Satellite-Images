@@ -164,6 +164,24 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
     submission_name = submission_name + '.csv'
     generate_submission(test_df, submission_name)
 
+def postprocess_pickle(pickle_path):
+
+    sub_df, test_imgs = get_test_data()
+    print(test_imgs.shape[0])
+    submission_name = pickle_path.split('/')[-1].split('.')[0]
+
+    with open(pickle_path, 'rb') as handle:
+        pred_emsemble = pickle.load(handle)
+
+    batch_idx = list(range(test_imgs.shape[0]))
+    # masks_posprocessed = predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_emsemble)
+    pred_emsemble = np.array(predict_postprocess(batch_idx, True, pred_emsemble))
+
+    print(pred_emsemble.shape)
+    test_df = convert_masks_for_submission(batch_idx, test_imgs, sub_df, pred_emsemble)
+    submission_name = submission_name + '.csv'
+    generate_submission(test_df, submission_name)
+
 
 def generate_submission(test_df, name):
 
@@ -184,7 +202,7 @@ def parse_args(args):
     parser.add_argument('--posprocess', help='Shape of resized images', default=False, type=bool)
     parser.add_argument('--fold', help='Fold number to predict', default=None, nargs='+', type=int)
     parser.add_argument('--emsemble', help='Do model emsemble', default=False, type=bool)
-
+    parser.add_argument('--prediction', help='Pickle path for prediction', default=None, type=str)
 
     return parser.parse_args(args)
 
@@ -203,5 +221,7 @@ if __name__ == '__main__':
     else:
         models = [[args.model, args.backbone]]
 
-
-    final_predict(models,folds,args.shape,args.tta,args.posprocess)
+    if args.prediction is not None:
+        postprocess_pickle(args.prediction)
+    else:
+        final_predict(models,folds,args.shape,args.tta,args.posprocess)

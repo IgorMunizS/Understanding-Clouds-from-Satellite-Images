@@ -67,6 +67,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             # opt = AdamAccumulate(lr=0.0002, accum_iters=8)
 
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
+            swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', 7)
 
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
@@ -77,29 +78,28 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             history = model.fit_generator(
                 train_generator,
                 validation_data=val_generator,
-                callbacks=[ckp, rlr, es],
-                epochs=20,
+                callbacks=[ckp, rlr, swa],
+                epochs=25,
                 use_multiprocessing=True,
                 workers=42
             )
 
 
             # vl_postprocess = ValPosprocess(val_generator,batch_size,shape)
-            lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
-            lookahead.inject(model)
-            snapshot = SnapshotCallbackBuilder(nb_epochs=10, nb_snapshots=1, init_lr=1e-5)
-            callbacks_list = snapshot.get_callbacks(filepath)
-            swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', 7)
-            callbacks_list.append(swa)
-
-            history = model.fit_generator(
-                train_generator,
-                validation_data=val_generator,
-                callbacks=callbacks_list,
-                epochs=10,
-                use_multiprocessing=True,
-                workers=42
-            )
+            # lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
+            # lookahead.inject(model)
+            # snapshot = SnapshotCallbackBuilder(nb_epochs=10, nb_snapshots=1, init_lr=1e-5)
+            # callbacks_list = snapshot.get_callbacks(filepath)
+            # callbacks_list.append(swa)
+            #
+            # history = model.fit_generator(
+            #     train_generator,
+            #     validation_data=val_generator,
+            #     callbacks=callbacks_list,
+            #     epochs=10,
+            #     use_multiprocessing=True,
+            #     workers=42
+            # )
 
 
             # opt = RAdam(lr=0.00001)
