@@ -131,9 +131,9 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
         model_masks=[]
         submission_name = submission_name + str(smmodel) + '_' + str(backbone) + '_'
 
-        for i in range(0, test_imgs.shape[0], 5):
+        for i in range(0, test_imgs.shape[0], 860):
             batch_idx = list(
-                range(i, min(test_imgs.shape[0], i + 5))
+                range(i, min(test_imgs.shape[0], i + 860))
             )
             fold_result = []
 
@@ -144,19 +144,24 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
                 fold_result.append(batch_pred_masks)
 
             batch_pred_masks = sum(fold_result) / len(fold_result)
+            del fold_result
+            gc.collect()
+
             batch_pred_masks = np.array(predict_postprocess(batch_idx, posprocess, batch_pred_masks))
 
             model_masks.extend(batch_pred_masks)
+            del batch_pred_masks
+            gc.collect()
 
         batch_pred_emsemble.append(model_masks)
 
-        del model, model_masks,batch_pred_masks,fold_result
+        del model, model_masks
         gc.collect()
 
     batch_pred_emsemble = np.mean(batch_pred_emsemble, axis=0)
 
     save_prediction(batch_pred_emsemble, submission_name)
-
+    batch_idx = list(range(test_imgs.shape[0]))
     # print(pred_emsemble.shape)
     test_df = convert_masks_for_submission(batch_idx,test_imgs,sub_df,batch_pred_emsemble)
     submission_name = submission_name + '.csv'
