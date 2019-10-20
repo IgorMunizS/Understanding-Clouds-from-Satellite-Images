@@ -172,13 +172,13 @@ def postprocess_pickle(pickle_path, emsemble):
 
     if emsemble:
         submission_name = 'emsemble_submission'
-        pred_emsemble = []
+        emsemble = []
         for file in os.listdir('../predictions/'):
             with open('../predictions/' + file, 'rb') as handle:
                 pred = pickle.load(handle)
-            pred_emsemble.append(pred)
+            emsemble.append(pred)
 
-        pred_emsemble = np.mean(pred_emsemble, axis=0)
+        pred_emsemble = np.mean(emsemble, axis=0)
 
     else:
         submission_name = pickle_path.split('/')[-1].split('.')[0]
