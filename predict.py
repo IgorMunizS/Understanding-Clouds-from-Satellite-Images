@@ -131,9 +131,9 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
         model_masks=[]
         submission_name = submission_name + str(smmodel) + '_' + str(backbone) + '_'
 
-        for i in range(0, test_imgs.shape[0], 860):
+        for i in range(0, test_imgs.shape[0], 5):
             batch_idx = list(
-                range(i, min(test_imgs.shape[0], i + 860))
+                range(i, min(test_imgs.shape[0], i + 5))
             )
             fold_result = []
 
@@ -143,7 +143,7 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
                 # print(np.array(batch_pred_masks).shape)
                 fold_result.append(batch_pred_masks)
 
-            batch_pred_masks = np.mean(fold_result, axis=0)
+            batch_pred_masks = sum(fold_result) / len(fold_result)
             batch_pred_masks = np.array(predict_postprocess(batch_idx, posprocess, batch_pred_masks))
 
             model_masks.extend(batch_pred_masks)
