@@ -151,13 +151,13 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
         gc.collect()
 
 
-    pred_emsemble = [sum(i) for i in zip(*batch_pred_emsemble)] / len(models)
+    batch_pred_emsemble = np.mean(batch_pred_emsemble, axis=0)
 
-    save_prediction(pred_emsemble, submission_name)
+    save_prediction(batch_pred_emsemble, submission_name)
 
     batch_idx = list(range(test_imgs.shape[0]))
     # masks_posprocessed = predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_emsemble)
-    pred_emsemble = np.array(predict_postprocess(batch_idx, posprocess, pred_emsemble))
+    pred_emsemble = np.array(predict_postprocess(batch_idx, posprocess, batch_pred_emsemble))
 
     print(pred_emsemble.shape)
     test_df = convert_masks_for_submission(batch_idx,test_imgs,sub_df,pred_emsemble)
