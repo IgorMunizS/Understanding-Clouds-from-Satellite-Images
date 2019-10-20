@@ -144,6 +144,8 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
                 fold_result.append(batch_pred_masks)
 
             batch_pred_masks = np.mean(fold_result, axis=0)
+            batch_pred_masks = np.array(predict_postprocess(batch_idx, posprocess, batch_pred_masks))
+
             model_masks.extend(batch_pred_masks)
 
         batch_pred_emsemble.append(model_masks)
@@ -151,17 +153,12 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
         del model, model_masks,batch_pred_masks,fold_result
         gc.collect()
 
-
     batch_pred_emsemble = np.mean(batch_pred_emsemble, axis=0)
 
     save_prediction(batch_pred_emsemble, submission_name)
 
-    batch_idx = list(range(test_imgs.shape[0]))
-    # masks_posprocessed = predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_emsemble)
-    pred_emsemble = np.array(predict_postprocess(batch_idx, posprocess, batch_pred_emsemble))
-
-    print(pred_emsemble.shape)
-    test_df = convert_masks_for_submission(batch_idx,test_imgs,sub_df,pred_emsemble)
+    # print(pred_emsemble.shape)
+    test_df = convert_masks_for_submission(batch_idx,test_imgs,sub_df,batch_pred_emsemble)
     submission_name = submission_name + '.csv'
     generate_submission(test_df, submission_name)
 
