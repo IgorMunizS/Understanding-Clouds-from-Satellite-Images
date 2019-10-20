@@ -50,7 +50,7 @@ def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
 
     return batch_pred_masks
 
-def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),minsize=None,threshold=0.7):
+def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),minsize=None,threshold=0.6):
     if minsize is None:
         minsizes = [10000, 10000, 10000, 10000]
     else:
@@ -197,7 +197,7 @@ def parse_args(args):
 
     parser.add_argument('--model', help='Segmentation model', default='unet')
     parser.add_argument('--backbone', help='Model backbone', default='resnet34', type=str)
-    parser.add_argument('--shape', help='Shape of resized images', nargs='+', default=[384, 576], type=int)
+    parser.add_argument('--shape', help='Shape of resized images', nargs='+', default=[320, 480], type=int)
     parser.add_argument('--tta', help='Shape of resized images', default=False, type=bool)
     parser.add_argument('--posprocess', help='Shape of resized images', default=False, type=bool)
     parser.add_argument('--fold', help='Fold number to predict', default=None, nargs='+', type=int)
