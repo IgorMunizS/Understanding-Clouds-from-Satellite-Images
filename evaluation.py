@@ -1,6 +1,6 @@
 import argparse
 import sys
-from sklearn.model_selection import ShuffleSplit
+from sklearn.model_selection import StratifiedShuffleSplit
 from utils.preprocess import get_data_preprocessed
 from sklearn.metrics import f1_score
 from utils.generator import DataGenerator
@@ -28,9 +28,9 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
 
     train_df, mask_count_df = get_data_preprocessed()
 
-    skf = ShuffleSplit(n_splits=5, test_size=0.15, random_state=133)
+    skf = StratifiedShuffleSplit(n_splits=5, test_size=0.15, random_state=133)
 
-    for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index)):
+    for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
 
 
         if n_fold >= 4:
@@ -77,19 +77,20 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
 
             print("Dice: ", np_dice_coef(y_true,y_pred))
             batch_idx = list(range(y_true.shape[0]))
-            # minsizes = [[1000, 1000, 1000, 1000],
-            #             [2000, 2000, 2000, 2000],
-            #             [3000, 3000, 3000, 3000],
-            #             [4000, 4000, 4000, 4000],
-            #             [5000, 5000, 5000, 5000],
-            #             [6000, 6000, 6000, 6000]]
-            # thresholds = [0.58,0.59,0.6,0.61,0.62]
-            # for minsize in minsizes:
-            #     for threshold in thresholds:
-            #         batch_pred_masks = np.array(predict_postprocess(batch_idx, True, y_pred, shape,minsize, threshold))
-            #         print(minsize)
-            #         print(threshold)
-            #         print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
+            minsizes = [[1000, 1000, 1000, 1000],
+                        [2000, 2000, 2000, 2000],
+                        [3000, 3000, 3000, 3000],
+                        [4000, 4000, 4000, 4000],
+                        [5000, 5000, 5000, 5000],
+                        [6000, 6000, 6000, 6000],
+                        [20000, 20000, 22500, 10000]]
+            thresholds = [0.58,0.59,0.6,0.61,0.62]
+            for minsize in minsizes:
+                for threshold in thresholds:
+                    batch_pred_masks = np.array(predict_postprocess(batch_idx, True, y_pred, shape,minsize, threshold))
+                    print(minsize)
+                    print(threshold)
+                    print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
 
             shape_posprocess_list = ['rect', 'min', 'convex', 'approx']
 
