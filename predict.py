@@ -13,6 +13,7 @@ import sys
 import gc
 from tta_wrapper import tta_segmentation
 import pickle
+import os
 
 def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
     h,w = shape
@@ -50,9 +51,9 @@ def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
 
     return batch_pred_masks
 
-def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),minsize=None,threshold=0.59):
+def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),minsize=None,threshold=0.6):
     if minsize is None:
-        minsizes = [5000, 5000, 5000, 5000]
+        minsizes = [20000, 20000, 22500, 10000]
     else:
         minsizes = minsize
 
@@ -164,14 +165,26 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
     submission_name = submission_name + '.csv'
     generate_submission(test_df, submission_name)
 
-def postprocess_pickle(pickle_path):
+def postprocess_pickle(pickle_path, emsemble):
 
     sub_df, test_imgs = get_test_data()
     print(test_imgs.shape[0])
-    submission_name = pickle_path.split('/')[-1].split('.')[0]
 
-    with open(pickle_path, 'rb') as handle:
-        pred_emsemble = pickle.load(handle)
+    if emsemble:
+        submission_name = 'emsemble_submission'
+        pred_emsemble = []
+        for file in os.listdir('../predictions/'):
+            with open('../predictions/' + file, 'rb') as handle:
+                pred = pickle.load(handle)
+            pred_emsemble.append(pred)
+
+        pred_emsemble = np.mean(pred_emsemble, axis=0)
+
+    else:
+        submission_name = pickle_path.split('/')[-1].split('.')[0]
+
+        with open(pickle_path, 'rb') as handle:
+            pred_emsemble = pickle.load(handle)
 
     batch_idx = list(range(test_imgs.shape[0]))
     # masks_posprocessed = predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_emsemble)
@@ -223,6 +236,6 @@ if __name__ == '__main__':
 
     h,w = args.shape
     if args.prediction is not None:
-        postprocess_pickle(args.prediction)
+        postprocess_pickle(args.prediction, args.emsemble)
     else:
         final_predict(models,folds,(h,w),args.tta,args.posprocess)
