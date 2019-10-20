@@ -53,7 +53,7 @@ def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
 
 def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),minsize=None,threshold=0.6):
     if minsize is None:
-        minsizes = [80000, 80000, 90000, 40000]
+        minsizes = [60000, 60000, 70000, 25000]
     else:
         minsizes = minsize
 
