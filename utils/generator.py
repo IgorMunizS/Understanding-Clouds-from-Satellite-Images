@@ -32,6 +32,9 @@ class DataGenerator(keras.utils.Sequence):
         self.TTA = TTA
         self.randomcrop = randomcrop
 
+        if self.augment is False:
+            self.dim = reshape
+
         self.on_epoch_end()
         np.random.seed(self.random_state)
 
@@ -149,45 +152,40 @@ class DataGenerator(keras.utils.Sequence):
 
         return img
 
-    def __random_transform(self, img, masks, validation):
+    def __random_transform(self, img, masks):
         # composition = albu.Compose([
         #     albu.HorizontalFlip(),
         #     albu.VerticalFlip(),
         #     albu.ShiftScaleRotate(rotate_limit=45, shift_limit=0.15, scale_limit=0.15)
         # ])
 
-        if validation:
-            composition = albu.Compose([
-                albu.RandomCrop(height=self.reshape[0], width=self.reshape[1], always_apply=True, p=1.0),
 
-            ], p=1)
-        else:
 
-            composition = albu.Compose([
-                            # albu.OneOf([albu.RandomSizedCrop(min_max_height=(self.reshape[0]//2, self.reshape[0]),
-                            #                                  height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
-                            #                                  p=0.5),
-                            #       albu.PadIfNeeded(min_height=self.reshape[0], min_width=self.reshape[1], p=0.5)], p=0.3),
-                            # albu.RandomSizedCrop(min_max_height=(self.reshape[0] // 2, self.reshape[0]),
-                            #                                            height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
-                            #                                            p=0.3),
-                            albu.RandomCrop(height=self.reshape[0], width=self.reshape[1],always_apply=True, p=1.0),
-                            albu.HorizontalFlip(),
-                            albu.VerticalFlip(),
-                            albu.RandomRotate90(),
-                            albu.ShiftScaleRotate(rotate_limit=45, shift_limit=0.15, scale_limit=0.15),
-                            albu.OneOf([
-                                albu.ElasticTransform(p=0.5, alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
-                                albu.GridDistortion(p=0.5),
-                                albu.OpticalDistortion(p=0.5, distort_limit=2, shift_limit=0.5)
-                                ], p=0.3),
-                            albu.OneOf([
-                                albu.RandomContrast(),
-                                albu.RandomGamma(),
-                                albu.RandomBrightness(),
-                                albu.Solarize()
-                            ], p=0.3)
-            ], p=1)
+        composition = albu.Compose([
+                        # albu.OneOf([albu.RandomSizedCrop(min_max_height=(self.reshape[0]//2, self.reshape[0]),
+                        #                                  height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
+                        #                                  p=0.5),
+                        #       albu.PadIfNeeded(min_height=self.reshape[0], min_width=self.reshape[1], p=0.5)], p=0.3),
+                        # albu.RandomSizedCrop(min_max_height=(self.reshape[0] // 2, self.reshape[0]),
+                        #                                            height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
+                        #                                            p=0.3),
+                        albu.RandomCrop(height=self.reshape[0], width=self.reshape[1],always_apply=True, p=1.0),
+                        albu.HorizontalFlip(),
+                        albu.VerticalFlip(),
+                        albu.RandomRotate90(),
+                        albu.ShiftScaleRotate(rotate_limit=45, shift_limit=0.15, scale_limit=0.15),
+                        albu.OneOf([
+                            albu.ElasticTransform(p=0.5, alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
+                            albu.GridDistortion(p=0.5),
+                            albu.OpticalDistortion(p=0.5, distort_limit=2, shift_limit=0.5)
+                            ], p=0.3),
+                        albu.OneOf([
+                            albu.RandomContrast(),
+                            albu.RandomGamma(),
+                            albu.RandomBrightness(),
+                            albu.Solarize()
+                        ], p=0.3)
+        ], p=1)
 
         composed = composition(image=img.astype('uint8'), mask=masks)
         aug_img = composed['image']
@@ -195,7 +193,7 @@ class DataGenerator(keras.utils.Sequence):
 
         return aug_img, aug_masks
 
-    def __augment_batch(self, img_batch, masks_batch, validation=False):
+    def __augment_batch(self, img_batch, masks_batch):
         if self.randomcrop:
             img_batch_crop = np.empty((self.batch_size, *self.reshape, self.n_channels))
             masks_batch_crop = np.empty((self.batch_size, *self.reshape, self.n_classes), dtype=int)
@@ -206,7 +204,7 @@ class DataGenerator(keras.utils.Sequence):
                     img_batch[i,], masks_batch[i,])
             else:
                 img_batch[i,], masks_batch[i,] = self.__random_transform(
-                    img_batch[i,], masks_batch[i,], validation)
+                    img_batch[i,], masks_batch[i,])
 
         if self.randomcrop:
             return img_batch_crop, masks_batch_crop
