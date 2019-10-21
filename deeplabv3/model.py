@@ -21,25 +21,24 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras import layers
-from tensorflow.python.keras.layers import Input
-from tensorflow.python.keras.layers import Lambda
-from tensorflow.python.keras.layers import Activation
-from tensorflow.python.keras.layers import Concatenate
-from tensorflow.python.keras.layers import Add
-from tensorflow.python.keras.layers import Dropout
-from tensorflow.python.keras.layers import BatchNormalization
-from tensorflow.python.keras.layers import Conv2D
-from tensorflow.python.keras.layers import DepthwiseConv2D
-from tensorflow.python.keras.layers import ZeroPadding2D
-from tensorflow.python.keras.layers import GlobalAveragePooling2D
-from tensorflow.python.keras.utils.layer_utils import get_source_inputs
-from tensorflow.python.keras.utils.data_utils import get_file
-from tensorflow.python.keras import backend as K
-from tensorflow.python.keras.activations import relu
-from tensorflow.python.keras.applications.imagenet_utils import preprocess_input
+from keras.models import Model
+from keras import layers
+from keras.layers import Input
+from keras.layers import Lambda
+from keras.layers import Activation
+from keras.layers import Concatenate
+from keras.layers import Add
+from keras.layers import Dropout
+from keras.layers import BatchNormalization
+from keras.layers import Conv2D
+from keras.layers import DepthwiseConv2D
+from keras.layers import ZeroPadding2D
+from keras.layers import GlobalAveragePooling2D
+from keras.utils.layer_utils import get_source_inputs
+from keras.utils.data_utils import get_file
+from keras import backend as K
+from keras.activations import relu
+from keras.applications.imagenet_utils import preprocess_input
 
 WEIGHTS_PATH_X = "https://github.com/bonlime/keras-deeplab-v3-plus/releases/download/1.1/deeplabv3_xception_tf_dim_ordering_tf_kernels.h5"
 WEIGHTS_PATH_MOBILE = "https://github.com/bonlime/keras-deeplab-v3-plus/releases/download/1.1/deeplabv3_mobilenetv2_tf_dim_ordering_tf_kernels.h5"
@@ -365,7 +364,7 @@ def Deeplabv3(weights='pascal_voc', input_tensor=None, input_shape=(512, 512, 3)
     # branching for Atrous Spatial Pyramid Pooling
 
     # Image Feature branch
-    shape_before = tf.shape(x)
+    shape_before = K.shape(x)
     b4 = GlobalAveragePooling2D()(x)
     # from (b_size, channels)->(b_size, 1, 1, channels)
     b4 = Lambda(lambda x: K.expand_dims(x, 1))(b4)
@@ -375,8 +374,8 @@ def Deeplabv3(weights='pascal_voc', input_tensor=None, input_shape=(512, 512, 3)
     b4 = BatchNormalization(name='image_pooling_BN', epsilon=1e-5)(b4)
     b4 = Activation('relu')(b4)
     # upsample. have to use compat because of the option align_corners
-    size_before = tf.keras.backend.int_shape(x)
-    b4 = Lambda(lambda x: tf.image.resize(x, size_before[1:3],
+    size_before = K.int_shape(x)
+    b4 = Lambda(lambda x: tf.keras.image.resize(x, size_before[1:3],
                                                     method='bilinear', align_corners=True))(b4)
     # simple 1x1
     b0 = Conv2D(256, (1, 1), padding='same', use_bias=False, name='aspp0')(x)
