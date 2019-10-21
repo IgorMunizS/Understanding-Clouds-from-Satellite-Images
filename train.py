@@ -71,15 +71,15 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
 
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
-            ckp = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
+            ckp = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='max',
                                          save_weights_only=True)
             es = EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=5, verbose=1, mode='min')
-            rlr = ReduceLROnPlateau(monitor='val_dice_coef', factor=0.2, patience=2, verbose=1, mode='max', min_delta=0.0001)
+            rlr = ReduceLROnPlateau(monitor='loss', factor=0.2, patience=2, verbose=1, mode='max', min_delta=0.0001)
             history = model.fit_generator(
                 train_generator,
                 validation_data=val_generator,
                 callbacks=[ckp, rlr, swa],
-                epochs=25,
+                epochs=100,
                 use_multiprocessing=True,
                 workers=42
             )
