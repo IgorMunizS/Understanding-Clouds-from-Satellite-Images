@@ -14,7 +14,7 @@ import gc
 from imblearn.over_sampling import RandomOverSampler
 import itertools
 
-from segmentation_models.losses import bce_jaccard_loss
+from segmentation_models.losses import categorical_focal_dice_loss
 
 
 def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None):
@@ -66,7 +66,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             opt = Nadam(lr=0.0003)
             # opt = AdamAccumulate(lr=0.0003, accum_iters=8)
 
-            model = get_model(smmodel,backbone,opt,lovasz_softmax_loss,dice_coef,shape)
+            model = get_model(smmodel,backbone,opt,categorical_focal_dice_loss,dice_coef,shape)
             swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', 22)
 
 
