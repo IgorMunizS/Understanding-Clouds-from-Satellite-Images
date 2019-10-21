@@ -254,36 +254,17 @@ def flatten_probas(probas, labels, ignore=None, order='BHWC'):
     return vprobas, vlabels
 
 
-def active_countor_loss(y_true, y_pred):
-    # y_pred = K.cast(y_pred, dtype = 'float64')
-
-    """
-    lenth term
-    """
-
-    x = y_pred[:, :, 1:, :] - y_pred[:, :, :-1, :]  # horizontal and vertical directions
-    y = y_pred[:, :, :, 1:] - y_pred[:, :, :, :-1]
-
-    delta_x = x[:, :, 1:, :-2] ** 2
-    delta_y = y[:, :, :-2, 1:] ** 2
-    delta_u = K.abs(delta_x + delta_y)
-
-    epsilon = 0.00000001  # where is a parameter to avoid square root is zero in practice.
-    w = 1
-    lenth = w * K.sum(K.sqrt(delta_u + epsilon))  # equ.(11) in the paper
-
-    """
-    region term
-    """
-
-    C_1 = np.ones((256, 256))
-    C_2 = np.zeros((256, 256))
-
-    region_in = K.abs(K.sum(y_pred[:, 0, :, :] * ((y_true[:, 0, :, :] - C_1) ** 2)))  # equ.(12) in the paper
-    region_out = K.abs(K.sum((1 - y_pred[:, 0, :, :]) * ((y_true[:, 0, :, :] - C_2) ** 2)))  # equ.(12) in the paper
-
-    lambdaP = 1  # lambda parameter could be various.
-
-    loss = lenth + lambdaP * (region_in + region_out)
-
-    return loss
+def combo_loss_2(y_true, y_pred):
+    ce_w = 0.3
+    ce_d_w = 0.5
+    e = K.epsilon()
+    smooth = 1
+    y_true_f = K.flatten(y_true)
+    y_pred_f = K.flatten(y_pred)
+    intersection = K.sum(y_true_f * y_pred_f)
+    d = (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
+    y_pred_f = K.clip(y_pred_f, e, 1.0 - e)
+    out = - (ce_w * ((y_true_f * K.log(y_pred_f)) + ((1 - ce_w) * (1.0 - y_true_f) * K.log(1.0 - y_pred_f))))
+    weighted_ce = K.mean(out, axis=-1)
+    combo = (ce_d_w * weighted_ce) - ((1 - ce_d_w) * d)
+    return combo
