@@ -42,7 +42,7 @@ def get_model(model,BACKBONE,opt,loss,metric,shape):
     elif model == 'deeplab':
         model = Deeplabv3(weights=None, input_shape=(h,w,4), classes=4, backbone='xception',
               alpha=1., activation='sigmoid')
-        model.compile(optimizer=Nadam(lr=7e-4), loss=loss, metrics=[metric])
+        model.compile(optimizer=opt, loss=loss, metrics=[metric])
 
     else:
         raise ValueError('Unknown network ' + model)
