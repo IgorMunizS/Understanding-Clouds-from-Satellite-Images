@@ -40,7 +40,7 @@ def get_model(model,BACKBONE,opt,loss,metric,shape):
         model.compile(optimizer=opt, loss=loss, metrics=[metric])
 
     elif model == 'deeplab':
-        model = Deeplabv3(weights=None, input_shape=(h,w,4), classes=4, backbone='xception',
+        model = Deeplabv3(weights=None, input_shape=(h,w,3), classes=4, backbone='xception',
               alpha=1., activation='sigmoid')
         model.compile(optimizer=opt, loss=loss, metrics=[metric])
 
