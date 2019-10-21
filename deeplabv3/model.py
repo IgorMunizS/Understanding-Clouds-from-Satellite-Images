@@ -409,7 +409,7 @@ def Deeplabv3(weights='pascal_voc', input_tensor=None, input_shape=(512, 512, 3)
     if backbone == 'xception':
         # Feature projection
         # x4 (x2) block
-        size_before2 = tf.keras.backend.int_shape(x)
+        size_before2 = K.int_shape(x)
         x = Lambda(lambda xx: tf.image.resize(xx,
                                                         skip1.shape[1:3],
                                                         method='bilinear', align_corners=True))(x)
@@ -432,7 +432,7 @@ def Deeplabv3(weights='pascal_voc', input_tensor=None, input_shape=(512, 512, 3)
         last_layer_name = 'custom_logits_semantic'
 
     x = Conv2D(classes, (1, 1), padding='same', name=last_layer_name)(x)
-    size_before3 = tf.keras.backend.int_shape(img_input)
+    size_before3 = K.int_shape(img_input)
     x = Lambda(lambda xx: tf.image.resize(xx,
                                                     size_before3[1:3],
                                                     method='bilinear', align_corners=True))(x)
@@ -446,7 +446,7 @@ def Deeplabv3(weights='pascal_voc', input_tensor=None, input_shape=(512, 512, 3)
         inputs = img_input
 
     if activation in {'softmax', 'sigmoid'}:
-        x = tf.keras.layers.Activation(activation)(x)
+        x = Activation(activation)(x)
 
     model = Model(inputs, x, name='deeplabv3plus')
 
