@@ -158,7 +158,7 @@ class DataGenerator(keras.utils.Sequence):
 
         if validation:
             composition = albu.Compose([
-                albu.RandomCrop(height=340, width=340, always_apply=True, p=1.0),
+                albu.RandomCrop(height=self.reshape[0], width=self.reshape[1], always_apply=True, p=1.0),
 
             ], p=1)
         else:
