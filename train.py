@@ -7,7 +7,7 @@ from keras_radam import RAdam
 from keras.optimizers import Adam, Nadam, SGD
 from utils.lr import CyclicLR, Lookahead, AdamAccumulate
 from models import get_model
-from utils.losses import dice_coef, dice_coef_loss_bce, lovasz_loss, combo_loss,combo_loss_2
+from utils.losses import dice_coef, dice_coef_loss_bce, lovasz_loss, combo_loss,combo_loss_2,lovasz_softmax_loss
 from utils.callbacks import ValPosprocess, SnapshotCallbackBuilder, SWA
 from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
@@ -66,7 +66,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             opt = Nadam(lr=0.0003)
             # opt = AdamAccumulate(lr=0.0003, accum_iters=8)
 
-            model = get_model(smmodel,backbone,opt,'categorical_crossentropy',dice_coef,shape)
+            model = get_model(smmodel,backbone,opt,lovasz_softmax_loss,dice_coef,shape)
             swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', 22)
 
 
