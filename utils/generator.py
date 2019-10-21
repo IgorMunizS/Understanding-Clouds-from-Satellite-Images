@@ -5,8 +5,9 @@ import segmentation_models as sm
 import cv2
 from utils.utils import build_masks,np_resize
 from skimage.exposure import adjust_gamma
+import tensorflow as tf
 
-class DataGenerator(keras.utils.Sequence):
+class DataGenerator(tf.python.keras.utils.data_utils.Sequence):
     'Generates data for Keras'
 
     def __init__(self, list_IDs, df, target_df=None, mode='fit',
