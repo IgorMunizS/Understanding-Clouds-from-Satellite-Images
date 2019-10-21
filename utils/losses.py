@@ -170,7 +170,7 @@ def lovasz_softmax_ce(y_true,y_pred):
     return lovasz_softmax(y_pred,y_true) + categorical_crossentropy(y_true,y_pred)
 
 
-def lovasz_softmax(probas, labels, classes='present', per_image=False, ignore=None, order='BHWC'):
+def lovasz_softmax(probas, labels, classes='all', per_image=False, ignore=None, order='BHWC'):
     """
     Multi-class Lovasz-Softmax loss
       probas: [B, H, W, C] or [B, C, H, W] Variable, class probabilities at each prediction (between 0 and 1)
