@@ -5,7 +5,7 @@ import keras.layers as KL
 
 
 def conv_block(tensor, num_filters, kernel_size, padding='same', strides=1, dilation_rate=1, w_init='he_normal'):
-    x = KL.Conv2D(filters=num_filters,
+    x = tf.keras.layers.Conv2D(filters=num_filters,
                                kernel_size=kernel_size,
                                padding=padding,
                                strides=strides,
