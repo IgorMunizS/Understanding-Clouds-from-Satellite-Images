@@ -12,13 +12,13 @@ def conv_block(tensor, num_filters, kernel_size, padding='same', strides=1, dila
                                dilation_rate=dilation_rate,
                                kernel_initializer=w_init,
                                use_bias=False)(tensor)
-    x = KL.BatchNormalization()(x)
-    x = KL.ReLU()(x)
+    x = tf.keras.layers.BatchNormalization()(x)
+    x = tf.keras.layers.ReLU()(x)
     return x
 
 
 def sepconv_block(tensor, num_filters, kernel_size, padding='same', strides=1, dilation_rate=1, w_init='he_normal'):
-    x = KL.SeparableConv2D(filters=num_filters,
+    x = tf.keras.layers.SeparableConv2D(filters=num_filters,
                                         depth_multiplier=1,
                                         kernel_size=kernel_size,
                                         padding=padding,
@@ -26,8 +26,8 @@ def sepconv_block(tensor, num_filters, kernel_size, padding='same', strides=1, d
                                         dilation_rate=dilation_rate,
                                         depthwise_initializer=w_init,
                                         use_bias=False)(tensor)
-    x = KL.BatchNormalization()(x)
-    x = KL.ReLU()(x)
+    x = tf.keras.layers.BatchNormalization()(x)
+    x = tf.keras.layers.ReLU()(x)
     return x
 
 
