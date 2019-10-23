@@ -101,13 +101,13 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
                             else:
                                 d.append(np_dice_coef(i, j))
 
-                        print((t, ms, np.mean(d)))
+                        # print((t, ms, np.mean(d)))
                         attempts.append((t, ms, np.mean(d)))
 
                 attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'dice'])
 
                 attempts_df = attempts_df.sort_values('dice', ascending=False)
-                print(attempts_df.head())
+                # print(attempts_df.head())
                 best_threshold = attempts_df['threshold'].values[0]
                 best_size = attempts_df['size'].values[0]
 
