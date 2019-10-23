@@ -101,6 +101,7 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
                             else:
                                 d.append(np_dice_coef(i, j))
 
+                        print((t, ms, np.mean(d)))
                         attempts.append((t, ms, np.mean(d)))
 
                 attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'dice'])
