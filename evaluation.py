@@ -87,7 +87,7 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
                 attempts = []
                 for t in range(0, 100, 5):
                     t /= 100
-                    for ms in [0, 100, 1200, 5000, 10000]:
+                    for ms in [5000, 10000, 15000, 20000, 25000]:
                         masks = []
                         for i in range(len(y_pred)):
                             probability = y_pred[i,:,:,class_id]
