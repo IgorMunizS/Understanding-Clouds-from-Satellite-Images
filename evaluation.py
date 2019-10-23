@@ -1,6 +1,6 @@
 import argparse
 import sys
-from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.model_selection import StratifiedKFold
 from utils.preprocess import get_data_preprocessed
 from sklearn.metrics import f1_score
 from utils.generator import DataGenerator
@@ -28,7 +28,7 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
 
     train_df, mask_count_df = get_data_preprocessed()
 
-    skf = StratifiedShuffleSplit(n_splits=5, test_size=0.15, random_state=133)
+    skf = StratifiedKFold(n_splits=5, random_state=133)
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
 
@@ -94,17 +94,17 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
 
             shape_posprocess_list = ['rect', 'min', 'convex', 'approx']
 
-            for mode in shape_posprocess_list:
-                pred_masks=[]
-                for mask in y_pred:
-                    class_masks=np.zeros((mask.shape[0], mask.shape[1], 4))
-                    for i in range(4):
-                        class_pred_masks = np.array(draw_convex_hull((mask[:,:,i]*255).astype(np.uint8), mode))
-                        # class_pred_masks = post_process_minsize(class_pred_masks, 10000)
-                        class_masks[:,:,i] = class_pred_masks
-                    pred_masks.append(class_masks)
-                print(mode)
-                print("Dice with shape process: ", np_dice_coef(y_true, np.array(pred_masks)))
+            # for mode in shape_posprocess_list:
+            #     pred_masks=[]
+            #     for mask in y_pred:
+            #         class_masks=np.zeros((mask.shape[0], mask.shape[1], 4))
+            #         for i in range(4):
+            #             class_pred_masks = np.array(draw_convex_hull((mask[:,:,i]*255).astype(np.uint8), mode))
+            #             # class_pred_masks = post_process_minsize(class_pred_masks, 10000)
+            #             class_masks[:,:,i] = class_pred_masks
+            #         pred_masks.append(class_masks)
+            #     print(mode)
+            #     print("Dice with shape process: ", np_dice_coef(y_true, np.array(pred_masks)))
 
 def parse_args(args):
     """ Parse the arguments.
