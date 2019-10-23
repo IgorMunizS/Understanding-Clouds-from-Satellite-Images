@@ -15,10 +15,13 @@ import gc
 from imblearn.over_sampling import RandomOverSampler
 import itertools
 from predict import predict_postprocess
+from utils.posprocess import post_process
+
 import numpy as np
 from utils.posprocess import draw_convex_hull, post_process_minsize
 from utils.utils import mask2rle
 import os
+import pandas as pd
 
 def evaluate(smmodel,backbone,model_path,shape=(320,480)):
 
@@ -73,24 +76,57 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
             )
             print(y_true.shape)
             print(y_pred.shape)
-            print(y_pred)
+            # print(y_pred)
 
             print("Dice: ", np_dice_coef(y_true,y_pred))
-            batch_idx = list(range(y_true.shape[0]))
-            minsizes = [[1000, 1000, 1000, 1000],
-                        [2000, 2000, 2000, 2000],
-                        [3000, 3000, 3000, 3000],
-                        [4000, 4000, 4000, 4000],
-                        [5000, 5000, 5000, 5000],
-                        [6000, 6000, 6000, 6000],
-                        [20000, 20000, 22500, 10000]]
-            thresholds = [0.58,0.59,0.6,0.61,0.62]
-            for minsize in minsizes:
-                for threshold in thresholds:
-                    batch_pred_masks = np.array(predict_postprocess(batch_idx, True, y_pred, shape,minsize, threshold))
-                    print(minsize)
-                    print(threshold)
-                    print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
+            sigmoid = lambda x: 1 / (1 + np.exp(-x))
+
+            class_params = {}
+            for class_id in range(4):
+                print(class_id)
+                attempts = []
+                for t in range(0, 100, 5):
+                    t /= 100
+                    for ms in [0, 100, 1200, 5000, 10000]:
+                        masks = []
+                        for i in range(len(y_pred)):
+                            probability = y_pred[i,:,:,class_id]
+                            predict, num_predict = post_process(sigmoid(probability), t, ms, shape)
+                            masks.append(predict)
+
+                        d = []
+                        for i, j in zip(masks, y_true[:,:,:,class_id]):
+                            if (i.sum() == 0) & (j.sum() == 0):
+                                d.append(1)
+                            else:
+                                d.append(np_dice_coef(i, j))
+
+                        attempts.append((t, ms, np.mean(d)))
+
+                attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'dice'])
+
+                attempts_df = attempts_df.sort_values('dice', ascending=False)
+                print(attempts_df.head())
+                best_threshold = attempts_df['threshold'].values[0]
+                best_size = attempts_df['size'].values[0]
+
+                class_params[class_id] = (best_threshold, best_size)
+
+            # batch_idx = list(range(y_true.shape[0]))
+            # minsizes = [[1000, 1000, 1000, 1000],
+            #             [2000, 2000, 2000, 2000],
+            #             [3000, 3000, 3000, 3000],
+            #             [4000, 4000, 4000, 4000],
+            #             [5000, 5000, 5000, 5000],
+            #             [6000, 6000, 6000, 6000],
+            #             [20000, 20000, 22500, 10000]]
+            # thresholds = [0.58,0.59,0.6,0.61,0.62]
+            # for minsize in minsizes:
+            #     for threshold in thresholds:
+            #         batch_pred_masks = np.array(predict_postprocess(batch_idx, True, y_pred, shape,minsize, threshold))
+            #         print(minsize)
+            #         print(threshold)
+            #         print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
 
             shape_posprocess_list = ['rect', 'min', 'convex', 'approx']
 
