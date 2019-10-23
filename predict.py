@@ -51,11 +51,16 @@ def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
 
     return batch_pred_masks
 
-def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),minsize=None,threshold=0.6):
+def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),minsize=None,threshold=None):
     if minsize is None:
         minsizes = [10000, 10000, 10000, 10000]
     else:
         minsizes = minsize
+
+    if threshold is None:
+        thresholds = [0.6, 0.6, 0.6, 0.6]
+    else:
+        thresholds = threshold
 
     h,w = shape
     sigmoid = lambda x: 1 / (1 + np.exp(-x))
@@ -69,7 +74,7 @@ def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),mi
             pred_masks = cv2.resize(pred_masks, dsize=(w, h), interpolation=cv2.INTER_LINEAR)
             arrt = np.array([])
             for t in range(4):
-                a, num_predict = post_process(sigmoid(pred_masks[:, :, t]),threshold, minsizes[t], shape)
+                a, num_predict = post_process(sigmoid(pred_masks[:, :, t]),thresholds[t], minsizes[t], shape)
 
                 if (arrt.shape == (0,)):
                     arrt = a.reshape(h, w, 1)
@@ -115,7 +120,7 @@ def save_prediction(prediction, name):
         pickle.dump(prediction, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def final_predict(models,folds,shape,TTA=False,posprocess=False):
+def final_predict(models,folds,shape,TTA=False,posprocess=False,minsizes=None,thresholds=None):
 
     sub_df,test_imgs = get_test_data()
     print(test_imgs.shape[0])
@@ -143,11 +148,9 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
                 # print(np.array(batch_pred_masks).shape)
                 fold_result.append(batch_pred_masks.astype(np.float16))
 
-            batch_pred_masks = np.mean(fold_result, axis=0)
+            batch_pred_masks = np.mean(fold_result, axis=0, dtype=np.float16)
             del fold_result
             gc.collect()
-
-            batch_pred_masks = np.array(predict_postprocess(batch_idx, posprocess, batch_pred_masks))
 
             model_masks.extend(batch_pred_masks.astype(np.float16))
             del batch_pred_masks
@@ -158,11 +161,12 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False):
         del model, model_masks
         gc.collect()
 
-    batch_pred_emsemble = np.mean(batch_pred_emsemble, axis=0)
-
+    batch_pred_emsemble = np.mean(batch_pred_emsemble, axis=0, dtype=np.float16)
     save_prediction(batch_pred_emsemble, submission_name)
     batch_idx = list(range(test_imgs.shape[0]))
     # print(pred_emsemble.shape)
+    batch_pred_emsemble = np.array(predict_postprocess(batch_idx, posprocess, batch_pred_emsemble, minsizes,thresholds))
+
     test_df = convert_masks_for_submission(batch_idx,test_imgs,sub_df,batch_pred_emsemble)
     submission_name = submission_name + '.csv'
     generate_submission(test_df, submission_name)
@@ -218,6 +222,8 @@ def parse_args(args):
     parser.add_argument('--fold', help='Fold number to predict', default=None, nargs='+', type=int)
     parser.add_argument('--emsemble', help='Do model emsemble', default=False, type=bool)
     parser.add_argument('--prediction', help='Pickle path for prediction', default=None, type=str)
+    parser.add_argument('--minsizes', nargs='+', default=None, type=int)
+    parser.add_argument('--thresholds', nargs='+', default=None, type=int)
 
     return parser.parse_args(args)
 
@@ -240,4 +246,4 @@ if __name__ == '__main__':
     if args.prediction is not None:
         postprocess_pickle(args.prediction, args.emsemble)
     else:
-        final_predict(models,folds,(h,w),args.tta,args.posprocess)
+        final_predict(models,folds,(h,w),args.tta,args.posprocess,args.minsizes,args.thresholds)

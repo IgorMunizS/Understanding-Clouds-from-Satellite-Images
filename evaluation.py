@@ -115,7 +115,6 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
 
                         d = ray.get([parallel_post_process.remote(y_true_id,y_pred_id,class_id,t,ms,shape)])
 
-                        # print((t, ms, np.mean(d)))
                         attempts.append((t, ms, np.mean(d)))
 
                 attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'dice'])
@@ -127,21 +126,6 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
 
                 class_params[class_id] = (best_threshold, best_size)
 
-            # batch_idx = list(range(y_true.shape[0]))
-            # minsizes = [[1000, 1000, 1000, 1000],
-            #             [2000, 2000, 2000, 2000],
-            #             [3000, 3000, 3000, 3000],
-            #             [4000, 4000, 4000, 4000],
-            #             [5000, 5000, 5000, 5000],
-            #             [6000, 6000, 6000, 6000],
-            #             [20000, 20000, 22500, 10000]]
-            # thresholds = [0.58,0.59,0.6,0.61,0.62]
-            # for minsize in minsizes:
-            #     for threshold in thresholds:
-            #         batch_pred_masks = np.array(predict_postprocess(batch_idx, True, y_pred, shape,minsize, threshold))
-            #         print(minsize)
-            #         print(threshold)
-            #         print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
 
             # shape_posprocess_list = ['rect', 'min', 'convex', 'approx']
 
