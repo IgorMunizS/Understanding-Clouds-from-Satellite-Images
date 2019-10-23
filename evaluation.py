@@ -55,8 +55,11 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
 
     skf = StratifiedShuffleSplit(n_splits=5, test_size=0.15, random_state=133)
 
+
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
 
+        num_cpus = psutil.cpu_count(logical=True)
+        ray.init(num_cpus=num_cpus)
 
         if n_fold >= nfold:
             print('Evaluating fold number ',str(n_fold))
@@ -98,8 +101,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
             # print(y_pred)
 
             print("Dice: ", np_dice_coef(y_true,y_pred))
-            num_cpus = psutil.cpu_count(logical=True)
-            ray.init(num_cpus=num_cpus)
+
 
             y_true_id = ray.put(y_true)
             y_pred_id = ray.put(y_pred)
@@ -124,8 +126,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
                 best_size = attempts_df['size'].values[0]
 
                 class_params[class_id] = (best_threshold, best_size)
-
-
+        ray.shutdown()
             # shape_posprocess_list = ['rect', 'min', 'convex', 'approx']
 
             # for mode in shape_posprocess_list:

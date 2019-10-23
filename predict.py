@@ -165,13 +165,13 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False,minsizes=None,th
     save_prediction(batch_pred_emsemble, submission_name)
     batch_idx = list(range(test_imgs.shape[0]))
     # print(pred_emsemble.shape)
-    batch_pred_emsemble = np.array(predict_postprocess(batch_idx, posprocess, batch_pred_emsemble, minsizes,thresholds))
+    batch_pred_emsemble = np.array(predict_postprocess(batch_idx, posprocess, batch_pred_emsemble, minsize=minsizes,threshold=thresholds))
 
     test_df = convert_masks_for_submission(batch_idx,test_imgs,sub_df,batch_pred_emsemble)
     submission_name = submission_name + '.csv'
     generate_submission(test_df, submission_name)
 
-def postprocess_pickle(pickle_path, emsemble):
+def postprocess_pickle(pickle_path, emsemble, minsizes, thresholds):
 
     sub_df, test_imgs = get_test_data()
     print(test_imgs.shape[0])
@@ -194,7 +194,7 @@ def postprocess_pickle(pickle_path, emsemble):
 
     batch_idx = list(range(test_imgs.shape[0]))
     # masks_posprocessed = predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_emsemble)
-    pred_emsemble = np.array(predict_postprocess(batch_idx, True, pred_emsemble))
+    pred_emsemble = np.array(predict_postprocess(batch_idx, True, pred_emsemble, minsize=minsizes,threshold=thresholds))
 
     print(pred_emsemble.shape)
     test_df = convert_masks_for_submission(batch_idx, test_imgs, sub_df, pred_emsemble)
@@ -244,6 +244,6 @@ if __name__ == '__main__':
 
     h,w = args.shape
     if args.prediction is not None:
-        postprocess_pickle(args.prediction, args.emsemble)
+        postprocess_pickle(args.prediction, args.emsemble, args.minsizes,args.thresholds)
     else:
         final_predict(models,folds,(h,w),args.tta,args.posprocess,args.minsizes,args.thresholds)
