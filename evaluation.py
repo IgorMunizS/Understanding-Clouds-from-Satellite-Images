@@ -16,12 +16,32 @@ from imblearn.over_sampling import RandomOverSampler
 import itertools
 from predict import predict_postprocess
 from utils.posprocess import post_process
-
+import ray
+import psutil
 import numpy as np
 from utils.posprocess import draw_convex_hull, post_process_minsize
 from utils.utils import mask2rle
 import os
 import pandas as pd
+
+@ray.remote
+def parallel_post_process(y_true,y_pred,class_id,t,ms,shape):
+    sigmoid = lambda x: 1 / (1 + np.exp(-x))
+
+    masks = []
+    for i in range(len(y_pred)):
+        probability = y_pred[i, :, :, class_id]
+        predict, num_predict = post_process(sigmoid(probability), t, ms, shape)
+        masks.append(predict)
+
+    d = []
+    for i, j in zip(masks, y_true[:, :, :, class_id]):
+        if (i.sum() == 0) & (j.sum() == 0):
+            d.append(1)
+        else:
+            d.append(np_dice_coef(i, j))
+
+    return d
 
 def evaluate(smmodel,backbone,model_path,shape=(320,480)):
 
@@ -79,7 +99,11 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
             # print(y_pred)
 
             print("Dice: ", np_dice_coef(y_true,y_pred))
-            sigmoid = lambda x: 1 / (1 + np.exp(-x))
+            num_cpus = psutil.cpu_count(logical=False)
+            ray.init(num_cpus=num_cpus)
+
+            y_true_id = ray.put(y_true)
+            y_pred_id = ray.put(y_pred)
 
             class_params = {}
             for class_id in range(4):
@@ -88,18 +112,8 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
                 for t in range(40, 100, 5):
                     t /= 100
                     for ms in [5000, 10000, 15000, 20000, 25000]:
-                        masks = []
-                        for i in range(len(y_pred)):
-                            probability = y_pred[i,:,:,class_id]
-                            predict, num_predict = post_process(sigmoid(probability), t, ms, shape)
-                            masks.append(predict)
 
-                        d = []
-                        for i, j in zip(masks, y_true[:,:,:,class_id]):
-                            if (i.sum() == 0) & (j.sum() == 0):
-                                d.append(1)
-                            else:
-                                d.append(np_dice_coef(i, j))
+                        d = ray.get([parallel_post_process.remote(y_true_id,y_pred_id,class_id,t,ms,shape)])
 
                         # print((t, ms, np.mean(d)))
                         attempts.append((t, ms, np.mean(d)))
@@ -107,7 +121,7 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
                 attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'dice'])
 
                 attempts_df = attempts_df.sort_values('dice', ascending=False)
-                # print(attempts_df.head())
+                print(attempts_df.head())
                 best_threshold = attempts_df['threshold'].values[0]
                 best_size = attempts_df['size'].values[0]
 
