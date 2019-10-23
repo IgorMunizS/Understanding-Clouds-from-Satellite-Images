@@ -85,7 +85,7 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
             for class_id in range(4):
                 print(class_id)
                 attempts = []
-                for t in range(0, 100, 5):
+                for t in range(40, 100, 5):
                     t /= 100
                     for ms in [5000, 10000, 15000, 20000, 25000]:
                         masks = []
