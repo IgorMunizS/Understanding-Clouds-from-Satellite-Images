@@ -53,7 +53,7 @@ def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
 
 def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),minsize=None,threshold=0.6):
     if minsize is None:
-        minsizes = [50000, 50000, 50000, 20000]
+        minsizes = [10000, 10000, 10000, 10000]
     else:
         minsizes = minsize
 
@@ -103,7 +103,7 @@ def convert_masks_for_submission(batch_idx,test_imgs,sub_df,prediction):
 def predict_fold(fold_number,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA):
 
     print('Predicting Fold ', str(fold_number))
-    filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(fold_number) + '_swa.h5'
+    filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(fold_number) + '.h5'
     model.load_weights(filepath)
 
     batch_pred_masks = predict(batch_idx, test_imgs, shape, sub_df, backbone, TTA, model)
