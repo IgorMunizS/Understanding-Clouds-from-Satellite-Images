@@ -165,4 +165,4 @@ if __name__ == '__main__':
         os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 
-    evaluate(args.model,args.backbone,args.model_path,args.shape)
+    evaluate(args.model,args.backbone,args.nfold,args.shape)
