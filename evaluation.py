@@ -99,7 +99,7 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
             # print(y_pred)
 
             print("Dice: ", np_dice_coef(y_true,y_pred))
-            num_cpus = psutil.cpu_count(logical=False)
+            num_cpus = psutil.cpu_count(logical=True)
             ray.init(num_cpus=num_cpus)
 
             y_true_id = ray.put(y_true)
