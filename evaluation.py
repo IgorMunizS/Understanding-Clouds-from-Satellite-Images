@@ -128,7 +128,7 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
             #         print(threshold)
             #         print("Dice with post process: ", np_dice_coef(y_true, np.array(batch_pred_masks)))
 
-            shape_posprocess_list = ['rect', 'min', 'convex', 'approx']
+            # shape_posprocess_list = ['rect', 'min', 'convex', 'approx']
 
             # for mode in shape_posprocess_list:
             #     pred_masks=[]
