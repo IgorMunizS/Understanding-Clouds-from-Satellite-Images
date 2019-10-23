@@ -43,20 +43,22 @@ def parallel_post_process(y_true,y_pred,class_id,t,ms,shape):
 
     return d
 
-def evaluate(smmodel,backbone,model_path,shape=(320,480)):
+def evaluate(smmodel,backbone,nfold,shape=(320,480)):
 
     # if shape is None:
     #     shape = (1400,2100)
 
 
     train_df, mask_count_df = get_data_preprocessed()
+    opt = Nadam(lr=0.0002)
+    model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, dice_coef, shape)
 
     skf = StratifiedShuffleSplit(n_splits=5, test_size=0.15, random_state=133)
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
 
 
-        if n_fold >= 4:
+        if n_fold >= nfold:
             print('Evaluating fold number ',str(n_fold))
 
 
@@ -75,12 +77,9 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
 
             _ ,y_true = val_generator.__getitem__(0)
             val_generator.batch_size = 8
-            # opt = RAdam(lr=0.0002)
-            opt = Nadam(lr=0.0002)
-            # opt = AdamAccumulate(lr=0.0002, accum_iters=8)
 
-            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
-            model.load_weights(model_path)
+            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5'
+            model.load_weights(filepath)
 
             # results = model.evaluate_generator(
             #     val_generator,
@@ -109,9 +108,9 @@ def evaluate(smmodel,backbone,model_path,shape=(320,480)):
             for class_id in range(4):
                 print(class_id)
                 attempts = []
-                for t in range(40, 100, 5):
+                for t in range(40, 80, 5):
                     t /= 100
-                    for ms in [5000, 10000, 15000, 20000, 25000]:
+                    for ms in range(10000, 30000, 1000):
 
                         d = ray.get([parallel_post_process.remote(y_true_id,y_pred_id,class_id,t,ms,shape)])
 
@@ -149,8 +148,8 @@ def parse_args(args):
 
     parser.add_argument('--model', help='Segmentation model', default='unet')
     parser.add_argument('--backbone', help='Model backbone', default='resnet34', type=str)
-    parser.add_argument('--shape', help='Shape of resized images', default=(320, 480), type=tuple)
-    parser.add_argument('--model_path', help='model weight path', default=None, type=str)
+    parser.add_argument('--shape', help='Shape of resized images', default=(192, 288), type=tuple)
+    parser.add_argument('--nfold', help='number of fold to evaluate', default=0, type=int)
     parser.add_argument("--cpu", default=False, type=bool)
 
 
