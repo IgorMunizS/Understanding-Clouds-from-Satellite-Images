@@ -62,8 +62,8 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 backbone=backbone
             )
 
-            # opt = RAdam(lr=0.0001)
-            opt = Nadam(lr=0.0003)
+            opt = RAdam(lr=0.0003)
+            # opt = Nadam(lr=0.0003)
             # opt = AdamAccumulate(lr=0.0003, accum_iters=8)
 
             model = get_model(smmodel,backbone,opt,combo_loss_2,dice_coef,shape)
