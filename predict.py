@@ -223,7 +223,7 @@ def parse_args(args):
     parser.add_argument('--emsemble', help='Do model emsemble', default=False, type=bool)
     parser.add_argument('--prediction', help='Pickle path for prediction', default=None, type=str)
     parser.add_argument('--minsizes', nargs='+', default=None, type=int)
-    parser.add_argument('--thresholds', nargs='+', default=None, type=int)
+    parser.add_argument('--thresholds', nargs='+', default=None, type=float)
 
     return parser.parse_args(args)
 
