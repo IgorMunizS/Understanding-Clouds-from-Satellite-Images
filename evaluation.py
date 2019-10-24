@@ -30,7 +30,7 @@ def parallel_post_process(y_true,y_pred,class_id,t,ms,shape):
     sigmoid = lambda x: 1 / (1 + np.exp(-x))
 
     masks = []
-    for i in range(len(y_pred)):
+    for i in range(y_pred.shape[0]):
         probability = y_pred[i, :, :, class_id]
         predict, num_predict = post_process(sigmoid(probability), t, ms, shape)
         masks.append(predict)
@@ -111,11 +111,13 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
     del val_generator, model
     gc.collect()
 
-    # oof_data = np.array(oof_data*100).astype(np.uint8)
-    # oof_predicted_data = np.array(oof_predicted_data*100).astype(np.uint8)
-    print("CV Final Dice: ", dice(oof_data, oof_predicted_data))
-    oof_data = ray.put(oof_data)
-    oof_predicted_data = ray.put(oof_predicted_data)
+    oof_data = np.array(oof_data)
+    oof_predicted_data = np.array(oof_predicted_data)
+    print(oof_data.shape)
+    print(oof_predicted_data.shape)
+    print("CV Final Dice: ", np_dice_coef(oof_data, oof_predicted_data))
+    oof_data = ray.put(oof_data.astype(np.float32))
+    oof_predicted_data = ray.put(oof_predicted_data.astype(np.float32))
 
     now = time.time()
     class_params = {}
