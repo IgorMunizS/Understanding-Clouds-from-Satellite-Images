@@ -55,6 +55,8 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
     model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, dice_coef, shape)
 
     skf = StratifiedKFold(n_splits=5, random_state=133)
+    oof_data = []
+    oof_predicted_data =[]
 
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
@@ -100,35 +102,36 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
             print(y_true.shape)
             print(y_pred.shape)
             # print(y_pred)
-
+            oof_data.extend(y_true)
+            oof_predicted_data.extend(y_pred)
             print("Dice: ", np_dice_coef(y_true,y_pred))
 
+    print("CV Final Dice: ", np_dice_coef(oof_data, oof_predicted_data))
+    y_true_id = ray.put(oof_data)
+    y_pred_id = ray.put(oof_predicted_data)
 
-            y_true_id = ray.put(y_true)
-            y_pred_id = ray.put(y_pred)
+    now = time.time()
+    class_params = {}
+    for class_id in range(4):
+        print(class_id)
+        attempts = []
+        for t in range(40, 80, 5):
+            t /= 100
+            for ms in range(10000, 30000, 1000):
 
-            now = time.time()
-            class_params = {}
-            for class_id in range(4):
-                print(class_id)
-                attempts = []
-                for t in range(40, 80, 5):
-                    t /= 100
-                    for ms in range(10000, 30000, 1000):
+                d = ray.get([parallel_post_process.remote(y_true_id,y_pred_id,class_id,t,ms,shape)])
 
-                        d = ray.get([parallel_post_process.remote(y_true_id,y_pred_id,class_id,t,ms,shape)])
+                # print(t, ms, np.mean(d))
+                attempts.append((t, ms, np.mean(d)))
 
-                        # print(t, ms, np.mean(d))
-                        attempts.append((t, ms, np.mean(d)))
+        attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'dice'])
 
-                attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'dice'])
-
-                attempts_df = attempts_df.sort_values('dice', ascending=False)
-                print(attempts_df.head())
-                print('Time: ', time.time() - now)
-                best_threshold = attempts_df['threshold'].values[0]
-                best_size = attempts_df['size'].values[0]
-                class_params[class_id] = (best_threshold, best_size)
+        attempts_df = attempts_df.sort_values('dice', ascending=False)
+        print(attempts_df.head())
+        print('Time: ', time.time() - now)
+        best_threshold = attempts_df['threshold'].values[0]
+        best_size = attempts_df['size'].values[0]
+        class_params[class_id] = (best_threshold, best_size)
         ray.shutdown()
             # shape_posprocess_list = ['rect', 'min', 'convex', 'approx']
 
