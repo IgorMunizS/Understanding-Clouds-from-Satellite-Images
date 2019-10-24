@@ -127,9 +127,9 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
     for class_id in range(4):
         print(class_id)
         attempts = []
-        for t in tqdm(range(40, 80, 5)):
+        for t in tqdm(range(55, 80, 5)):
             t /= 100
-            for ms in range(10000, 30000, 1000):
+            for ms in range(10000, 31000, 5000):
 
                 d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,shape)
 
