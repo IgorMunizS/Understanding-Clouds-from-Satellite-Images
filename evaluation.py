@@ -23,6 +23,7 @@ from utils.posprocess import draw_convex_hull, post_process_minsize
 from utils.utils import mask2rle
 import os
 import pandas as pd
+import time
 
 @ray.remote
 def parallel_post_process(y_true,y_pred,class_id,t,ms,shape):
@@ -58,7 +59,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
 
-        num_cpus = psutil.cpu_count(logical=True)
+        num_cpus = psutil.cpu_count(logical=False)
         ray.init(num_cpus=num_cpus)
 
         if n_fold >= nfold:
@@ -106,6 +107,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
             y_true_id = ray.put(y_true)
             y_pred_id = ray.put(y_pred)
 
+            now = time.time()
             class_params = {}
             for class_id in range(4):
                 print(class_id)
@@ -123,9 +125,9 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
 
                 attempts_df = attempts_df.sort_values('dice', ascending=False)
                 print(attempts_df.head())
+                print('Time: ', time.time() - now)
                 best_threshold = attempts_df['threshold'].values[0]
                 best_size = attempts_df['size'].values[0]
-
                 class_params[class_id] = (best_threshold, best_size)
         ray.shutdown()
             # shape_posprocess_list = ['rect', 'min', 'convex', 'approx']
