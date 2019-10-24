@@ -1,6 +1,6 @@
 import argparse
 import sys
-from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.model_selection import StratifiedKFold
 from utils.preprocess import get_data_preprocessed
 from sklearn.metrics import f1_score
 from utils.generator import DataGenerator
@@ -53,7 +53,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
     opt = Nadam(lr=0.0002)
     model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, dice_coef, shape)
 
-    skf = StratifiedShuffleSplit(n_splits=5, test_size=0.15, random_state=133)
+    skf = StratifiedKFold(n_splits=5, random_state=133)
 
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
@@ -79,7 +79,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
             )
 
             _ ,y_true = val_generator.__getitem__(0)
-            val_generator.batch_size = 8
+            val_generator.batch_size = 1
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5'
             model.load_weights(filepath)
@@ -116,6 +116,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
 
                         d = ray.get([parallel_post_process.remote(y_true_id,y_pred_id,class_id,t,ms,shape)])
 
+                        print(t, ms, np.mean(d))
                         attempts.append((t, ms, np.mean(d)))
 
                 attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'dice'])
