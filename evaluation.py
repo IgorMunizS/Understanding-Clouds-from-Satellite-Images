@@ -8,7 +8,7 @@ from keras_radam import RAdam
 from keras.optimizers import Adam, Nadam, SGD
 from utils.lr import CyclicLR, Lookahead, AdamAccumulate
 from models import get_model
-from utils.losses import dice_coef, dice_coef_loss_bce, lovasz_loss, combo_loss, np_dice_coef
+from utils.losses import dice_coef, dice_coef_loss_bce, lovasz_loss, combo_loss, np_dice_coef,dice
 from utils.callbacks import ValPosprocess
 from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
@@ -111,9 +111,9 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
     del val_generator, model
     gc.collect()
 
-    oof_data = np.array(oof_data*100).astype(np.uint8)
-    oof_predicted_data = np.array(oof_predicted_data*100).astype(np.uint8)
-    print("CV Final Dice: ", np_dice_coef(oof_data, oof_predicted_data))
+    # oof_data = np.array(oof_data*100).astype(np.uint8)
+    # oof_predicted_data = np.array(oof_predicted_data*100).astype(np.uint8)
+    print("CV Final Dice: ", dice(oof_data, oof_predicted_data))
     oof_data = ray.put(oof_data)
     oof_predicted_data = ray.put(oof_predicted_data)
 

@@ -161,6 +161,13 @@ def np_dice_coef(y_true, y_pred):
     return ( (2. * intersection) /
              (np.sum(y_true_f) + np.sum(y_pred_f) ) )
 
+def dice(img1,img2):
+    img1 = np.asarray(img1).astype(np.bool)
+    img2 = np.asarray(img2).astype(np.bool)
+    if img1.sum() + img2.sum() == 0: return 1
+    intersection = np.logical_and(img1, img2)
+    return 2. * intersection.sum() / (img1.sum() + img2.sum())
+
 # --------------------------- MULTICLASS LOSSES ---------------------------
 
 def lovasz_softmax_loss(y_true,y_pred):
