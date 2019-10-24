@@ -31,12 +31,14 @@ def parallel_post_process(y_true,y_pred,class_id,t,ms,shape):
 
     masks = []
     for i in range(y_pred.shape[0]):
-        probability = y_pred[i, :, :, class_id]
+        probability = y_pred[i, :, :, class_id].astype(np.float32)
         predict, num_predict = post_process(sigmoid(probability), t, ms, shape)
         masks.append(predict)
 
     d = []
     for i, j in zip(masks, y_true[:, :, :, class_id]):
+        i = i.astype(np.float32)
+        j = j.astype(np.float32)
         if (i.sum() == 0) & (j.sum() == 0):
             d.append(1)
         else:
@@ -111,11 +113,11 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
     del val_generator, model
     gc.collect()
 
-    oof_data = np.array(oof_data).astype(np.float32)
-    oof_predicted_data = np.array(oof_predicted_data).astype(np.float32)
+    oof_data = np.asarray(oof_data)
+    oof_predicted_data = np.asarray(oof_predicted_data)
     print(oof_data.shape)
     print(oof_predicted_data.shape)
-    print("CV Final Dice: ", np_dice_coef(oof_data, oof_predicted_data))
+    # print("CV Final Dice: ", np_dice_coef(oof_data, oof_predicted_data))
 
     now = time.time()
     class_params = {}
