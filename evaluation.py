@@ -57,12 +57,11 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
     skf = StratifiedKFold(n_splits=5, random_state=133)
     oof_data = []
     oof_predicted_data =[]
-
+    num_cpus = psutil.cpu_count(logical=False)
+    ray.init(num_cpus=num_cpus)
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
 
-        num_cpus = psutil.cpu_count(logical=False)
-        ray.init(num_cpus=num_cpus)
 
         if n_fold >= nfold:
             print('Evaluating fold number ',str(n_fold))
