@@ -58,7 +58,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
     oof_data = []
     oof_predicted_data =[]
     num_cpus = psutil.cpu_count(logical=False)
-    ray.init(num_cpus=num_cpus)
+    ray.init(num_cpus=4)
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
 
@@ -107,6 +107,9 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
             oof_predicted_data.extend(y_pred.astype(np.float16))
             del y_true, y_pred
             gc.collect()
+
+    del val_generator, model
+    gc.collect()
 
     oof_data = np.array(oof_data).astype(np.float32)
     oof_predicted_data = np.array(oof_predicted_data).astype(np.float32)
