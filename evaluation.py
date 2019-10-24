@@ -81,7 +81,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
             _ ,y_true = val_generator.__getitem__(0)
             val_generator.batch_size = 1
 
-            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5'
+            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
             model.load_weights(filepath)
 
             # results = model.evaluate_generator(
