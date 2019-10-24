@@ -25,7 +25,7 @@ import os
 import pandas as pd
 import time
 
-@ray.remote
+# @ray.remote
 def parallel_post_process(y_true,y_pred,class_id,t,ms,shape):
     sigmoid = lambda x: 1 / (1 + np.exp(-x))
 
@@ -57,8 +57,8 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
     skf = StratifiedKFold(n_splits=5, random_state=133)
     oof_data = []
     oof_predicted_data =[]
-    num_cpus = psutil.cpu_count(logical=False)
-    ray.init(num_cpus=4)
+    # num_cpus = psutil.cpu_count(logical=False)
+    # ray.init(num_cpus=4)
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
 
@@ -111,8 +111,8 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
     del val_generator, model
     gc.collect()
 
-    oof_data = ray.put(np.array(oof_data).astype(np.float32))
-    oof_predicted_data = ray.put(np.array(oof_predicted_data).astype(np.float32))
+    oof_data = np.array(oof_data).astype(np.float32)
+    oof_predicted_data = np.array(oof_predicted_data).astype(np.float32)
     print(oof_data.shape)
     print(oof_predicted_data.shape)
     print("CV Final Dice: ", np_dice_coef(oof_data, oof_predicted_data))
@@ -126,7 +126,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
             t /= 100
             for ms in range(10000, 30000, 1000):
 
-                d = ray.get([parallel_post_process.remote(oof_data,oof_predicted_data,class_id,t,ms,shape)])
+                d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,shape)
 
                 # print(t, ms, np.mean(d))
                 attempts.append((t, ms, np.mean(d)))
@@ -139,7 +139,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
         best_threshold = attempts_df['threshold'].values[0]
         best_size = attempts_df['size'].values[0]
         class_params[class_id] = (best_threshold, best_size)
-        ray.shutdown()
+        # ray.shutdown()
             # shape_posprocess_list = ['rect', 'min', 'convex', 'approx']
 
             # for mode in shape_posprocess_list:
