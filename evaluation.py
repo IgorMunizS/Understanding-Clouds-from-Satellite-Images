@@ -114,8 +114,8 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
     oof_data = np.array(oof_data).astype(np.float32)
     oof_predicted_data = np.array(oof_predicted_data).astype(np.float32)
     print("CV Final Dice: ", np_dice_coef(oof_data, oof_predicted_data))
-    y_true_id = ray.put(oof_data)
-    y_pred_id = ray.put(oof_predicted_data)
+    oof_data = ray.put(oof_data)
+    oof_predicted_data = ray.put(oof_predicted_data)
 
     now = time.time()
     class_params = {}
@@ -126,7 +126,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
             t /= 100
             for ms in range(10000, 30000, 1000):
 
-                d = ray.get([parallel_post_process.remote(y_true_id,y_pred_id,class_id,t,ms,shape)])
+                d = ray.get([parallel_post_process.remote(oof_data,oof_predicted_data,class_id,t,ms,shape)])
 
                 # print(t, ms, np.mean(d))
                 attempts.append((t, ms, np.mean(d)))
