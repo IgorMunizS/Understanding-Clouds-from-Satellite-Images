@@ -111,13 +111,11 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
     del val_generator, model
     gc.collect()
 
-    oof_data = np.array(oof_data)
-    oof_predicted_data = np.array(oof_predicted_data)
+    oof_data = ray.put(oof_data.astype(np.float32))
+    oof_predicted_data = ray.put(oof_predicted_data.astype(np.float32))
     print(oof_data.shape)
     print(oof_predicted_data.shape)
     print("CV Final Dice: ", np_dice_coef(oof_data, oof_predicted_data))
-    oof_data = ray.put(oof_data.astype(np.float32))
-    oof_predicted_data = ray.put(oof_predicted_data.astype(np.float32))
 
     now = time.time()
     class_params = {}
