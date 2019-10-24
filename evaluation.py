@@ -79,7 +79,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
             )
 
             _ ,y_true = val_generator.__getitem__(0)
-            val_generator.batch_size = 1
+            val_generator.batch_size = 11
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
             model.load_weights(filepath)
@@ -116,7 +116,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
 
                         d = ray.get([parallel_post_process.remote(y_true_id,y_pred_id,class_id,t,ms,shape)])
 
-                        print(t, ms, np.mean(d))
+                        # print(t, ms, np.mean(d))
                         attempts.append((t, ms, np.mean(d)))
 
                 attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'dice'])
