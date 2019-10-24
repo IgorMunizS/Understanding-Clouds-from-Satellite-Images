@@ -24,7 +24,7 @@ from utils.utils import mask2rle
 import os
 import pandas as pd
 import time
-
+from tqdm import tqdm
 # @ray.remote
 def parallel_post_process(y_true,y_pred,class_id,t,ms,shape):
     sigmoid = lambda x: 1 / (1 + np.exp(-x))
@@ -122,7 +122,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
     for class_id in range(4):
         print(class_id)
         attempts = []
-        for t in range(40, 80, 5):
+        for t in tqdm(range(40, 80, 5)):
             t /= 100
             for ms in range(10000, 30000, 1000):
 
