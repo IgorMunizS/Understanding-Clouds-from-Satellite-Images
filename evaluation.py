@@ -101,9 +101,12 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
             print(y_true.shape)
             print(y_pred.shape)
             # print(y_pred)
-            oof_data.extend(y_true)
-            oof_predicted_data.extend(y_pred)
-            print("Dice: ", np_dice_coef(y_true,y_pred))
+            print("Dice: ", np_dice_coef(y_true, y_pred))
+
+            oof_data.extend(y_true.astype(np.float16))
+            oof_predicted_data.extend(y_pred.astype(np.float16))
+            del y_true, y_pred
+            gc.collect()
 
     print("CV Final Dice: ", np_dice_coef(oof_data, oof_predicted_data))
     y_true_id = ray.put(oof_data)
