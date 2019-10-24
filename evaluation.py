@@ -61,6 +61,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
     oof_predicted_data =[]
     # num_cpus = psutil.cpu_count(logical=False)
     # ray.init(num_cpus=4)
+    oof_dice = []
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
 
@@ -103,7 +104,9 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
             print(y_true.shape)
             print(y_pred.shape)
             # print(y_pred)
-            print("Dice: ", np_dice_coef(y_true, y_pred))
+            d = np_dice_coef(y_true, y_pred)
+            oof_dice.append(d)
+            print("Dice: ", d)
 
             oof_data.extend(y_true.astype(np.float16))
             oof_predicted_data.extend(y_pred.astype(np.float16))
@@ -117,7 +120,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
     oof_predicted_data = np.asarray(oof_predicted_data)
     print(oof_data.shape)
     print(oof_predicted_data.shape)
-    # print("CV Final Dice: ", np_dice_coef(oof_data, oof_predicted_data))
+    print("CV Final Dice: ", np.mean(oof_dice))
 
     now = time.time()
     class_params = {}
