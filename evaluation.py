@@ -88,10 +88,6 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480), tta=False):
             _ ,y_true = val_generator.__getitem__(0)
             val_generator.batch_size = 1
 
-            if tta:
-                model = tta_segmentation(model, h_flip=True, h_shift=(-15, 15),
-                                         v_flip=True, v_shift=(-15, 15), contrast=(-0.9, 0.9), merge='gmean')
-
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
             model.load_weights(filepath)
 
@@ -101,6 +97,11 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480), tta=False):
             #     verbose=1
             # )
             # print(results)
+
+            if tta:
+                model = tta_segmentation(model, h_flip=True, h_shift=(-15, 15),
+                                         v_flip=True, v_shift=(-15, 15), contrast=(-0.9, 0.9), merge='gmean')
+
 
             y_pred = model.predict_generator(
                 val_generator,
