@@ -13,6 +13,7 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
 from imblearn.over_sampling import RandomOverSampler
 import itertools
+from config import n_fold_splits,random_seed,epochs
 
 from segmentation_models.losses import bce_jaccard_loss
 
@@ -24,9 +25,9 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
 
 
     train_df, mask_count_df = get_data_preprocessed(pseudo_label)
-    ros = RandomOverSampler(random_state=133)
+    ros = RandomOverSampler(random_state=random_seed)
 
-    skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed)
+    skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed, shuffle=True)
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
         # train_indices, _ = ros.fit_resample(train_indices.reshape(-1, 1),
@@ -67,7 +68,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             # opt = AdamAccumulate(lr=0.0003, accum_iters=8)
 
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
-            swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', 17)
+            swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', epochs - 3)
 
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
@@ -79,7 +80,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 train_generator,
                 validation_data=val_generator,
                 callbacks=[ckp, rlr, swa],
-                epochs=25,
+                epochs=epochs,
                 use_multiprocessing=True,
                 workers=42
             )

@@ -2,19 +2,11 @@ import argparse
 import sys
 from sklearn.model_selection import StratifiedKFold
 from utils.preprocess import get_data_preprocessed
-from sklearn.metrics import f1_score
 from utils.generator import DataGenerator
-from keras_radam import RAdam
 from keras.optimizers import Adam, Nadam, SGD
-from utils.lr import CyclicLR, Lookahead, AdamAccumulate
 from models import get_model
 from utils.losses import dice_coef, dice_coef_loss_bce, lovasz_loss, combo_loss, np_dice_coef,dice
-from utils.callbacks import ValPosprocess
-from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
-from imblearn.over_sampling import RandomOverSampler
-import itertools
-from predict import predict_postprocess
 from utils.posprocess import post_process
 import ray
 import psutil
@@ -26,6 +18,7 @@ import pandas as pd
 import time
 from tqdm import tqdm
 from tta_wrapper import tta_segmentation
+from config import n_fold_splits, random_seed
 
 # @ray.remote
 def parallel_post_process(y_true,y_pred,class_id,t,ms,shape):
@@ -48,8 +41,7 @@ def parallel_post_process(y_true,y_pred,class_id,t,ms,shape):
 
     return d
 
-def evaluate(smmodel,backbone,nfold,shape=(320,480), tta=False):
-    n_splits = 5
+def evaluate(smmodel,backbone,nfold,shape=(320,480),swa=False, tta=False):
     h,w =shape
 
 
@@ -57,7 +49,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480), tta=False):
     opt = Nadam(lr=0.0002)
     model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, dice_coef, shape)
 
-    skf = StratifiedKFold(n_splits=n_splits, random_state=133)
+    skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed)
     oof_data = []
     oof_predicted_data =[]
     # num_cpus = psutil.cpu_count(logical=False)
@@ -87,7 +79,14 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480), tta=False):
             _ ,y_true = val_generator.__getitem__(0)
             val_generator.batch_size = 1
 
-            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
+            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
+
+            if swa:
+                filepath += '.h5'
+            else:
+                filepath += '_swa.h5'
+
+
             model.load_weights(filepath)
 
             # results = model.evaluate_generator(
@@ -128,8 +127,8 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480), tta=False):
     print(oof_predicted_data.shape)
     print("CV Final Dice: ", np.mean(oof_dice))
 
-    np.save('../validations/y_true_' + str(n_splits) + '.npy', oof_data)
-    np.save('../validations/' + str(smmodel) + '_' + str(backbone) + '_' + str(n_splits) + '.npy', oof_predicted_data)
+    np.save('../validations/y_true_' + str(n_fold_splits) + '.npy', oof_data)
+    np.save('../validations/' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold_splits) + '.npy', oof_predicted_data)
 
     now = time.time()
     class_params = {}
@@ -179,6 +178,7 @@ def parse_args(args):
     parser.add_argument('--shape', help='Shape of resized images', default=(320, 480), type=tuple)
     parser.add_argument('--nfold', help='number of fold to evaluate', default=0, type=int)
     parser.add_argument('--tta', help='apply TTA', default=False, type=bool)
+    parser.add_argument('--swa', help='apply SWA', default=False, type=bool)
     parser.add_argument('--search', help='search post processing values', default=False, type=bool)
     parser.add_argument("--cpu", default=False, type=bool)
 
@@ -197,4 +197,4 @@ if __name__ == '__main__':
     if args.search:
         pass
     else:
-        evaluate(args.model,args.backbone,args.nfold,args.shape,args.tta)
+        evaluate(args.model,args.backbone,args.nfold,args.shape,args.swa,args.tta)

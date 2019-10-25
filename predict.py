@@ -224,6 +224,8 @@ def parse_args(args):
     parser.add_argument('--prediction', help='Pickle path for prediction', default=None, type=str)
     parser.add_argument('--minsizes', nargs='+', default=None, type=int)
     parser.add_argument('--thresholds', nargs='+', default=None, type=float)
+    parser.add_argument("--cpu", default=False, type=bool)
+
 
     return parser.parse_args(args)
 
@@ -236,11 +238,17 @@ if __name__ == '__main__':
     else:
         folds = args.fold
 
+    if args.cpu:
+        os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
 
     if args.emsemble:
         models = [['unet','efficientnetb4'],['unet','efficientnetb3']]
     else:
         models = [[args.model, args.backbone]]
+
+
 
     h,w = args.shape
     if args.prediction is not None:
