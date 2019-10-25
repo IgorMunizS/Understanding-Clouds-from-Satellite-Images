@@ -50,8 +50,7 @@ def parallel_post_process(y_true,y_pred,class_id,t,ms,shape):
 
 def evaluate(smmodel,backbone,nfold,shape=(320,480), tta=False):
     n_splits = 5
-    # if shape is None:
-    #     shape = (1400,2100)
+    h,w =shape
 
 
     train_df, mask_count_df = get_data_preprocessed()
@@ -99,8 +98,8 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480), tta=False):
             # print(results)
 
             if tta:
-                model = tta_segmentation(model, h_flip=True, h_shift=(-15, 15),
-                                         v_flip=True, v_shift=(-15, 15), contrast=(-0.9, 0.9), merge='gmean')
+                model = tta_segmentation(model, h_flip=True,h_shift=(-15, 15),
+                                     input_shape=(h, w, 3), merge='gmean')
 
 
             y_pred = model.predict_generator(
