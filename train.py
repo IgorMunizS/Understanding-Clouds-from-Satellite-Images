@@ -78,8 +78,8 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             history = model.fit_generator(
                 train_generator,
                 validation_data=val_generator,
-                callbacks=[ckp, rlr, es],
-                epochs=100,
+                callbacks=[ckp, rlr, swa],
+                epochs=20,
                 use_multiprocessing=True,
                 workers=42
             )
