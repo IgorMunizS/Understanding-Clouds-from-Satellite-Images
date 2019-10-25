@@ -26,7 +26,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
     train_df, mask_count_df = get_data_preprocessed(pseudo_label)
     ros = RandomOverSampler(random_state=133)
 
-    skf = StratifiedKFold(n_splits=5, random_state=133)
+    skf = StratifiedKFold(n_splits=6, random_state=133)
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
         # train_indices, _ = ros.fit_resample(train_indices.reshape(-1, 1),
