@@ -130,6 +130,7 @@ def parse_args(args):
     parser.add_argument('--backbone', help='Model backbone', default='efficientnetb3', type=str)
     parser.add_argument('--shape', help='Shape of resized images', nargs='+', default=(320, 480), type=int)
     parser.add_argument('--tta', help='Shape of resized images', default=False, type=bool)
+    parser.add_argument('--swa', help='swa or not', default=False, type=bool)
     parser.add_argument('--n_splits', help='n_fold', default=6, nargs='+', type=int)
     parser.add_argument('--what_to_make', help='test or valid', default='test', type=str)
     parser.add_argument("--cpu", default=False, type=bool)
@@ -147,4 +148,4 @@ if __name__ == '__main__':
         os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
     make_prediction(smmodel=args.model, backbone=args.backbone, reshape=args.shape,
-                    n_splits=args.n_splits, tta=args.tta, what_to_make=args.what_to_make)
+                    n_splits=args.n_splits, tta=args.tta, swa=args.swa, what_to_make=args.what_to_make)
