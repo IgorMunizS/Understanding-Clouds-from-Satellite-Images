@@ -160,6 +160,7 @@ class DataGenerator(keras.utils.Sequence):
                                                                    p=0.3),
                         albu.HorizontalFlip(),
                         albu.VerticalFlip(),
+                        albu.RandomRotate90(),
                         albu.ShiftScaleRotate(rotate_limit=45, shift_limit=0.15, scale_limit=0.15),
                         albu.OneOf([
                             albu.ElasticTransform(p=0.5, alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
@@ -171,7 +172,7 @@ class DataGenerator(keras.utils.Sequence):
                             albu.RandomGamma(),
                             albu.RandomBrightness(),
                             albu.Solarize()
-                        ], p=0.3)
+                        ], p=0.5)
         ], p=1)
 
         composed = composition(image=img.astype('uint8'), mask=masks)
