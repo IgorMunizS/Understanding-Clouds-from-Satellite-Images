@@ -74,7 +74,7 @@ def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),mi
             pred_masks = cv2.resize(np.float32(pred_masks), dsize=(w, h), interpolation=cv2.INTER_LINEAR)
             arrt = np.array([])
             for t in range(4):
-                a, num_predict = post_process(sigmoid(pred_masks[:, :, t]),thresholds[t], minsizes[t], shape)
+                a, num_predict = post_process(pred_masks[:, :, t],thresholds[t], minsizes[t], shape)
 
                 if (arrt.shape == (0,)):
                     arrt = a.reshape(h, w, 1)
@@ -232,7 +232,7 @@ if __name__ == '__main__':
     args = parse_args(args)
 
     if args.fold is None:
-        folds = [0,1,2,3,4]
+        folds = [0,1,2,3,4,5]
     else:
         folds = args.fold
 

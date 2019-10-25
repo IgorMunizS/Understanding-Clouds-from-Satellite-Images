@@ -25,14 +25,16 @@ import os
 import pandas as pd
 import time
 from tqdm import tqdm
+from tta_wrapper import tta_segmentation
+
 # @ray.remote
 def parallel_post_process(y_true,y_pred,class_id,t,ms,shape):
-    sigmoid = lambda x: 1 / (1 + np.exp(-x))
+    # sigmoid = lambda x: 1 / (1 + np.exp(-x))
 
     masks = []
     for i in range(y_pred.shape[0]):
         probability = y_pred[i, :, :, class_id].astype(np.float32)
-        predict, num_predict = post_process(sigmoid(probability), t, ms, shape)
+        predict, num_predict = post_process(probability, t, ms, shape)
         masks.append(predict)
 
     d = []
@@ -46,8 +48,8 @@ def parallel_post_process(y_true,y_pred,class_id,t,ms,shape):
 
     return d
 
-def evaluate(smmodel,backbone,nfold,shape=(320,480)):
-
+def evaluate(smmodel,backbone,nfold,shape=(320,480), tta=False):
+    n_splits = 5
     # if shape is None:
     #     shape = (1400,2100)
 
@@ -56,7 +58,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
     opt = Nadam(lr=0.0002)
     model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, dice_coef, shape)
 
-    skf = StratifiedKFold(n_splits=5, random_state=133)
+    skf = StratifiedKFold(n_splits=n_splits, random_state=133)
     oof_data = []
     oof_predicted_data =[]
     # num_cpus = psutil.cpu_count(logical=False)
@@ -85,6 +87,10 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
 
             _ ,y_true = val_generator.__getitem__(0)
             val_generator.batch_size = 1
+
+            if tta:
+                model = tta_segmentation(model, h_flip=True, h_shift=(-15, 15),
+                                         v_flip=True, v_shift=(-15, 15), contrast=(-0.9, 0.9), merge='gmean')
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
             model.load_weights(filepath)
@@ -121,6 +127,9 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480)):
     print(oof_data.shape)
     print(oof_predicted_data.shape)
     print("CV Final Dice: ", np.mean(oof_dice))
+
+    np.save('../validations/y_true_' + str(n_splits) + '.npy', oof_data)
+    np.save('../validations/' + str(smmodel) + '_' + str(backbone) + '_' + str(n_splits) + '.npy', oof_predicted_data)
 
     now = time.time()
     class_params = {}
@@ -169,6 +178,8 @@ def parse_args(args):
     parser.add_argument('--backbone', help='Model backbone', default='resnet34', type=str)
     parser.add_argument('--shape', help='Shape of resized images', default=(320, 480), type=tuple)
     parser.add_argument('--nfold', help='number of fold to evaluate', default=0, type=int)
+    parser.add_argument('--tta', help='apply TTA', default=False, type=bool)
+    parser.add_argument('--search', help='search post processing values', default=False, type=bool)
     parser.add_argument("--cpu", default=False, type=bool)
 
 
@@ -183,5 +194,7 @@ if __name__ == '__main__':
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
         os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
-
-    evaluate(args.model,args.backbone,args.nfold,args.shape)
+    if args.search:
+        pass
+    else:
+        evaluate(args.model,args.backbone,args.nfold,args.shape,args.tta)

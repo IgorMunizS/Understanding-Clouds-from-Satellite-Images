@@ -34,10 +34,11 @@ def make_prediction(smmodel, backbone, reshape, n_splits, tta, swa, what_to_make
 
     all_preds = np.zeros((nb_img_preds, 350, 525, 4), dtype=np.float16)
     cnt, val_names = 0, []
+    model = get_model(smmodel, backbone, Adam(), dice_coef_loss_bce, dice_coef, reshape)
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
         print('Predicting fold', n_fold, '...')
-        model = get_model(smmodel, backbone, Adam(), dice_coef_loss_bce, dice_coef, reshape)
+
         model_fold_filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
 
         if swa:
