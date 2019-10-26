@@ -25,9 +25,9 @@ def postprocess_shape(file,mode):
     sub = pd.read_csv(file)
     name = file.split('/')[-1].split('.')[0]
 
-    mode = 'convex'  # choose from 'rect', 'min', 'convex' and 'approx'
+    # mode = 'convex'  # choose from 'rect', 'min', 'convex' and 'approx'
     model_class_names = ['Fish', 'Flower', 'Gravel', 'Sugar']
-    min_size = [20000, 20000, 22500, 10000]
+    min_size = [25000, 15000, 22500, 10000]
 
     img_label_list = []
     enc_pixels_list = []
@@ -171,6 +171,8 @@ def parse_args(args):
     """ Parse the arguments.
     """
     parser = argparse.ArgumentParser(description='Post Processing Script')
+    parser.add_argument('--file', help='predict file path', default=None)
+    parser.add_argument('--mode', help='Segmentation model', default='convex')
 
     parser.add_argument('--prediction', help='predict file path', default=None)
     parser.add_argument('--model', help='Segmentation model', default='unet')
@@ -189,6 +191,6 @@ if __name__ == '__main__':
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
         os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
-    evaluate(args.model, args.backbone, args.nfold, args.shape)
+    postprocess_shape(args.file,args.mode)
 
 
