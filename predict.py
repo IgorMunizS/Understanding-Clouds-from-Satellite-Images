@@ -105,10 +105,14 @@ def convert_masks_for_submission(batch_idx,test_imgs,sub_df,prediction):
 
 
 
-def predict_fold(fold_number,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA):
+def predict_fold(fold_number,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA,swa):
 
     print('Predicting Fold ', str(fold_number))
-    filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(fold_number) + '.h5'
+    filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(fold_number)
+    if swa:
+        filepath += '_swa.h5'
+    else:
+        filepath += '.h5'
     model.load_weights(filepath)
 
     batch_pred_masks = predict(batch_idx, test_imgs, shape, sub_df, backbone, TTA, model)
@@ -120,7 +124,7 @@ def save_prediction(prediction, name):
         pickle.dump(prediction, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def final_predict(models,folds,shape,TTA=False,posprocess=False,minsizes=None,thresholds=None):
+def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsizes=None,thresholds=None):
 
     sub_df,test_imgs = get_test_data()
     print(test_imgs.shape[0])
@@ -144,7 +148,7 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False,minsizes=None,th
 
             for i in folds:
 
-                batch_pred_masks = predict_fold(i,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA)
+                batch_pred_masks = predict_fold(i,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA,swa)
                 # print(np.array(batch_pred_masks).shape)
                 fold_result.append(batch_pred_masks.astype(np.float16))
 
@@ -218,6 +222,7 @@ def parse_args(args):
     parser.add_argument('--backbone', help='Model backbone', default='resnet34', type=str)
     parser.add_argument('--shape', help='Shape of resized images', nargs='+', default=[320, 480], type=int)
     parser.add_argument('--tta', help='Shape of resized images', default=False, type=bool)
+    parser.add_argument('--swa', help='Apply SWA', default=False, type=bool)
     parser.add_argument('--posprocess', help='Shape of resized images', default=False, type=bool)
     parser.add_argument('--fold', help='Fold number to predict', default=None, nargs='+', type=int)
     parser.add_argument('--emsemble', help='Do model emsemble', default=False, type=bool)
@@ -254,4 +259,4 @@ if __name__ == '__main__':
     if args.prediction is not None:
         postprocess_pickle(args.prediction, args.emsemble, args.minsizes,args.thresholds)
     else:
-        final_predict(models,folds,(h,w),args.tta,args.posprocess,args.minsizes,args.thresholds)
+        final_predict(models,folds,(h,w),args.tta,args.posprocess,args.swa,args.minsizes,args.thresholds)
