@@ -193,8 +193,11 @@ def postprocess_pickle(pickle_path, emsemble, minsizes, thresholds):
     else:
         submission_name = pickle_path.split('/')[-1].split('.')[0]
 
-        with open(pickle_path, 'rb') as handle:
-            pred_emsemble = pickle.load(handle)
+        try:
+            with open(pickle_path, 'rb') as handle:
+                pred_emsemble = pickle.load(handle)
+        except:
+            pred_emsemble = np.load(pickle_path)
 
     batch_idx = list(range(test_imgs.shape[0]))
     # masks_posprocessed = predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_emsemble)
