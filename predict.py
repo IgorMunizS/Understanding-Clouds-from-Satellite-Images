@@ -35,7 +35,7 @@ def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
     if TTA:
         test_generator.batch_size = 1
         tta_model = tta_segmentation(model, h_flip=True,h_shift=(-15, 15),
-                                     input_shape=(h, w, 3), merge='mean')
+                                     input_shape=(h, w, 3), merge='gmean')
 
         batch_pred_masks = tta_model.predict_generator(
             test_generator,
