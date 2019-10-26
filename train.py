@@ -63,8 +63,8 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 backbone=backbone
             )
 
-            opt = RAdam(lr=0.0003)
-            # opt = Nadam(lr=0.0003)
+            # opt = RAdam(lr=0.0003)
+            opt = Nadam(lr=0.0003)
             # opt = AdamAccumulate(lr=0.0003, accum_iters=8)
 
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
@@ -75,11 +75,11 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             ckp = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
                                          save_weights_only=True)
             es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=5, verbose=1, mode='max')
-            rlr = ReduceLROnPlateau(monitor='val_dice_coef', factor=0.2, patience=2, verbose=1, mode='max', min_delta=0.0001)
+            rlr = ReduceLROnPlateau(monitor='val_dice_coef', factor=0.2, patience=3, verbose=1, mode='max', min_delta=0.0001)
             history = model.fit_generator(
                 train_generator,
                 validation_data=val_generator,
-                callbacks=[ckp, rlr, swa],
+                callbacks=[ckp, rlr, es],
                 epochs=epochs,
                 use_multiprocessing=True,
                 workers=42
