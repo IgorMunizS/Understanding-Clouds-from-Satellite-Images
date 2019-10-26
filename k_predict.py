@@ -32,7 +32,7 @@ def make_prediction(smmodel, backbone, reshape, n_splits, tta, swa, what_to_make
 
     nb_img_preds = nb_test_img if what_to_make == 'test' else len(mask_count_df)
 
-    all_preds = np.zeros((nb_img_preds, 350, 525, 4), dtype=np.int16)
+    all_preds = np.zeros((nb_img_preds, 350, 525, 4), dtype=np.float16)
     cnt, val_names = 0, []
     model = get_model(smmodel, backbone, Adam(), dice_coef_loss_bce, dice_coef, reshape)
 
@@ -69,11 +69,11 @@ def make_prediction(smmodel, backbone, reshape, n_splits, tta, swa, what_to_make
                 cnt += 1
 
     if what_to_make == 'test':
-        all_preds = (all_preds // 6).astype(np.int8)
+        all_preds = (all_preds / 6).astype(np.float16)
         filesave = '../predictions/' + str(smmodel) + '_' + str(backbone) + '_' + str(n_splits) + '_test_avg_tta_more.npy'
 
     elif what_to_make == 'valid':
-        all_preds = all_preds.astype(np.int8)
+        all_preds = all_preds.astype(np.float16)
         filesave = '../predictions/' + str(smmodel) + '_' + str(backbone) + '_' + str(n_splits) + '_oof_tta.npy'
         # np.save('../predictions/' + str(smmodel) + '_' + str(backbone) + '_' + str(n_splits) + '_oof_imgnames_tta.npy', val_names)
 
@@ -99,11 +99,11 @@ def load_img(img_name, mode='test', backbone='efficientnetb3', reshape=(320, 480
 
 
 def reshape_to_submission_single(pred):
-    output = np.zeros((350, 525, 4), dtype=np.int16)
+    output = np.zeros((350, 525, 4), dtype=np.float16)
     for t in range(4):
         pred_layer = pred[:, :, t]
         pred_layer = cv2.resize(pred_layer, dsize=(525, 350), interpolation=cv2.INTER_LINEAR)
-        pred_layer = (pred_layer*100).astype(np.int16)
+        pred_layer = pred_layer.astype(np.float16)
         output[:, :, t] = pred_layer
     return output
 
