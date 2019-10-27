@@ -154,13 +154,13 @@ def bce_lovasz_loss(y_true, y_pred):
     return binary_crossentropy(y_true,y_pred) + lovasz_hinge(y_pred, y_true, per_image=True, ignore=None)
 
 def np_dice_coef(y_true, y_pred):
-
     y_true_f = y_true.flatten()
-    y_pred_f = y_pred.flatten()
+    y_pred_f = np.greater(y_pred.flatten(), 0.5)
+    intersection = np.sum(y_true_f * y_pred_f)
     union = np.sum(y_true_f) + np.sum(y_pred_f)
     if union == 0: return 1
-    intersection = np.sum(y_true_f * y_pred_f)
-    return 2. * intersection / union
+    return (2. * intersection) / union
+
 
 
 
