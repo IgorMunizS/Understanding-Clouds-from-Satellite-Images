@@ -34,7 +34,7 @@ def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
 
     if TTA:
         test_generator.batch_size = 1
-        tta_model = tta_segmentation(model, h_flip=True,h_shift=(-15, 15),
+        tta_model = tta_segmentation(model, h_flip=True,
                                      input_shape=(h, w, 3), merge='mean')
 
         batch_pred_masks = tta_model.predict_generator(
@@ -166,6 +166,10 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsiz
         gc.collect()
 
     batch_pred_emsemble = np.mean(batch_pred_emsemble, axis=0, dtype=np.float16)
+
+    if TTA:
+        submission_name += '_tta'
+
     save_prediction(batch_pred_emsemble, submission_name)
     batch_idx = list(range(test_imgs.shape[0]))
     # print(pred_emsemble.shape)
