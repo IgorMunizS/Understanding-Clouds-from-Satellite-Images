@@ -19,6 +19,7 @@ import time
 from tqdm import tqdm
 from tta_wrapper import tta_segmentation
 from config import n_fold_splits, random_seed
+import os
 
 # @ray.remote
 def parallel_post_process(y_true,y_pred,class_id,t,ms,shape,fixshape):
@@ -154,13 +155,23 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480),swa=False, tta=False):
         class_params[class_id] = (best_threshold, best_size)
 
 
-def search(val_file,shape,fixshape=False):
+def search(val_file,shape,fixshape=False, emsemble=False):
 
 
     oof_data = np.load('../validations/y_true_' + str(n_fold_splits) + '.npy')
-    oof_predicted_data = np.load(val_file)
+
+    if emsemble:
+        oof_predicted_data = []
+        for file in os.listdir(val_file):
+            oof_predicted_data.append(np.load(val_file + file))
+
+        oof_predicted_data = np.mean(oof_predicted_data, axis=0)
+    else:
+        oof_predicted_data = np.load(val_file)
+
     print(oof_data.shape)
     print(oof_predicted_data.shape)
+    print(np_dice_coef(oof_data.astype(np.float32), oof_predicted_data.astype(np.float32)))
 
     now = time.time()
     class_params = {}
@@ -214,6 +225,7 @@ def parse_args(args):
     parser.add_argument('--search', help='search post processing values', default=False, type=bool)
     parser.add_argument('--val_file', help='val file to search', default=None, type=str)
     parser.add_argument('--fixshape', help='apply shape convex or not', default=False, type=bool)
+    parser.add_argument('--emsemble', help='Validation emsemble of models. val_file must be a path to folder with all models', default=False, type=bool)
 
     parser.add_argument("--cpu", default=False, type=bool)
 
@@ -230,6 +242,6 @@ if __name__ == '__main__':
         os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
     if args.search:
-        search(args.val_file,args.shape,args.fixshape)
+        search(args.val_file,args.shape,args.fixshape, args.emsemble)
     else:
         evaluate(args.model,args.backbone,args.nfold,args.shape,args.swa,args.tta)

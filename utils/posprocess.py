@@ -10,7 +10,7 @@ def post_process(probability, threshold, min_size,shape=(350, 525), fixshape=Fal
     mask = cv2.threshold(probability, threshold, 1, cv2.THRESH_BINARY)[1]
 
     if fixshape:
-        mask = draw_convex_hull(mask.astype(np.uint8)*255, mode='convex')
+        mask = draw_convex_hull(mask.astype(np.uint8), mode='convex')
 
     num_component, component = cv2.connectedComponents(mask.astype(np.uint8))
     predictions = np.zeros(shape, np.float32)
