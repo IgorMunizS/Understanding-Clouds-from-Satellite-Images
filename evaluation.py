@@ -82,9 +82,9 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480),swa=False, tta=False):
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
 
             if swa:
-                filepath += '.h5'
-            else:
                 filepath += '_swa.h5'
+            else:
+                filepath += '.h5'
 
 
             model.load_weights(filepath)
