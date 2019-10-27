@@ -51,7 +51,7 @@ def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
 
     return batch_pred_masks
 
-def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),minsize=None,threshold=None):
+def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(320,480),minsize=None,threshold=None):
     if minsize is None:
         minsizes = [10000, 10000, 10000, 10000]
     else:
@@ -62,7 +62,7 @@ def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),mi
     else:
         thresholds = threshold
 
-    h,w = shape
+    h,w = (350,525)
     sigmoid = lambda x: 1 / (1 + np.exp(-x))
 
     all_masks =[]
@@ -173,7 +173,7 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsiz
     save_prediction(batch_pred_emsemble, submission_name)
     batch_idx = list(range(test_imgs.shape[0]))
     # print(pred_emsemble.shape)
-    batch_pred_emsemble = np.array(predict_postprocess(batch_idx, posprocess, batch_pred_emsemble, minsize=minsizes,threshold=thresholds))
+    batch_pred_emsemble = np.array(predict_postprocess(batch_idx, posprocess, batch_pred_emsemble, shape=shape, minsize=minsizes,threshold=thresholds))
 
     test_df = convert_masks_for_submission(batch_idx,test_imgs,sub_df,batch_pred_emsemble)
     submission_name = submission_name + '.csv'
