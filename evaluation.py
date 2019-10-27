@@ -174,17 +174,17 @@ def search(val_file,shape,fixshape=False, emsemble=False):
 
     print(oof_data.shape)
     print(oof_predicted_data.shape)
-    d = []
-
-    for i, j in zip(oof_data, oof_predicted_data):
-        i = i.astype(np.float32)
-        j = j.astype(np.float32)
-        if (i.sum() == 0) & (j.sum() == 0):
-            d.append(1)
-        else:
-            d.append(np_dice_coef(i, j))
-
-    print(np.mean(d))
+    # d = []
+    #
+    # for i, j in zip(oof_data, oof_predicted_data):
+    #     i = i.astype(np.float32)
+    #     j = j.astype(np.float32)
+    #     if (i.sum() == 0) & (j.sum() == 0):
+    #         d.append(1)
+    #     else:
+    #         d.append(np_dice_coef(i, j))
+    #
+    # print(np.mean(d))
 
     now = time.time()
     class_params = {}
