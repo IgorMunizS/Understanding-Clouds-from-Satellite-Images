@@ -161,13 +161,11 @@ def search(val_file,shape,fixshape=False, emsemble=False):
     oof_data = np.load('../validations/y_true_' + str(n_fold_splits) + '.npy')
 
     if emsemble:
+        oof_predicted_data = []
         for i,file in enumerate(os.listdir(val_file)):
-            if i == 0:
-                oof_predicted_data = np.load(val_file + file)
-            else:
-                oof_predicted_data += np.load(val_file + file)
+           oof_predicted_data.append(np.load(val_file + file))
 
-        oof_predicted_data /= len(os.listdir(val_file))
+        oof_predicted_data = np.mean(oof_predicted_data, axis=1)
     else:
         oof_predicted_data = np.load(val_file)
 
