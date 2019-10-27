@@ -49,7 +49,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480),swa=False, tta=False):
     opt = Nadam(lr=0.0002)
     model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, dice_coef, shape)
 
-    skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed)
+    skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed, shuffle=True)
     oof_data = []
     oof_predicted_data =[]
     # num_cpus = psutil.cpu_count(logical=False)
