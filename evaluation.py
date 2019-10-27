@@ -213,7 +213,7 @@ def parse_args(args):
     parser.add_argument('--swa', help='apply SWA', default=False, type=bool)
     parser.add_argument('--search', help='search post processing values', default=False, type=bool)
     parser.add_argument('--val_file', help='val file to search', default=None, type=str)
-    parser.add_argument('--fixhape', help='apply shape convex or not', default=False, type=bool)
+    parser.add_argument('--fixshape', help='apply shape convex or not', default=False, type=bool)
 
     parser.add_argument("--cpu", default=False, type=bool)
 
