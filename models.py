@@ -26,6 +26,15 @@ def get_model(model,BACKBONE,opt,loss,metric,shape):
         )
         model.compile(optimizer=opt, loss=loss, metrics=[metric])
 
+    elif model == 'psp':
+        model = sm.PSPNet(
+            BACKBONE,
+            classes=4,
+            input_shape=(h, w, 3),
+            activation='sigmoid'
+        )
+        model.compile(optimizer=opt, loss=loss, metrics=[metric])
+
     elif model == 'xnet':
         model = smx.Xnet(
             BACKBONE,
