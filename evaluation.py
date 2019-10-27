@@ -165,7 +165,7 @@ def search(val_file,shape,fixshape=False, emsemble=False):
         for i,file in enumerate(os.listdir(val_file)):
            oof_predicted_data.append(np.load(val_file + file))
 
-        oof_predicted_data = np.mean(oof_predicted_data, axis=1)
+        oof_predicted_data = np.mean(oof_predicted_data, axis=0)
     else:
         oof_predicted_data = np.load(val_file)
 
