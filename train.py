@@ -14,7 +14,7 @@ import gc
 from imblearn.over_sampling import RandomOverSampler
 import itertools
 from config import n_fold_splits,random_seed,epochs
-
+from keras_gradient_accumulation import GradientAccumulation
 from segmentation_models.losses import bce_jaccard_loss
 
 
@@ -63,11 +63,12 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 backbone=backbone
             )
 
-            # opt = RAdam(lr=0.0003)
-            opt = Nadam(lr=0.0003)
+            opt = RAdam(lr=0.0003)
+            # opt = Nadam(lr=0.0003)
             # opt = AdamAccumulate(lr=0.0003, accum_iters=8)
+            optimizer = GradientAccumulation(opt, accumulation_steps=4)
 
-            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
+            model = get_model(smmodel,backbone,optimizer,dice_coef_loss_bce,dice_coef,shape)
             swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', epochs - 3)
 
 
