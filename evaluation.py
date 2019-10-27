@@ -97,8 +97,8 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480),swa=False, tta=False):
             # print(results)
 
             if tta:
-                model = tta_segmentation(model, h_flip=True,h_shift=(-15, 15),
-                                     input_shape=(h, w, 3), merge='gmean')
+                model = tta_segmentation(model, h_flip=True,
+                                     input_shape=(h, w, 3), merge='mean')
 
 
             y_pred = model.predict_generator(
