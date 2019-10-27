@@ -47,7 +47,6 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480),swa=False, tta=False):
 
     train_df, mask_count_df = get_data_preprocessed()
     opt = Nadam(lr=0.0002)
-    model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, dice_coef, shape)
 
     skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed, shuffle=True)
     oof_data = []
@@ -58,6 +57,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480),swa=False, tta=False):
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
 
+        model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, dice_coef, shape)
 
         if n_fold >= nfold:
             print('Evaluating fold number ',str(n_fold))
