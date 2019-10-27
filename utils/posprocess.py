@@ -1,13 +1,16 @@
 import cv2
 import numpy as np
 
-def post_process(probability, threshold, min_size,shape=(350, 525)):
+def post_process(probability, threshold, min_size,shape=(350, 525), fixshape=False):
     """
     Post processing of each predicted mask, components with lesser number of pixels
     than `min_size` are ignored
     """
 
     mask = cv2.threshold(probability, threshold, 1, cv2.THRESH_BINARY)[1]
+
+    if fixshape:
+        mask = draw_convex_hull(mask.astype(np.uint8), mode='convex')
 
     num_component, component = cv2.connectedComponents(mask.astype(np.uint8))
     predictions = np.zeros(shape, np.float32)

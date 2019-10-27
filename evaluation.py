@@ -21,13 +21,13 @@ from tta_wrapper import tta_segmentation
 from config import n_fold_splits, random_seed
 
 # @ray.remote
-def parallel_post_process(y_true,y_pred,class_id,t,ms,shape):
+def parallel_post_process(y_true,y_pred,class_id,t,ms,shape,fixshape):
     # sigmoid = lambda x: 1 / (1 + np.exp(-x))
 
     masks = []
     for i in range(y_pred.shape[0]):
         probability = y_pred[i, :, :, class_id].astype(np.float32)
-        predict, num_predict = post_process(probability, t, ms, shape)
+        predict, num_predict = post_process(probability, t, ms, shape,fixshape)
         masks.append(predict)
 
     d = []
@@ -152,6 +152,38 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480),swa=False, tta=False):
         best_threshold = attempts_df['threshold'].values[0]
         best_size = attempts_df['size'].values[0]
         class_params[class_id] = (best_threshold, best_size)
+
+
+def search(val_file,shape,fixshape=False):
+
+
+    oof_data = np.load('../validations/y_true_' + str(n_fold_splits) + '.npy')
+    oof_predicted_data = np.load(val_file)
+    print(oof_data.shape)
+    print(oof_predicted_data.shape)
+
+    now = time.time()
+    class_params = {}
+    for class_id in range(4):
+        print(class_id)
+        attempts = []
+        for t in tqdm(range(35, 85, 5)):
+            t /= 100
+            for ms in tqdm(range(10000, 31000, 5000)):
+
+                d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,shape,fixshape)
+
+                # print(t, ms, np.mean(d))
+                attempts.append((t, ms, np.mean(d)))
+
+        attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'dice'])
+
+        attempts_df = attempts_df.sort_values('dice', ascending=False)
+        print(attempts_df.head())
+        print('Time: ', time.time() - now)
+        best_threshold = attempts_df['threshold'].values[0]
+        best_size = attempts_df['size'].values[0]
+        class_params[class_id] = (best_threshold, best_size)
         # ray.shutdown()
             # shape_posprocess_list = ['rect', 'min', 'convex', 'approx']
 
@@ -180,6 +212,9 @@ def parse_args(args):
     parser.add_argument('--tta', help='apply TTA', default=False, type=bool)
     parser.add_argument('--swa', help='apply SWA', default=False, type=bool)
     parser.add_argument('--search', help='search post processing values', default=False, type=bool)
+    parser.add_argument('--val_file', help='val file to search', default=None, type=str)
+    parser.add_argument('--fixhape', help='apply shape convex or not', default=False, type=bool)
+
     parser.add_argument("--cpu", default=False, type=bool)
 
 
@@ -195,6 +230,6 @@ if __name__ == '__main__':
         os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
     if args.search:
-        pass
+        search(args.val_file,args.shape,args.fixshape)
     else:
         evaluate(args.model,args.backbone,args.nfold,args.shape,args.swa,args.tta)
