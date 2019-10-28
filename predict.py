@@ -201,13 +201,13 @@ def postprocess_pickle(pickle_path, emsemble, minsizes, thresholds,fixshape=Fals
 
         try:
             with open(pickle_path, 'rb') as handle:
-                pred_emsemble = pickle.load(handle)
+                predicted_data = pickle.load(handle)
         except:
-            pred_emsemble = np.load(pickle_path)
+            predicted_data = np.load(pickle_path)
 
     batch_idx = list(range(test_imgs.shape[0]))
     # masks_posprocessed = predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_emsemble)
-    pred_emsemble = np.array(predict_postprocess(batch_idx, True, pred_emsemble, minsize=minsizes,threshold=thresholds,
+    pred_emsemble = np.array(predict_postprocess(batch_idx, True, predicted_data, minsize=minsizes,threshold=thresholds,
                                                  fixshape=fixshape))
 
     print(pred_emsemble.shape)
