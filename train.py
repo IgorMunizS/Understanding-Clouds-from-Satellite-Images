@@ -68,8 +68,8 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             # opt = AdamAccumulate(lr=0.0003, accum_iters=8)
             # optimizer = GradientAccumulation(opt, accumulation_steps=4)
 
-            # dice_focal_loss = sm_loss()
-            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,dice_coef,shape)
+            dice_focal_loss = sm_loss()
+            model = get_model(smmodel,backbone,opt,dice_focal_loss,dice_coef,shape)
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
             ckp = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',

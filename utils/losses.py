@@ -43,9 +43,9 @@ def dice_coef_loss_bce(y_true, y_pred, dice=1., bce=1.):
     return binary_crossentropy_smoothed(y_true, y_pred) * bce + dice_coef_loss(y_true, y_pred) * dice
 
 def sm_loss(d=0.5, f=0.5):
-    dice_loss = sm.losses.DiceLoss()
-    focal_loss = sm.losses.BinaryFocalLoss()
-    total_loss = d*dice_loss + (f * focal_loss)
+    dice_loss = sm.losses.DiceLoss(per_image=True)
+    bce_loss = sm.losses.BinaryCELoss()
+    total_loss = d*dice_loss + (f * bce_loss)
 
     return total_loss
 
