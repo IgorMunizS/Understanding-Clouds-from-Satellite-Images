@@ -64,7 +64,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             )
 
             # opt = RAdam(lr=0.0003)
-            opt = Nadam(lr=0.01)
+            opt = Nadam(lr=0.00001)
             # opt = AdamAccumulate(lr=0.0003, accum_iters=8)
             # optimizer = GradientAccumulation(opt, accumulation_steps=4)
 
