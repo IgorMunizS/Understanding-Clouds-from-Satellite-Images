@@ -267,6 +267,6 @@ if __name__ == '__main__':
 
     h,w = args.shape
     if args.prediction is not None:
-        postprocess_pickle(args.prediction, args.emsemble, args.minsizes,args.thresholds, fixshape)
+        postprocess_pickle(args.prediction, args.emsemble, args.minsizes,args.thresholds, args.fixshape)
     else:
         final_predict(models,folds,(h,w),args.tta,args.posprocess,args.swa,args.minsizes,args.thresholds)
