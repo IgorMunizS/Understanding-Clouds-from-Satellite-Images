@@ -14,9 +14,10 @@ def dice_coef(y_true, y_pred):
     return score
 
 def dice_coef_loss(y_true, y_pred):
-    smooth = 1.
+    smooth = 1e-5
     y_true_f = K.flatten(y_true)
-    y_pred_f = K.flatten(y_pred)
+    y_pred = K.cast(y_pred, 'float32')
+    y_pred_f = K.cast(K.greater(K.flatten(y_pred), 0.5), 'float32')
     intersection = y_true_f * y_pred_f
     score = (2. * K.sum(intersection) + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
     return 1. - score
@@ -39,7 +40,7 @@ def binary_crossentropy_smoothed(y_true, y_pred):
 #     intersection = K.sum(y_true_f * y_pred_f)
 #     return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
 
-def dice_coef_loss_bce(y_true, y_pred, dice=1., bce=2.):
+def dice_coef_loss_bce(y_true, y_pred, dice=1., bce=1.):
     return binary_crossentropy_smoothed(y_true, y_pred) * bce + dice_coef_loss(y_true, y_pred) * dice
 
 def sm_loss(d=0.5, f=0.5):
