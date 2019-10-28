@@ -161,7 +161,6 @@ def search(val_file,shape,fixshape=False, emsemble=False):
     oof_data = np.load('../validations/y_true_' + str(n_fold_splits) + '.npy')
 
     if emsemble:
-        oof_predicted_data = []
         for i,file in enumerate(os.listdir(val_file)):
             if i == 0:
                 oof_predicted_data = np.load(val_file + file)
@@ -174,17 +173,6 @@ def search(val_file,shape,fixshape=False, emsemble=False):
 
     print(oof_data.shape)
     print(oof_predicted_data.shape)
-    d = []
-
-    for i, j in zip(oof_data, oof_predicted_data):
-        i = i.astype(np.float32)
-        j = j.astype(np.float32)
-        if (i.sum() == 0) & (j.sum() == 0):
-            d.append(1)
-        else:
-            d.append(np_dice_coef(i, j))
-
-    print(np.mean(d))
 
     now = time.time()
     class_params = {}

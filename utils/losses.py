@@ -2,6 +2,8 @@ import keras.backend as K
 from keras.losses import binary_crossentropy, categorical_crossentropy
 import numpy as np
 import tensorflow as tf
+import segmentation_models as sm
+
 
 def dice_coef(y_true, y_pred):
     y_true_f = K.flatten(y_true)
@@ -39,6 +41,13 @@ def binary_crossentropy_smoothed(y_true, y_pred):
 
 def dice_coef_loss_bce(y_true, y_pred, dice=1., bce=2.):
     return binary_crossentropy_smoothed(y_true, y_pred) * bce + dice_coef_loss(y_true, y_pred) * dice
+
+def sm_loss(d=0.5, f=0.5):
+    dice_loss = sm.losses.DiceLoss()
+    focal_loss = sm.losses.BinaryFocalLoss()
+    total_loss = d*dice_loss + (f * focal_loss)
+
+    return total_loss
 
 # def lovasz_loss(y_true, y_pred):
 #     y_true, y_pred = K.cast(K.squeeze(y_true, -1), 'int32'), K.cast(K.squeeze(y_pred, -1), 'float32')

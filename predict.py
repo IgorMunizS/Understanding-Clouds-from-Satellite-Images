@@ -185,15 +185,17 @@ def postprocess_pickle(pickle_path, emsemble, minsizes, thresholds,fixshape=Fals
     print(test_imgs.shape[0])
 
     if emsemble:
+        models_emsemble_path = '../predictions/emsemble/'
         submission_name = 'emsemble_submission'
-        emsemble = []
-        for file in os.listdir('../predictions/'):
-            with open('../predictions/' + file, 'rb') as handle:
-                pred = pickle.load(handle)
-            emsemble.append(pred)
+        for i,file in enumerate(os.listdir(models_emsemble_path)):
+            if i == 0:
+                with open(models_emsemble_path + file, 'rb') as handle:
+                    predicted_data = pickle.load(handle)
+            else:
+                with open(models_emsemble_path + file, 'rb') as handle:
+                    predicted_data += pickle.load(handle)
 
-        pred_emsemble = np.mean(emsemble, axis=0)
-
+        predicted_data /= len(os.listdir(models_emsemble_path))
     else:
         submission_name = pickle_path.split('/')[-1].split('.')[0]
 
