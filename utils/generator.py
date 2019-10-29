@@ -180,7 +180,7 @@ class DataGenerator(keras.utils.Sequence):
                         ], p=0.5)
         ], p=1)
 
-        composed = composition(image=img.astype('uint8'), mask=masks)
+        composed = composition(image=img, mask=masks)
         aug_img = composed['image']
         aug_masks = composed['mask']
 
