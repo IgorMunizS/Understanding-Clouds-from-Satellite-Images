@@ -7,7 +7,7 @@ from keras_radam import RAdam
 from keras.optimizers import Adam, Nadam, SGD
 from utils.lr import CyclicLR, Lookahead, AdamAccumulate
 from models import get_model
-from utils.losses import dice_coef, dice_coef_loss_bce, sm_loss, lovasz_loss, jaccard
+from utils.losses import dice_coef, dice_coef_loss_bce, sm_loss, lovasz_loss, jaccard,dice_coef_loss
 from utils.callbacks import ValPosprocess, SnapshotCallbackBuilder, SWA
 from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
@@ -15,8 +15,7 @@ from imblearn.over_sampling import RandomOverSampler
 import itertools
 from config import n_fold_splits,random_seed,epochs, ft_epochs
 from keras_gradient_accumulation import GradientAccumulation
-from segmentation_models.losses import bce_jaccard_loss
-
+from segmentation_models.losses import dice_loss
 
 def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None):
 
@@ -64,7 +63,8 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             )
 
             # opt = RAdam(lr=0.0003)
-            opt = Nadam(lr=0.0003)
+            # opt = Nadam(lr=0.0003)
+            opt = Adam(lr=0.0003)
             # opt = AdamAccumulate(lr=0.0003, accum_iters=8)
             # optimizer = GradientAccumulation(opt, accumulation_steps=4)
 
@@ -103,25 +103,25 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             # )
 
 
-            # opt = RAdam(lr=0.00001)
-            # checkpoint = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
-            #                              save_weights_only=True)
-            # # es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=5, verbose=1, mode='max')
-            # #
-            # model.compile(optimizer=opt, loss=lovasz_loss, metrics=[dice_coef])
+            opt = RAdam(lr=0.00001)
+            checkpoint = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
+                                         save_weights_only=True)
+            # es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=5, verbose=1, mode='max')
             #
-            # clr = CyclicLR(base_lr=0.000001, max_lr=0.00001,
-            #                step_size=150, reduce_on_plateau=3, monitor='val_dice_coef', reduce_factor=10, mode='exp_range')
-            # swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', ft_epochs - 3)
-            #
-            # history = model.fit_generator(
-            #     train_generator,
-            #     validation_data=val_generator,
-            #     callbacks=[checkpoint, swa, clr],
-            #     epochs=ft_epochs,
-            #     use_multiprocessing=True,
-            #     workers=42
-            # )
+            model.compile(optimizer=opt, loss=dice_coef_loss, metrics=[dice_coef])
+
+            clr = CyclicLR(base_lr=0.000001, max_lr=0.00001,
+                           step_size=150, reduce_on_plateau=3, monitor='val_dice_coef', reduce_factor=10, mode='exp_range')
+            swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', ft_epochs - 3)
+
+            history = model.fit_generator(
+                train_generator,
+                validation_data=val_generator,
+                callbacks=[checkpoint, swa, clr],
+                epochs=ft_epochs,
+                use_multiprocessing=True,
+                workers=42
+            )
 
             del train_generator,val_generator,model
             gc.collect()

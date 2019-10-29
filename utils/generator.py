@@ -161,7 +161,7 @@ class DataGenerator(keras.utils.Sequence):
                         #                          p=0.5),
                         #     albu.CropNonEmptyMaskIfExists(self.reshape[0], self.reshape[1], p=0.3)
                         # ], p=0.3),
-                        albu.RandomSizedCrop(min_max_height=(self.reshape[0] // 2, self.reshape[0]),
+                        albu.RandomSizedCrop(min_max_height=(self.reshape[0] - 70, self.reshape[0]),
                                  height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
                                  p=0.5),
                         albu.HorizontalFlip(),
@@ -180,7 +180,7 @@ class DataGenerator(keras.utils.Sequence):
                         ], p=0.5)
         ], p=1)
 
-        composed = composition(image=img.astype('uint8'), mask=masks)
+        composed = composition(image=img, mask=masks)
         aug_img = composed['image']
         aug_masks = composed['mask']
 
