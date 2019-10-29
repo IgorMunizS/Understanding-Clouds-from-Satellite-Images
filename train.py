@@ -104,11 +104,11 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
 
 
             opt = RAdam(lr=0.00001)
-            checkpoint = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
+            checkpoint = ModelCheckpoint(filepath, monitor='val_f1-score', verbose=1, save_best_only=True, mode='max',
                                          save_weights_only=True)
             # es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=5, verbose=1, mode='max')
             #
-            model.compile(optimizer=opt, loss=dice_coef_loss, metrics=[dice_coef])
+            model.compile(optimizer=opt, loss=dice_coef_loss, metrics=[dice_coef,dice_metric])
 
             clr = CyclicLR(base_lr=0.000001, max_lr=0.00001,
                            step_size=150, reduce_on_plateau=3, monitor='val_dice_coef', reduce_factor=10, mode='exp_range')
