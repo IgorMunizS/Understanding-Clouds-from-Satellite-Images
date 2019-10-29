@@ -15,7 +15,7 @@ def get_model(model,BACKBONE,opt,loss,metric,shape):
             input_shape=(h, w, 3),
             activation='sigmoid'
         )
-        model.compile(optimizer=opt, loss=loss, metrics=[metric])
+        model.compile(optimizer=opt, loss=loss, metrics=metric)
 
     elif model == 'unet':
         model = sm.Unet(
@@ -24,7 +24,7 @@ def get_model(model,BACKBONE,opt,loss,metric,shape):
             input_shape=(h, w, 3),
             activation='sigmoid'
         )
-        model.compile(optimizer=opt, loss=loss, metrics=[metric])
+        model.compile(optimizer=opt, loss=loss, metrics=metric)
 
     elif model == 'psp':
         model = sm.PSPNet(
@@ -33,7 +33,7 @@ def get_model(model,BACKBONE,opt,loss,metric,shape):
             input_shape=(h, w, 3),
             activation='sigmoid'
         )
-        model.compile(optimizer=opt, loss=loss, metrics=[metric])
+        model.compile(optimizer=opt, loss=loss, metrics=metric)
 
     elif model == 'xnet':
         model = smx.Xnet(
@@ -43,15 +43,15 @@ def get_model(model,BACKBONE,opt,loss,metric,shape):
             input_shape=(h, w, 3),
             activation='sigmoid'
         )
-        model.compile(optimizer=opt, loss=loss, metrics=[metric])
+        model.compile(optimizer=opt, loss=loss, metrics=metric)
     elif model == 'jpu':
         model = JPU_DeepLab(h,w,4)
-        model.compile(optimizer=opt, loss=loss, metrics=[metric])
+        model.compile(optimizer=opt, loss=loss, metrics=metric)
 
     elif model == 'deeplab':
         model = Deeplabv3(weights=None, input_shape=(h,w,3), classes=4, backbone='xception',
               alpha=1., activation='sigmoid')
-        model.compile(optimizer=opt, loss=loss, metrics=[metric])
+        model.compile(optimizer=opt, loss=loss, metrics=metric)
 
     else:
         raise ValueError('Unknown network ' + model)

@@ -14,7 +14,7 @@ def dice_coef(y_true, y_pred):
     return score
 
 def jaccard():
-    metric = 2 *  sm.metrics.IOUScore(per_image=True)
+    metric = sm.metrics.IOUScore(per_image=True)
     return metric
 
 def dice_coef_loss(y_true, y_pred):
