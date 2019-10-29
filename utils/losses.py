@@ -13,6 +13,10 @@ def dice_coef(y_true, y_pred):
     score = 2. * K.sum(intersection) / (K.sum(y_true_f) + K.sum(y_pred_f))
     return score
 
+def jaccard():
+    metric = 2*sm.metrics.iou_score(per_image=True)
+    return metric
+
 def dice_coef_loss(y_true, y_pred):
     smooth = 1e-5
     y_true_f = K.flatten(y_true)
@@ -42,8 +46,8 @@ def binary_crossentropy_smoothed(y_true, y_pred):
 def dice_coef_loss_bce(y_true, y_pred, dice=1., bce=1.):
     return binary_crossentropy_smoothed(y_true, y_pred) * bce + dice_coef_loss(y_true, y_pred) * dice
 
-def sm_loss(d=1., f=0.):
-    dice_loss = sm.losses.DiceLoss(per_image=True)
+def sm_loss(d=1., f=1.):
+    dice_loss = 2*sm.losses.JaccardLoss(per_image=True)
     bce_loss = sm.losses.BinaryCELoss()
     total_loss = d*dice_loss + (f * bce_loss)
 
