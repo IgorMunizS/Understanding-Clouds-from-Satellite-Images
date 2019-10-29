@@ -70,13 +70,13 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
 
             dice_focal_loss = sm_loss()
             dice_metric = jaccard()
-            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,[dice_coef,dice_metric],shape)
+            model = get_model(smmodel,backbone,opt,dice_focal_loss,[dice_coef,dice_metric],shape)
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
-            ckp = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
+            ckp = ModelCheckpoint(filepath, monitor='val_f1-score', verbose=1, save_best_only=True, mode='max',
                                          save_weights_only=True)
-            es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=5, verbose=1, mode='max')
-            rlr = ReduceLROnPlateau(monitor='val_dice_coef', factor=0.2, patience=3, verbose=1, mode='max', min_delta=0.0001)
+            es = EarlyStopping(monitor='val_f1-score', min_delta=0.0001, patience=5, verbose=1, mode='max')
+            rlr = ReduceLROnPlateau(monitor='val_f1-score', factor=0.2, patience=3, verbose=1, mode='max', min_delta=0.0001)
 
             history = model.fit_generator(
                 train_generator,
