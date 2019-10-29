@@ -124,7 +124,7 @@ class DataGenerator(keras.utils.Sequence):
 
     def __load_grayscale(self, img_path):
         img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-        # img = img.astype(np.float32) / 255.
+        img = img.astype(np.float32) / 255.
         img = np.expand_dims(img, axis=-1)
 
         return img
@@ -133,7 +133,7 @@ class DataGenerator(keras.utils.Sequence):
         try:
             img = cv2.imread(img_path)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        # img = img.astype(np.float32) / 255.
+            img = img.astype(np.float32) / 255.
 
         except:
             img_name = img_path.split('/')[-1]
