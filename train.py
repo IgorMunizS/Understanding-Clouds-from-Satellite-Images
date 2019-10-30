@@ -4,7 +4,7 @@ from sklearn.model_selection import StratifiedKFold
 from utils.preprocess import get_data_preprocessed
 from utils.generator import DataGenerator
 from keras_radam import RAdam
-from keras.optimizers import Adam, Nadam, SGD
+from keras.optimizers import Adam, Nadam, SGD, RMSprop
 from utils.lr import CyclicLR, Lookahead, AdamAccumulate
 from models import get_model
 from utils.losses import dice_coef, dice_coef_loss_bce, sm_loss, lovasz_loss, jaccard,dice_coef_loss
@@ -46,7 +46,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 reshape=shape,
                 augment=True,
                 n_channels=3,
-                n_classes=4,
+                n_classes=5,
                 backbone=backbone,
             )
 
@@ -58,14 +58,14 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 reshape=shape,
                 augment=False,
                 n_channels=3,
-                n_classes=4,
+                n_classes=5,
                 backbone=backbone
             )
 
             # opt = RAdam(lr=0.0003)
             # opt = Nadam(lr=0.0003)
-            # opt = Adam(lr=0.0003)
-            opt = AdamAccumulate(lr=0.0003, accum_iters=4)
+            opt = RMSprop(lr=0.0003)
+            # opt = AdamAccumulate(lr=0.0003, accum_iters=4)
             # optimizer = GradientAccumulation(opt, accumulation_steps=4)
 
             dice_focal_loss = sm_loss()
