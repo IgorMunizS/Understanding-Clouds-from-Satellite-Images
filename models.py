@@ -20,7 +20,7 @@ def get_model(model,BACKBONE,opt,loss,metric,shape):
     elif model == 'unet':
         model = sm.Unet(
             BACKBONE,
-            classes=5,
+            classes=4,
             input_shape=(h, w, 3),
             activation='sigmoid'
         )

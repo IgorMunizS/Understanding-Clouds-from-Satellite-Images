@@ -118,10 +118,10 @@ class DataGenerator(keras.utils.Sequence):
             else:
                 masks = build_masks(rles, input_shape=self.dim)
 
-            background = 1 - masks.sum(axis=-1, keepdims=True)
-            # print(background.shape)
-            masks = np.concatenate((masks,background),axis=-1)
-            # print(masks.shape)
+            # background = 1 - masks.sum(axis=-1, keepdims=True)
+            # # print(background.shape)
+            # masks = np.concatenate((masks,background),axis=-1)
+            # # print(masks.shape)
 
             y[i,] = masks
 
@@ -166,24 +166,45 @@ class DataGenerator(keras.utils.Sequence):
                         #                          p=0.5),
                         #     albu.CropNonEmptyMaskIfExists(self.reshape[0], self.reshape[1], p=0.3)
                         # ], p=0.3),
-                        # albu.RandomSizedCrop(min_max_height=(self.reshape[0] // 2, self.reshape[0]),
-                        #          height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
-                        #          p=0.5),
-                        albu.HorizontalFlip(),
-                        # albu.VerticalFlip(),
-                        albu.ShiftScaleRotate(rotate_limit=45, shift_limit=0.15, scale_limit=0.15),
+                        albu.RandomSizedCrop(min_max_height=(self.reshape[0] // 2, self.reshape[0]),
+                                 height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
+                                 p=0.3),
+                        albu.HorizontalFlip(p=0.5),
+
+                        albu.ShiftScaleRotate(scale_limit=0.5, rotate_limit=0, shift_limit=0.1, p=1, border_mode=0),
+                        albu.IAAAdditiveGaussianNoise(p=0.2),
+                        albu.IAAPerspective(p=0.5),
+
                         albu.OneOf([
                             albu.ElasticTransform(p=0.5, alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
                             albu.GridDistortion(p=0.5),
-                            # albu.OpticalDistortion(p=0.5, distort_limit=2, shift_limit=0.5)
+                            albu.OpticalDistortion(p=0.5, distort_limit=2, shift_limit=0.5)
                             ], p=0.3),
-                        albu.OneOf([
-                            albu.RandomContrast(),
-                            albu.RandomGamma(),
-                            albu.RandomBrightness(),
-                            # albu.Solarize()
-                        ], p=0.5)
-        ], p=1)
+                        albu.OneOf(
+                            [
+                                albu.CLAHE(p=1),
+                                albu.RandomBrightness(p=1),
+                                albu.RandomGamma(p=1),
+                            ],
+                            p=0.9,
+                        ),
+
+                        albu.OneOf(
+                            [
+                                albu.IAASharpen(p=1),
+                                albu.Blur(blur_limit=3, p=1),
+                                albu.MotionBlur(blur_limit=3, p=1),
+                            ],
+                            p=0.9,
+                        ),
+
+                        albu.OneOf(
+                            [
+                                albu.RandomContrast(p=1),
+                                albu.HueSaturationValue(p=1),
+                            ],
+                            p=0.9,)
+                    ], p=1)
 
         composed = composition(image=img.astype(np.float32), mask=masks)
         aug_img = composed['image']
