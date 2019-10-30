@@ -118,8 +118,9 @@ class DataGenerator(keras.utils.Sequence):
             else:
                 masks = build_masks(rles, input_shape=self.dim)
 
-            y[i,] = masks.astype(np.float32) / 255.
+            y[i,] = masks // 255
 
+        print(masks)
         return y
 
     def __load_grayscale(self, img_path):
