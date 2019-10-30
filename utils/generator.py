@@ -118,7 +118,7 @@ class DataGenerator(keras.utils.Sequence):
             else:
                 masks = build_masks(rles, input_shape=self.dim)
 
-            y[i,] = masks // 255
+            y[i,] = masks
 
         print(masks)
         return y
