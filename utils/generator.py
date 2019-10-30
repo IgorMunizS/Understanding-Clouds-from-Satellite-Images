@@ -173,7 +173,7 @@ class DataGenerator(keras.utils.Sequence):
 
                         albu.ShiftScaleRotate(scale_limit=0.5, rotate_limit=0, shift_limit=0.1, p=1, border_mode=0),
                         albu.IAAAdditiveGaussianNoise(p=0.2),
-                        albu.IAAPerspective(p=0.5),
+                        # albu.IAAPerspective(p=0.5),
 
                         albu.OneOf([
                             albu.ElasticTransform(p=0.5, alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
