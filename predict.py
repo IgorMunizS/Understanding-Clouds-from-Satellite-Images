@@ -136,7 +136,7 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsiz
     for smmodel,backbone in models:
         print('Predicting {} {}'.format(smmodel,backbone))
         opt = Adam()
-        model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, dice_coef, shape)
+        model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef], shape)
         model_masks=[]
         submission_name = submission_name + str(smmodel) + '_' + str(backbone) + '_'
 
