@@ -118,10 +118,10 @@ class DataGenerator(keras.utils.Sequence):
             else:
                 masks = build_masks(rles, input_shape=self.dim)
 
-            background = 1 - masks.sum(axis=-1, keepdims=True)
-            print(background.shape)
-            masks = np.concatenate((masks,background),axis=-1)
-            print(masks.shape)
+            # background = 1 - masks.sum(axis=-1, keepdims=True)
+            # print(background.shape)
+            # masks = np.concatenate((masks,background),axis=-1)
+            # print(masks.shape)
 
             y[i,] = masks
 

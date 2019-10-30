@@ -46,7 +46,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 reshape=shape,
                 augment=True,
                 n_channels=3,
-                n_classes=5,
+                n_classes=4,
                 backbone=backbone,
             )
 
@@ -58,7 +58,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 reshape=shape,
                 augment=False,
                 n_channels=3,
-                n_classes=5,
+                n_classes=4,
                 backbone=backbone
             )
 
