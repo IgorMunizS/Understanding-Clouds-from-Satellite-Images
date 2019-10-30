@@ -54,7 +54,7 @@ def build_masks(rles, input_shape, reshape=None):
                 mask = rle2mask(rle, input_shape)
                 reshaped_mask = np_resize(mask, reshape)
                 masks[:, :, i] = reshaped_mask
-    masks[:,:,-1] = 1 - masks.sum(axis=-1, keepdims=True)
+    masks[:,:,-1] = np.clip(1.0 - np.amax(masks, axis=2), 0.0, 1.0)
 
     return masks
 
