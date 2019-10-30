@@ -55,10 +55,10 @@ class DataGenerator(keras.utils.Sequence):
             if self.augment:
                 X, y = self.__augment_batch(X, y)
 
-            return self.preprocess_input(X), y
+            return X, y
 
         elif self.mode == 'predict':
-            return self.preprocess_input(X)
+            return X
 
         else:
             raise AttributeError('The mode parameter should be set to "fit" or "predict".')
@@ -120,7 +120,6 @@ class DataGenerator(keras.utils.Sequence):
 
             y[i,] = masks
 
-        print(masks)
         return y
 
     def __load_grayscale(self, img_path):
