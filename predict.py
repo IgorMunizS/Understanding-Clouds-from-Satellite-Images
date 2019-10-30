@@ -124,7 +124,7 @@ def save_prediction(prediction, name):
         pickle.dump(prediction, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsizes=None,thresholds=None):
+def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsizes=None,thresholds=None,fixshape=False):
 
     sub_df,test_imgs = get_test_data()
     print(test_imgs.shape[0])
@@ -173,7 +173,8 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsiz
     save_prediction(batch_pred_emsemble, submission_name)
     batch_idx = list(range(test_imgs.shape[0]))
     # print(pred_emsemble.shape)
-    batch_pred_emsemble = np.array(predict_postprocess(batch_idx, posprocess, batch_pred_emsemble, shape=shape, minsize=minsizes,threshold=thresholds))
+    batch_pred_emsemble = np.array(predict_postprocess(batch_idx, posprocess, batch_pred_emsemble, shape=shape,
+                                                       minsize=minsizes,threshold=thresholds, fixshape=fixshape))
 
     test_df = convert_masks_for_submission(batch_idx,test_imgs,sub_df,batch_pred_emsemble)
     submission_name = submission_name + '.csv'
@@ -271,4 +272,4 @@ if __name__ == '__main__':
     if args.prediction is not None:
         postprocess_pickle(args.prediction, args.emsemble, args.minsizes,args.thresholds, args.fixshape)
     else:
-        final_predict(models,folds,(h,w),args.tta,args.posprocess,args.swa,args.minsizes,args.thresholds)
+        final_predict(models,folds,(h,w),args.tta,args.posprocess,args.swa,args.minsizes,args.thresholds,args.fixshape)
