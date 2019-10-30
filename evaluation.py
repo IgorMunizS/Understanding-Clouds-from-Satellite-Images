@@ -42,7 +42,7 @@ def parallel_post_process(y_true,y_pred,class_id,t,ms,shape,fixshape):
 
     return d
 
-def evaluate(smmodel,backbone,nfold,shape=(320,480),swa=False, tta=False):
+def evaluate(smmodel,backbone,nfold,shape=(320,480),swa=False, tta=False,fixshape=True):
     h,w =shape
 
 
@@ -140,7 +140,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480),swa=False, tta=False):
             t /= 100
             for ms in tqdm(range(10000, 31000, 5000)):
 
-                d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,shape)
+                d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,shape,fixshape)
 
                 # print(t, ms, np.mean(d))
                 attempts.append((t, ms, np.mean(d)))
@@ -245,4 +245,4 @@ if __name__ == '__main__':
     if args.search:
         search(args.val_file,args.shape,args.fixshape, args.emsemble)
     else:
-        evaluate(args.model,args.backbone,args.nfold,args.shape,args.swa,args.tta)
+        evaluate(args.model,args.backbone,args.nfold,args.shape,args.swa,args.tta,args.fixshape)
