@@ -120,6 +120,7 @@ class DataGenerator(keras.utils.Sequence):
 
             background = np.clip(1.0 - np.amax(masks, axis=2), 0.0, 1.0)
             print(background.shape)
+            print(masks.shape)
             masks = np.concatenate((masks,background),axis=2)
             print(masks.shape)
 
