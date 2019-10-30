@@ -52,8 +52,8 @@ class DataGenerator(keras.utils.Sequence):
         if self.mode == 'fit':
             y = self.__generate_y(list_IDs_batch)
 
-            if self.augment:
-                X, y = self.__augment_batch(X, y)
+            # if self.augment:
+            #     X, y = self.__augment_batch(X, y)
 
             return self.preprocess_input(X), y
 
@@ -118,9 +118,9 @@ class DataGenerator(keras.utils.Sequence):
             else:
                 masks = build_masks(rles, input_shape=self.dim)
 
-            # background = 1 - masks.sum(axis=-1, keepdims=True)
+            background = 1 - masks.sum(axis=-1, keepdims=True)
             # print(background.shape)
-            masks = np.concatenate((masks,masks[:,:,0,None]),axis=-1)
+            masks = np.concatenate((masks,background),axis=-1)
             # print(masks.shape)
 
             y[i,] = masks
