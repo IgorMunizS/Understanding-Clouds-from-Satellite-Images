@@ -138,7 +138,7 @@ class DataGenerator(keras.utils.Sequence):
         try:
             img = cv2.imread(img_path)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            img = img.astype(np.float32) / 255.
+            # img = img.astype(np.float32) / 255.
 
         except:
             img_name = img_path.split('/')[-1]
@@ -173,7 +173,7 @@ class DataGenerator(keras.utils.Sequence):
 
                         albu.ShiftScaleRotate(scale_limit=0.5, rotate_limit=0, shift_limit=0.1, p=1, border_mode=0),
                         albu.IAAAdditiveGaussianNoise(p=0.2),
-                        # albu.IAAPerspective(p=0.5),
+                        albu.IAAPerspective(p=0.5),
 
                         albu.OneOf([
                             albu.ElasticTransform(p=0.5, alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
@@ -206,7 +206,7 @@ class DataGenerator(keras.utils.Sequence):
                             p=0.9,)
                     ], p=1)
 
-        composed = composition(image=img.astype(np.float32), mask=masks)
+        composed = composition(image=img.astype(np.uint8), mask=masks)
         aug_img = composed['image']
         aug_masks = composed['mask']
 
