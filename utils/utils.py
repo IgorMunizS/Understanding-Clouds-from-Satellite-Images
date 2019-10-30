@@ -40,7 +40,7 @@ def rle2mask(rle, input_shape):
 
 
 def build_masks(rles, input_shape, reshape=None):
-    depth = len(rles)
+    depth = len(rles) + 1
     if reshape is None:
         masks = np.zeros((*input_shape, depth))
     else:
@@ -54,6 +54,7 @@ def build_masks(rles, input_shape, reshape=None):
                 mask = rle2mask(rle, input_shape)
                 reshaped_mask = np_resize(mask, reshape)
                 masks[:, :, i] = reshaped_mask
+    masks[:,:,-1] = 1 - masks.sum(axis=-1, keepdims=True)
 
     return masks
 
