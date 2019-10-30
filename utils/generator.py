@@ -55,10 +55,10 @@ class DataGenerator(keras.utils.Sequence):
             if self.augment:
                 X, y = self.__augment_batch(X, y)
 
-            return X, y
+            return self.preprocess_input(X), y
 
         elif self.mode == 'predict':
-            return X
+            return self.preprocess_input(X)
 
         else:
             raise AttributeError('The mode parameter should be set to "fit" or "predict".')
@@ -163,7 +163,7 @@ class DataGenerator(keras.utils.Sequence):
                         # ], p=0.3),
                         albu.RandomSizedCrop(min_max_height=(self.reshape[0] // 2, self.reshape[0]),
                                  height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
-                                 p=0.5),
+                                 always_apply=True, p=1.),
                         albu.HorizontalFlip(),
                         albu.VerticalFlip(),
                         albu.ShiftScaleRotate(rotate_limit=45, shift_limit=0.15, scale_limit=0.15),
