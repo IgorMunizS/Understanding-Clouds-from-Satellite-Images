@@ -156,6 +156,7 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480),swa=False, tta=False,fixshap
 
 def search(val_file,shape,fixshape=False, emsemble=False):
 
+    h,w = shape
 
     oof_data = np.load('../validations/y_true_' + str(n_fold_splits) + '.npy')
 
@@ -172,6 +173,18 @@ def search(val_file,shape,fixshape=False, emsemble=False):
 
     print(oof_data.shape)
     print(oof_predicted_data.shape)
+
+    for x,img in tqdm(enumerate(oof_predicted_data)):
+        for k in range(4):
+            im_layer = img[:,:,k]
+            max_col = np.max(im_layer, axis=1)
+            max_row = np.max(im_layer, axis=0)
+            mat = [max_col[i] + max_row[j] for i in range(h) for j in range(w)]
+            mat = np.reshape(mat, (h,w))
+            im_layer = 0.7*im_layer + 0.3*mat
+
+            oof_predicted_data[x,:,:,k] = im_layer
+
 
     now = time.time()
     class_params = {}
