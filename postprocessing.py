@@ -63,12 +63,12 @@ def postprocess_shape(file,mode):
 
 # @ray.remote
 def parallel_post_process(y_true, y_pred, class_id, t, ms, shape):
-    sigmoid = lambda x: 1 / (1 + np.exp(-x))
+    # sigmoid = lambda x: 1 / (1 + np.exp(-x))
 
     masks = []
     for i in range(y_pred.shape[0]):
         probability = y_pred[i, :, :, class_id].astype(np.float32)
-        predict, num_predict = post_process(sigmoid(probability), t, ms, shape)
+        predict, num_predict = post_process(probability, t, ms, shape)
         masks.append(predict)
 
     d = []

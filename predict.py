@@ -63,7 +63,7 @@ def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(320,480),mi
         thresholds = threshold
 
     h,w = (350,525)
-    sigmoid = lambda x: 1 / (1 + np.exp(-x))
+    # sigmoid = lambda x: 1 / (1 + np.exp(-x))
 
     all_masks =[]
 
