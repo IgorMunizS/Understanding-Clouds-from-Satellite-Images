@@ -14,31 +14,31 @@ def dice_coef(y_true, y_pred):
     return score
 
 def dice_coef_fish(y_true, y_pred):
-    y_true_f = K.flatten(y_true[:,:,0])
-    y_pred = K.cast(y_pred[:,:,0], 'float32')
+    y_true_f = K.flatten(y_true[:,:,:,0])
+    y_pred = K.cast(y_pred[:,:,:,0], 'float32')
     y_pred_f = K.cast(K.greater(K.flatten(y_pred), 0.5), 'float32')
     intersection = y_true_f * y_pred_f
     score = 2. * K.sum(intersection) / (K.sum(y_true_f) + K.sum(y_pred_f))
     return score
 
 def dice_coef_flower(y_true, y_pred):
-    y_true_f = K.flatten(y_true[:,:,1])
-    y_pred = K.cast(y_pred[:,:,1], 'float32')
+    y_true_f = K.flatten(y_true[:,:,:,1])
+    y_pred = K.cast(y_pred[:,:,:,1], 'float32')
     y_pred_f = K.cast(K.greater(K.flatten(y_pred), 0.5), 'float32')
     intersection = y_true_f * y_pred_f
     score = 2. * K.sum(intersection) / (K.sum(y_true_f) + K.sum(y_pred_f))
     return score
 def dice_coef_gravel(y_true, y_pred):
-    y_true_f = K.flatten(y_true[:,:,2])
-    y_pred = K.cast(y_pred[:,:,2], 'float32')
+    y_true_f = K.flatten(y_true[:,:,:,2])
+    y_pred = K.cast(y_pred[:,:,:,2], 'float32')
     y_pred_f = K.cast(K.greater(K.flatten(y_pred), 0.5), 'float32')
     intersection = y_true_f * y_pred_f
     score = 2. * K.sum(intersection) / (K.sum(y_true_f) + K.sum(y_pred_f))
     return score
 
 def dice_coef_sugar(y_true, y_pred):
-    y_true_f = K.flatten(y_true[:,:,3])
-    y_pred = K.cast(y_pred[:,:,3], 'float32')
+    y_true_f = K.flatten(y_true[:,:,:,3])
+    y_pred = K.cast(y_pred[:,:,:,3], 'float32')
     y_pred_f = K.cast(K.greater(K.flatten(y_pred), 0.5), 'float32')
     intersection = y_true_f * y_pred_f
     score = 2. * K.sum(intersection) / (K.sum(y_true_f) + K.sum(y_pred_f))

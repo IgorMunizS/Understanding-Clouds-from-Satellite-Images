@@ -138,7 +138,7 @@ class DataGenerator(keras.utils.Sequence):
         try:
             img = cv2.imread(img_path)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            img = img.astype(np.float32) / 255.
+            # img = img.astype(np.float32) / 255.
 
         except:
             img_name = img_path.split('/')[-1]
@@ -166,26 +166,26 @@ class DataGenerator(keras.utils.Sequence):
                         #                          p=0.5),
                         #     albu.CropNonEmptyMaskIfExists(self.reshape[0], self.reshape[1], p=0.3)
                         # ], p=0.3),
-                        albu.RandomSizedCrop(min_max_height=(self.reshape[0] // 2, self.reshape[0]),
-                                             height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
-                                             p=0.3),
+                        # albu.RandomSizedCrop(min_max_height=(self.reshape[0] // 2, self.reshape[0]),
+                        #                      height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
+                        #                      p=0.3),
                         albu.HorizontalFlip(),
-                        albu.VerticalFlip(),
-                        albu.ShiftScaleRotate(rotate_limit=45, shift_limit=0.15, scale_limit=0.15),
-                        albu.OneOf([
-                            albu.ElasticTransform(p=0.5, alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
-                            albu.GridDistortion(p=0.5),
-                            albu.OpticalDistortion(p=0.5, distort_limit=2, shift_limit=0.5)
-                        ], p=0.3),
-                        albu.OneOf([
-                            albu.RandomContrast(),
-                            albu.RandomGamma(),
-                            albu.RandomBrightness(),
-                            albu.Solarize()
-                        ], p=0.5)
+                        # albu.VerticalFlip(),
+                        # albu.ShiftScaleRotate(rotate_limit=45, shift_limit=0.15, scale_limit=0.15),
+                        # albu.OneOf([
+                        #     albu.ElasticTransform(p=0.5, alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
+                        #     albu.GridDistortion(p=0.5),
+                            # albu.OpticalDistortion(p=0.5, distort_limit=2, shift_limit=0.5)
+                        # ], p=0.3),
+                        # albu.OneOf([
+                        #     albu.RandomContrast(),
+                        #     albu.RandomGamma(),
+                        #     albu.RandomBrightness(),
+                        #     albu.Solarize()
+                        # ], p=0.5)
         ], p=1)
 
-        composed = composition(image=img.astype(np.float32), mask=masks)
+        composed = composition(image=img.astype(np.uint8), mask=masks)
         aug_img = composed['image']
         aug_masks = composed['mask']
 
