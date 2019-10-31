@@ -48,6 +48,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 n_channels=3,
                 n_classes=n_classes,
                 backbone=backbone,
+                classes=1
             )
 
             val_generator = DataGenerator(
