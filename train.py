@@ -14,7 +14,7 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
 from imblearn.over_sampling import RandomOverSampler
 import itertools
-from config import n_fold_splits,random_seed,epochs, n_classes
+from config import n_fold_splits,random_seed,epochs, n_classes,classes
 from keras_gradient_accumulation import GradientAccumulation
 from segmentation_models.losses import dice_loss
 
@@ -49,7 +49,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 n_channels=3,
                 n_classes=n_classes,
                 backbone=backbone,
-                classes=0
+                classes=classes
             )
 
             val_generator = DataGenerator(
@@ -62,7 +62,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 n_channels=3,
                 n_classes=n_classes,
                 backbone=backbone,
-                classes=0
+                classes=classes
             )
 
             # opt = RAdam(lr=0.0003)
@@ -74,8 +74,8 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             dice_focal_loss = sm_loss()
             dice_metric = jaccard()
 
-            # metrics = [dice_coef,dice_coef_fish,dice_coef_flower,dice_coef_gravel,dice_coef_sugar]
-            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,[dice_coef,dice_metric],shape)
+            metrics = [dice_coef,dice_coef_fish,dice_coef_flower,dice_coef_gravel,dice_coef_sugar]
+            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,metrics,shape)
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
             ckp = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
