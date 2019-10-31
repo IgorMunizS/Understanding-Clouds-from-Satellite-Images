@@ -52,7 +52,7 @@ class DataGenerator(keras.utils.Sequence):
 
         if self.mode == 'fit':
             y = self.__generate_y(list_IDs_batch)
-            y = y[...,0]
+
 
             if self.augment:
                 X, y = self.__augment_batch(X, y)
