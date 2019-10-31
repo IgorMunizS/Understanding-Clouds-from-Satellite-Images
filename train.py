@@ -49,7 +49,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 n_channels=3,
                 n_classes=n_classes,
                 backbone=backbone,
-                classes=1
+                classes=4
             )
 
             val_generator = DataGenerator(
@@ -62,7 +62,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 n_channels=3,
                 n_classes=n_classes,
                 backbone=backbone,
-                classes=1
+                classes=4
             )
 
             # opt = RAdam(lr=0.0003)
