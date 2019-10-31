@@ -14,6 +14,7 @@ import gc
 from tta_wrapper import tta_segmentation
 import pickle
 import os
+from tqdm import tqdm
 
 def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
     h,w = shape
@@ -205,6 +206,17 @@ def postprocess_pickle(pickle_path, emsemble, minsizes, thresholds,fixshape=Fals
                 predicted_data = pickle.load(handle)
         except:
             predicted_data = np.load(pickle_path)
+
+    for x,img in tqdm(enumerate(predicted_data)):
+        for k in [0,2]:
+            im_layer = img[:,:,k]
+            max_col = np.max(im_layer, axis=1)
+            max_row = np.max(im_layer, axis=0)
+            mat = [max_col[i] + max_row[j] for i in range(h) for j in range(w)]
+            mat = np.reshape(mat, (h,w))
+            im_layer = 0.7*im_layer + 0.3*mat
+
+            predicted_data[x,:,:,k] = im_layer
 
     batch_idx = list(range(test_imgs.shape[0]))
     # masks_posprocessed = predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_emsemble)
