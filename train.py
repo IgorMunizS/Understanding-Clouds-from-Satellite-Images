@@ -13,7 +13,7 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
 from imblearn.over_sampling import RandomOverSampler
 import itertools
-from config import n_fold_splits,random_seed,epochs, ft_epochs
+from config import n_fold_splits,random_seed,epochs, n_classes
 from keras_gradient_accumulation import GradientAccumulation
 from segmentation_models.losses import dice_loss
 
@@ -46,7 +46,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 reshape=shape,
                 augment=True,
                 n_channels=3,
-                n_classes=4,
+                n_classes=n_classes,
                 backbone=backbone,
             )
 
@@ -58,7 +58,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 reshape=shape,
                 augment=False,
                 n_channels=3,
-                n_classes=4,
+                n_classes=n_classes,
                 backbone=backbone
             )
 

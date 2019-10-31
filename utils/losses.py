@@ -77,10 +77,10 @@ def binary_crossentropy_smoothed(y_true, y_pred):
 
 def dice_coef_loss_bce(y_true, y_pred, dice=1., bce=1.):
     return binary_crossentropy_smoothed(y_true, y_pred) * bce + \
-           dice_coef_loss(y_true[...,0], y_pred[...,0]) * 0.3 + \
-           dice_coef_loss(y_true[..., 1], y_pred[..., 1]) * 0.1 + \
-           dice_coef_loss(y_true[...,2], y_pred[...,2]) * 0.3 + \
-           dice_coef_loss(y_true[..., 3], y_pred[..., 3]) * 0.3
+           dice_coef_loss(y_true[...,0], y_pred[...,0]) * 0.25 + \
+           dice_coef_loss(y_true[..., 1], y_pred[..., 1]) * 0.25 + \
+           dice_coef_loss(y_true[...,2], y_pred[...,2]) * 0.25 + \
+           dice_coef_loss(y_true[..., 3], y_pred[..., 3]) * 0.25
 
 
 def sm_loss(d=1., f=1.):
