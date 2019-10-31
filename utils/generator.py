@@ -105,9 +105,9 @@ class DataGenerator(keras.utils.Sequence):
             y = np.empty((self.batch_size, *self.dim, self.n_classes), dtype=int)
 
         elif self.reshape is not None and self.randomcrop is True:
-            y = np.empty((self.batch_size, *self.dim), dtype=int)
+            y = np.empty((self.batch_size, *self.dim,self.n_classes), dtype=int)
         else:
-            y = np.empty((self.batch_size, *self.reshape), dtype=int)
+            y = np.empty((self.batch_size, *self.reshape, self.n_classes), dtype=int)
 
         for i, ID in enumerate(list_IDs_batch):
             im_name = self.df['ImageId'].iloc[ID]
@@ -124,7 +124,7 @@ class DataGenerator(keras.utils.Sequence):
             # # print(background.shape)
             # masks = np.concatenate((masks,background),axis=-1)
             # # print(masks.shape)
-            masks = masks[...,self.classes]
+            masks = masks[...,self.classes][:,:,None]
             y[i,] = masks
 
         return y
