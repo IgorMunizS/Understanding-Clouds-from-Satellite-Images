@@ -7,7 +7,7 @@ from keras_radam import RAdam
 from keras.optimizers import Adam, Nadam, SGD, RMSprop
 from utils.lr import CyclicLR, Lookahead, AdamAccumulate
 from models import get_model
-from utils.losses import dice_coef, dice_coef_loss_bce, sm_loss, lovasz_loss, jaccard,dice_coef_loss
+from utils.losses import dice_coef, dice_coef_loss_bce, dice_coef_fish,dice_coef_flower,dice_coef_gravel,dice_coef_sugar
 from utils.callbacks import ValPosprocess, SnapshotCallbackBuilder, SWA
 from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
@@ -70,7 +70,9 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
 
             # dice_focal_loss = sm_loss()
             # dice_metric = jaccard()
-            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,[dice_coef],shape)
+
+            metrics = [dice_coef,dice_coef_fish,dice_coef_flower,dice_coef_gravel,dice_coef_sugar]
+            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,metrics,shape)
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
             ckp = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',

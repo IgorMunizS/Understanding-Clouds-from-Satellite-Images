@@ -63,7 +63,6 @@ def evaluate(smmodel,backbone,nfold,shape=(320,480),swa=False, tta=False,fixshap
         if n_fold >= nfold:
             print('Evaluating fold number ',str(n_fold))
 
-
             val_generator = DataGenerator(
                 val_indices,
                 df=mask_count_df,
