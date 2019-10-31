@@ -166,25 +166,25 @@ class DataGenerator(keras.utils.Sequence):
                         #                          p=0.5),
                         #     albu.CropNonEmptyMaskIfExists(self.reshape[0], self.reshape[1], p=0.3)
                         # ], p=0.3),
-                        albu.RandomSizedCrop(min_max_height=(self.reshape[0] // 2, self.reshape[0]),
-                                 height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
-                                 p=0.3),
+                        # albu.RandomSizedCrop(min_max_height=(self.reshape[0] // 2, self.reshape[0]),
+                        #          height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
+                        #          p=0.3),
                         albu.HorizontalFlip(p=0.5),
 
-                        albu.ShiftScaleRotate(scale_limit=0.5, rotate_limit=0, shift_limit=0.1, p=1, border_mode=0),
+                        albu.ShiftScaleRotate(scale_limit=0.5, rotate_limit=15, shift_limit=0.1, p=1, border_mode=0),
 
-
-                        albu.OneOf([
-                            albu.ElasticTransform(p=0.5, alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
-                            albu.GridDistortion(p=0.5),
-                            # albu.OpticalDistortion(p=0.5, distort_limit=2, shift_limit=0.5)
-                            ], p=0.3),
-                        albu.OneOf([
-                            albu.RandomContrast(),
-                            albu.RandomGamma(),
-                            albu.RandomBrightness(),
-                            # albu.Solarize()
-                        ], p=0.5)
+                        #
+                        # albu.OneOf([
+                        #     albu.ElasticTransform(p=0.5, alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
+                        #     albu.GridDistortion(p=0.5),
+                        #     # albu.OpticalDistortion(p=0.5, distort_limit=2, shift_limit=0.5)
+                        #     ], p=0.3),
+                        # albu.OneOf([
+                        #     albu.RandomContrast(),
+                        #     albu.RandomGamma(),
+                        #     albu.RandomBrightness(),
+                        #     # albu.Solarize()
+                        # ], p=0.5)
         ], p=1)
 
         composed = composition(image=img.astype(np.float32), mask=masks)
