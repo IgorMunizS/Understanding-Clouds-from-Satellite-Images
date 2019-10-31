@@ -7,7 +7,7 @@ from keras_radam import RAdam
 from keras.optimizers import Adam, Nadam, SGD, RMSprop
 from utils.lr import CyclicLR, Lookahead, AdamAccumulate
 from models import get_model
-from utils.losses import dice_coef, dice_coef_loss_bce, dice_coef_fish,dice_coef_flower,dice_coef_gravel,dice_coef_sugar
+from utils.losses import dice_coef, dice_coef_loss_bce, dice_coef_fish,dice_coef_flower,dice_coef_gravel,dice_coef_sugar,sm_loss
 from utils.callbacks import ValPosprocess, SnapshotCallbackBuilder, SWA
 from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
@@ -65,16 +65,16 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             )
 
             # opt = RAdam(lr=0.0003)
-            # opt = Nadam(lr=0.0003)
-            opt = RMSprop(lr=0.0003)
+            opt = Adam(lr=0.0001)
+            # opt = RMSprop(lr=0.0003)
             # opt = AdamAccumulate(lr=0.0003, accum_iters=4)
             # optimizer = GradientAccumulation(opt, accumulation_steps=4)
 
-            # dice_focal_loss = sm_loss()
+            dice_focal_loss = sm_loss()
             # dice_metric = jaccard()
 
             # metrics = [dice_coef,dice_coef_fish,dice_coef_flower,dice_coef_gravel,dice_coef_sugar]
-            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,[dice_coef],shape)
+            model = get_model(smmodel,backbone,opt,dice_focal_loss,[dice_coef,dice_focal_loss],shape)
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
             ckp = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
