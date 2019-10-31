@@ -28,6 +28,7 @@ def dice_coef_flower(y_true, y_pred):
     intersection = y_true_f * y_pred_f
     score = 2. * K.sum(intersection) / (K.sum(y_true_f) + K.sum(y_pred_f))
     return score
+
 def dice_coef_gravel(y_true, y_pred):
     y_true_f = K.flatten(y_true[:,:,:,2])
     y_pred = K.cast(y_pred[:,:,:,2], 'float32')
@@ -75,7 +76,12 @@ def binary_crossentropy_smoothed(y_true, y_pred):
 #     return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
 
 def dice_coef_loss_bce(y_true, y_pred, dice=1., bce=1.):
-    return binary_crossentropy_smoothed(y_true, y_pred) * bce + dice_coef_loss(y_true, y_pred) * dice
+    return binary_crossentropy_smoothed(y_true, y_pred) * bce + \
+           dice_coef_loss(y_true[...,0], y_pred[...,0]) * 0.3 + \
+           dice_coef_loss(y_true[..., 1], y_pred[..., 1]) * 0.1 + \
+           dice_coef_loss(y_true[...,2], y_pred[...,2]) * 0.3 + \
+           dice_coef_loss(y_true[..., 3], y_pred[..., 3]) * 0.3
+
 
 def sm_loss(d=1., f=1.):
     dice_loss = sm.losses.DiceLoss(per_image=True)
