@@ -13,7 +13,7 @@ class DataGenerator(keras.utils.Sequence):
                  base_path='../../dados/train_images',
                  batch_size=32, dim=(1400, 2100), n_channels=3, reshape=None,
                  augment=False, n_classes=4, random_state=2019, shuffle=True, backbone='resnet34',
-                 gamma=None, TTA=False, randomcrop=False):
+                 gamma=None, TTA=False, randomcrop=False,classes=0):
         self.dim = dim
         self.batch_size = batch_size
         self.df = df
@@ -31,6 +31,7 @@ class DataGenerator(keras.utils.Sequence):
         self.preprocess_input = sm.get_preprocessing(backbone)
         self.TTA = TTA
         self.randomcrop = randomcrop
+        self.classes = classes
 
         self.on_epoch_end()
         np.random.seed(self.random_state)
@@ -123,7 +124,7 @@ class DataGenerator(keras.utils.Sequence):
             # # print(background.shape)
             # masks = np.concatenate((masks,background),axis=-1)
             # # print(masks.shape)
-
+            masks = masks[...,self.classes]
             y[i,] = masks
 
         return y
