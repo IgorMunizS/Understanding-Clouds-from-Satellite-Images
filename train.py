@@ -29,10 +29,10 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
     skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed, shuffle=True)
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
-        train_indices, _ = ros.fit_resample(train_indices.reshape(-1, 1),
-                                                   mask_count_df[mask_count_df.index.isin(train_indices)]['hasMask'])
-
-        train_indices = list(itertools.chain.from_iterable(train_indices))
+        # train_indices, _ = ros.fit_resample(train_indices.reshape(-1, 1),
+        #                                            mask_count_df[mask_count_df.index.isin(train_indices)]['hasMask'])
+        #
+        # train_indices = list(itertools.chain.from_iterable(train_indices))
 
         if n_fold >= nfold:
             print('Training fold number ',str(n_fold))
