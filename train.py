@@ -1,6 +1,6 @@
 import argparse
 import sys
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import KFold
 from utils.preprocess import get_data_preprocessed
 from utils.generator import DataGenerator
 from keras_radam import RAdam
@@ -27,109 +27,112 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
     train_df, mask_count_df = get_data_preprocessed(pseudo_label)
     ros = RandomOverSampler(random_state=random_seed)
 
-    skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed, shuffle=True)
+    skf = KFold(n_splits=n_fold_splits, random_state=random_seed, shuffle=True)
 
-    for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
-        # train_indices, _ = ros.fit_resample(train_indices.reshape(-1, 1),
-        #                                            mask_count_df[mask_count_df.index.isin(train_indices)]['hasMask'])
-        #
-        # train_indices = list(itertools.chain.from_iterable(train_indices))
+    for classes in [0,1,2,3]:
 
-        if n_fold >= nfold:
-            print('Training fold number ',str(n_fold))
-
-
-            train_generator = DataGenerator(
-                train_indices,
-                df=mask_count_df,
-                target_df=train_df,
-                batch_size=batch_size,
-                reshape=shape,
-                augment=True,
-                n_channels=3,
-                n_classes=n_classes,
-                backbone=backbone,
-                classes=classes
-            )
-
-            val_generator = DataGenerator(
-                val_indices,
-                df=mask_count_df,
-                target_df=train_df,
-                batch_size=batch_size,
-                reshape=shape,
-                augment=False,
-                n_channels=3,
-                n_classes=n_classes,
-                backbone=backbone,
-                classes=classes
-            )
-
-            # opt = RAdam(lr=0.0003)
-            opt = Adam(lr=0.0001)
-            # opt = RMSprop(lr=0.0003)
-            # opt = AdamAccumulate(lr=0.0003, accum_iters=4)
-            # optimizer = GradientAccumulation(opt, accumulation_steps=4)
-
-            dice_focal_loss = sm_loss()
-            dice_metric = jaccard()
-
-            metrics = [dice_coef,dice_coef_fish,dice_coef_flower,dice_coef_gravel,dice_coef_sugar]
-            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,metrics,shape)
-
-            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
-            ckp = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
-                                         save_weights_only=True)
-            es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=5, verbose=1, mode='max')
-            rlr = ReduceLROnPlateau(monitor='val_dice_coef', factor=0.2, patience=3, verbose=1, mode='max', min_delta=0.0001)
-
-            history = model.fit_generator(
-                train_generator,
-                validation_data=val_generator,
-                callbacks=[ckp, rlr, es],
-                epochs=epochs,
-                use_multiprocessing=True,
-                workers=42
-            )
-            # vl_postprocess = ValPosprocess(val_generator,batch_size,shape)
-            # lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
-            # lookahead.inject(model)
-            # snapshot = SnapshotCallbackBuilder(nb_epochs=10, nb_snapshots=1, init_lr=1e-5)
-            # callbacks_list = snapshot.get_callbacks(filepath)
-            # callbacks_list.append(swa)
+        for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index)):
+            # train_indices, _ = ros.fit_resample(train_indices.reshape(-1, 1),
+            #                                            mask_count_df[mask_count_df.index.isin(train_indices)]['hasMask'])
             #
-            # history = model.fit_generator(
-            #     train_generator,
-            #     validation_data=val_generator,
-            #     callbacks=callbacks_list,
-            #     epochs=10,
-            #     use_multiprocessing=True,
-            #     workers=42
-            # )
+            # train_indices = list(itertools.chain.from_iterable(train_indices))
+
+            if n_fold >= nfold:
+                print('Training fold number ',str(n_fold))
+                print('Training class number ', str(classes))
 
 
-            # opt = RAdam(lr=0.00001)
-            # checkpoint = ModelCheckpoint(filepath, monitor='val_f1-score', verbose=1, save_best_only=True, mode='max',
-            #                              save_weights_only=True)
-            # # es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=5, verbose=1, mode='max')
-            # #
-            # model.compile(optimizer=opt, loss=dice_coef_loss, metrics=[dice_coef,dice_metric])
-            #
-            # clr = CyclicLR(base_lr=0.000001, max_lr=0.00001,
-            #                step_size=150, reduce_on_plateau=3, monitor='val_dice_coef', reduce_factor=10, mode='exp_range')
-            # swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', ft_epochs - 3)
-            #
-            # history = model.fit_generator(
-            #     train_generator,
-            #     validation_data=val_generator,
-            #     callbacks=[checkpoint, swa, clr],
-            #     epochs=ft_epochs,
-            #     use_multiprocessing=True,
-            #     workers=42
-            # )
-            #
-            # del train_generator,val_generator,model
-            # gc.collect()
+                train_generator = DataGenerator(
+                    train_indices,
+                    df=mask_count_df,
+                    target_df=train_df,
+                    batch_size=batch_size,
+                    reshape=shape,
+                    augment=True,
+                    n_channels=3,
+                    n_classes=n_classes,
+                    backbone=backbone,
+                    classes=classes
+                )
+
+                val_generator = DataGenerator(
+                    val_indices,
+                    df=mask_count_df,
+                    target_df=train_df,
+                    batch_size=batch_size,
+                    reshape=shape,
+                    augment=False,
+                    n_channels=3,
+                    n_classes=n_classes,
+                    backbone=backbone,
+                    classes=classes
+                )
+
+                # opt = RAdam(lr=0.0003)
+                opt = Nadam(lr=0.0003)
+                # opt = RMSprop(lr=0.0003)
+                # opt = AdamAccumulate(lr=0.0003, accum_iters=4)
+                # optimizer = GradientAccumulation(opt, accumulation_steps=4)
+
+                dice_focal_loss = sm_loss()
+                dice_metric = jaccard()
+
+                metrics = [dice_coef,dice_coef_fish,dice_coef_flower,dice_coef_gravel,dice_coef_sugar]
+                model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,[dice_coef],shape)
+
+                filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(classes) + '_'+ str(n_fold) + '.h5'
+                ckp = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
+                                             save_weights_only=True)
+                es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=5, verbose=1, mode='max')
+                rlr = ReduceLROnPlateau(monitor='val_dice_coef', factor=0.2, patience=3, verbose=1, mode='max', min_delta=0.0001)
+
+                history = model.fit_generator(
+                    train_generator,
+                    validation_data=val_generator,
+                    callbacks=[ckp, rlr, es],
+                    epochs=epochs,
+                    use_multiprocessing=True,
+                    workers=42
+                )
+                # vl_postprocess = ValPosprocess(val_generator,batch_size,shape)
+                # lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
+                # lookahead.inject(model)
+                # snapshot = SnapshotCallbackBuilder(nb_epochs=10, nb_snapshots=1, init_lr=1e-5)
+                # callbacks_list = snapshot.get_callbacks(filepath)
+                # callbacks_list.append(swa)
+                #
+                # history = model.fit_generator(
+                #     train_generator,
+                #     validation_data=val_generator,
+                #     callbacks=callbacks_list,
+                #     epochs=10,
+                #     use_multiprocessing=True,
+                #     workers=42
+                # )
+
+
+                # opt = RAdam(lr=0.00001)
+                # checkpoint = ModelCheckpoint(filepath, monitor='val_f1-score', verbose=1, save_best_only=True, mode='max',
+                #                              save_weights_only=True)
+                # # es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=5, verbose=1, mode='max')
+                # #
+                # model.compile(optimizer=opt, loss=dice_coef_loss, metrics=[dice_coef,dice_metric])
+                #
+                # clr = CyclicLR(base_lr=0.000001, max_lr=0.00001,
+                #                step_size=150, reduce_on_plateau=3, monitor='val_dice_coef', reduce_factor=10, mode='exp_range')
+                # swa = SWA('../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_swa.h5', ft_epochs - 3)
+                #
+                # history = model.fit_generator(
+                #     train_generator,
+                #     validation_data=val_generator,
+                #     callbacks=[checkpoint, swa, clr],
+                #     epochs=ft_epochs,
+                #     use_multiprocessing=True,
+                #     workers=42
+                # )
+                #
+                # del train_generator,val_generator,model
+                # gc.collect()
 
 def parse_args(args):
     """ Parse the arguments.

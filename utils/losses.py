@@ -76,7 +76,7 @@ def binary_crossentropy_smoothed(y_true, y_pred):
 #     return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
 
 def dice_coef_loss_bce(y_true, y_pred, dice=1., bce=1.):
-    return binary_crossentropy_smoothed(y_true, y_pred) * bce + \
+    return binary_crossentropy(y_true, y_pred) * bce + \
            dice_coef_loss(y_true, y_pred) *dice
 
 
