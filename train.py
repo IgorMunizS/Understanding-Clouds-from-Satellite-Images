@@ -32,14 +32,13 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
 
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index)):
-        train_indices, _ = ros.fit_resample(train_indices.reshape(-1, 1),
-                                                   mask_count_df[mask_count_df.index.isin(train_indices)]['hasMask'])
-
-        train_indices = list(itertools.chain.from_iterable(train_indices))
+        # train_indices, _ = ros.fit_resample(train_indices.reshape(-1, 1),
+        #                                            mask_count_df[mask_count_df.index.isin(train_indices)]['hasMask'])
+        #
+        # train_indices = list(itertools.chain.from_iterable(train_indices))
 
         if n_fold >= nfold:
             print('Training fold number ',str(n_fold))
-            print('Training class number ', str(classes))
 
 
             train_generator = DataGenerator(
@@ -81,7 +80,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             metrics = [dice_coef,dice_coef_fish,dice_coef_flower,dice_coef_gravel,dice_coef_sugar]
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,[dice_coef],shape)
 
-            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(classes) + '_'+ str(n_fold) + '.h5'
+            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + '_'+ str(n_fold) + '.h5'
             ckp = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
                                          save_weights_only=True)
             es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=5, verbose=1, mode='max')
