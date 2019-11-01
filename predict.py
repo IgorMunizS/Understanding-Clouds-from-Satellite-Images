@@ -208,7 +208,7 @@ def postprocess_pickle(pickle_path, emsemble, minsizes, thresholds,fixshape=Fals
             predicted_data = np.load(pickle_path)
 
     for x,img in tqdm(enumerate(predicted_data)):
-        for k in [0,2]:
+        for k in [0,1,2,3]:
             im_layer = img[:,:,k]
             max_col = np.max(im_layer, axis=1)
             max_row = np.max(im_layer, axis=0)
