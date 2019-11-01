@@ -68,10 +68,10 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 classes=classes
             )
 
-            opt = RAdam(lr=0.0003)
+            # opt = RAdam(lr=0.0003)
             # opt = Nadam(lr=0.0003)
             # opt = RMSprop(lr=0.0003)
-            # opt = AdamAccumulate(lr=0.0003, accum_iters=4)
+            opt = AdamAccumulate(lr=0.0003, accum_iters=4)
             # optimizer = GradientAccumulation(opt, accumulation_steps=4)
 
             dice_focal_loss = sm_loss()
