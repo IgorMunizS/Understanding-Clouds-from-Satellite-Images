@@ -1,6 +1,6 @@
 import argparse
 import sys
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import KFold
 from utils.preprocess import get_data_preprocessed
 from utils.generator import DataGenerator
 from keras.optimizers import Adam, Nadam, SGD
@@ -42,25 +42,25 @@ def parallel_post_process(y_true,y_pred,class_id,t,ms,shape,fixshape):
 
     return d
 
-def evaluate(smmodel,backbone,nfold,shape=(320,480),swa=False, tta=False,fixshape=True):
+def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False,fixshape=True):
     h,w =shape
 
 
     train_df, mask_count_df = get_data_preprocessed()
     opt = Nadam(lr=0.0002)
 
-    skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed, shuffle=True)
+    skf = KFold(n_splits=n_fold_splits, random_state=random_seed, shuffle=True)
     oof_data = []
     oof_predicted_data =[]
     # num_cpus = psutil.cpu_count(logical=False)
     # ray.init(num_cpus=4)
     oof_dice = []
 
-    for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
+    for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index)):
 
         model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef], shape)
 
-        if n_fold >= nfold:
+        if n_fold >= nfold and n_fold <= maxfold:
             print('Evaluating fold number ',str(n_fold))
 
             val_generator = DataGenerator(
@@ -233,6 +233,7 @@ def parse_args(args):
     parser.add_argument('--backbone', help='Model backbone', default='resnet34', type=str)
     parser.add_argument('--shape', help='Shape of resized images', default=(320, 480), type=tuple)
     parser.add_argument('--nfold', help='number of fold to evaluate', default=0, type=int)
+    parser.add_argument('--maxfold', help='number of fold to evaluate', default=5, type=int)
     parser.add_argument('--tta', help='apply TTA', default=False, type=bool)
     parser.add_argument('--swa', help='apply SWA', default=False, type=bool)
     parser.add_argument('--search', help='search post processing values', default=False, type=bool)
@@ -257,4 +258,4 @@ if __name__ == '__main__':
     if args.search:
         search(args.val_file,args.shape,args.fixshape, args.emsemble)
     else:
-        evaluate(args.model,args.backbone,args.nfold,args.shape,args.swa,args.tta,args.fixshape)
+        evaluate(args.model,args.backbone,args.nfold,args.maxfold,args.shape,args.swa,args.tta,args.fixshape)
