@@ -79,7 +79,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
             _ ,y_true = val_generator.__getitem__(0)
             val_generator.batch_size = 1
 
-            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
+            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '__' + str(n_fold)
 
             if swa:
                 filepath += '_swa.h5'
@@ -128,7 +128,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
     print("CV Final Dice: ", np.mean(oof_dice))
 
     np.save('../validations/y_true_' + str(n_fold_splits) + '.npy', oof_data)
-    np.save('../validations/' + str(smmodel) + '_' + str(backbone) + '__' + str(n_fold_splits) + '.npy', oof_predicted_data)
+    np.save('../validations/' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold_splits) + '.npy', oof_predicted_data)
 
     now = time.time()
     class_params = {}
