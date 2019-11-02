@@ -128,7 +128,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
     print("CV Final Dice: ", np.mean(oof_dice))
 
     np.save('../validations/y_true_' + str(n_fold_splits) + '.npy', oof_data)
-    np.save('../validations/' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold_splits) + '.npy', oof_predicted_data)
+    np.save('../validations/' + str(smmodel) + '_' + str(backbone) + '__' + str(n_fold_splits) + '.npy', oof_predicted_data)
 
     now = time.time()
     class_params = {}
