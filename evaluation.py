@@ -79,7 +79,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
             _ ,y_true = val_generator.__getitem__(0)
             val_generator.batch_size = 1
 
-            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '__' + str(n_fold)
+            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
 
             if swa:
                 filepath += '_swa.h5'
