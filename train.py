@@ -1,6 +1,6 @@
 import argparse
 import sys
-from sklearn.model_selection import KFold
+from sklearn.model_selection import StratifiedKFold
 from utils.preprocess import get_data_preprocessed
 from utils.generator import DataGenerator
 from keras_radam import RAdam
@@ -27,11 +27,9 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
     train_df, mask_count_df = get_data_preprocessed(pseudo_label)
     ros = RandomOverSampler(random_state=random_seed)
 
-    skf = KFold(n_splits=n_fold_splits, random_state=random_seed, shuffle=True)
+    skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed)
 
-
-
-    for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index)):
+    for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
         # train_indices, _ = ros.fit_resample(train_indices.reshape(-1, 1),
         #                                            mask_count_df[mask_count_df.index.isin(train_indices)]['hasMask'])
         #
