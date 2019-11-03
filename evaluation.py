@@ -49,7 +49,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
     train_df, mask_count_df = get_data_preprocessed()
     opt = Nadam(lr=0.0002)
 
-    skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed, shuffle=True)
+    skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed)
     oof_data = []
     oof_predicted_data =[]
     # num_cpus = psutil.cpu_count(logical=False)
