@@ -185,7 +185,7 @@ class DataGenerator(keras.utils.Sequence):
                             albu.RandomContrast(),
                             albu.RandomGamma(),
                             albu.RandomBrightness(),
-                            # albu.Solarize()
+                            albu.CLAHE()
                         ], p=0.5)
         ], p=1)
 
