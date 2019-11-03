@@ -49,9 +49,9 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
     train_df, mask_count_df = get_data_preprocessed()
     opt = Nadam(lr=0.0002)
 
-    skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed)
+    skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed, shuffle=True)
     oof_data = []
-    oof_predicted_data =[]
+    oof_predicted_data = []
     # num_cpus = psutil.cpu_count(logical=False)
     # ray.init(num_cpus=4)
     oof_dice = []
@@ -174,16 +174,16 @@ def search(val_file,shape,fixshape=False, emsemble=False):
     print(oof_data.shape)
     print(oof_predicted_data.shape)
 
-    # for x,img in tqdm(enumerate(oof_predicted_data)):
-    #     for k in range(4):
-    #         im_layer = img[:,:,k]
-    #         max_col = np.max(im_layer, axis=1)
-    #         max_row = np.max(im_layer, axis=0)
-    #         mat = [max_col[i] + max_row[j] for i in range(h) for j in range(w)]
-    #         mat = np.reshape(mat, (h,w))
-    #         im_layer = 0.7*im_layer + 0.3*mat
-    #
-    #         oof_predicted_data[x,:,:,k] = im_layer
+    for x,img in tqdm(enumerate(oof_predicted_data)):
+        for k in range(4):
+            im_layer = img[:,:,k]
+            max_col = np.max(im_layer, axis=1)
+            max_row = np.max(im_layer, axis=0)
+            mat = [max_col[i] + max_row[j] for i in range(h) for j in range(w)]
+            mat = np.reshape(mat, (h,w))
+            im_layer = 0.7*im_layer + 0.3*mat
+
+            oof_predicted_data[x,:,:,k] = im_layer
 
 
     now = time.time()
@@ -191,9 +191,9 @@ def search(val_file,shape,fixshape=False, emsemble=False):
     for class_id in range(4):
         print(class_id)
         attempts = []
-        for t in tqdm(range(50, 55, 5)):
+        for t in tqdm(range(35, 85, 5)):
             t /= 100
-            for ms in tqdm(range(10000, 15000, 5000)):
+            for ms in tqdm(range(10000, 35000, 5000)):
 
                 d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,shape,fixshape)
 
