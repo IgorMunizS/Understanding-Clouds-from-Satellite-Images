@@ -76,18 +76,28 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             dice_metric = jaccard()
 
             metrics = [dice_coef,dice_coef_fish,dice_coef_flower,dice_coef_gravel,dice_coef_sugar]
-            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,[dice_coef],shape)
+            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,metrics,shape)
 
-            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '.h5'
-            ckp = ModelCheckpoint(filepath, monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
+            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
+
+            ckp = ModelCheckpoint(filepath + '.h5', monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
                                          save_weights_only=True)
+            ckp_fish = ModelCheckpoint(filepath + '_fish.h5', monitor='val_dice_coef_fish', verbose=1, save_best_only=True, mode='max',
+                                  save_weights_only=True)
+            ckp_flower = ModelCheckpoint(filepath + '_flower.h5', monitor='val_dice_coef_flower', verbose=1, save_best_only=True, mode='max',
+                                  save_weights_only=True)
+            ckp_gravel = ModelCheckpoint(filepath + '_gravel.h5', monitor='val_dice_coef_gravel', verbose=1, save_best_only=True, mode='max',
+                                  save_weights_only=True)
+            ckp_sugar = ModelCheckpoint(filepath + '_sugar.h5', monitor='val_dice_coef_sugar', verbose=1, save_best_only=True, mode='max',
+                                  save_weights_only=True)
+
             es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=5, verbose=1, mode='max')
             rlr = ReduceLROnPlateau(monitor='val_dice_coef', factor=0.2, patience=3, verbose=1, mode='max', min_delta=0.0001)
 
             history = model.fit_generator(
                 train_generator,
                 validation_data=val_generator,
-                callbacks=[ckp, rlr, es],
+                callbacks=[ckp, rlr, es,ckp_fish,ckp_flower,ckp_gravel,ckp_sugar],
                 epochs=epochs,
                 use_multiprocessing=True,
                 workers=42

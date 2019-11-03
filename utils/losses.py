@@ -62,7 +62,7 @@ def binary_crossentropy_smoothed(y_true, y_pred):
         y_true,
         y_pred,
         from_logits=False,
-        label_smoothing=0.3
+        label_smoothing=0.1
     )
     return loss
 
