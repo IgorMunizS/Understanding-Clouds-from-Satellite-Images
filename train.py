@@ -76,7 +76,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             dice_metric = jaccard()
 
             metrics = [dice_coef,dice_coef_fish,dice_coef_flower,dice_coef_gravel,dice_coef_sugar]
-            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,metrics,shape)
+            model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,[dice_coef],shape)
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
 
