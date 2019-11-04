@@ -274,6 +274,7 @@ def parse_args(args):
     parser.add_argument('--minsizes', nargs='+', default=None, type=int)
     parser.add_argument('--thresholds', nargs='+', default=None, type=float)
     parser.add_argument('--fixshape', default=False, type=bool)
+    parser.add_argument('--multimodel', default=False, type=bool)
 
     parser.add_argument("--cpu", default=False, type=bool)
 
@@ -305,4 +306,5 @@ if __name__ == '__main__':
     if args.prediction is not None:
         postprocess_pickle(args.prediction, args.emsemble, args.minsizes,args.thresholds, args.fixshape)
     else:
-        final_predict(models,folds,(h,w),args.tta,args.posprocess,args.swa,args.minsizes,args.thresholds,args.fixshape)
+        final_predict(models,folds,(h,w),args.tta,args.posprocess,args.swa,args.minsizes,args.thresholds,
+                      args.multimodel,args.fixshape)
