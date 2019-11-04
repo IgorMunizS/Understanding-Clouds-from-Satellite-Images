@@ -58,7 +58,6 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
     classes=['fish','flower','grovel','sugar']
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
-        model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef], shape)
 
         if n_fold >= nfold and n_fold <= maxfold:
             print('Evaluating fold number ', str(n_fold))
@@ -80,6 +79,7 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
             val_generator.batch_size = 1
 
         for i,cls in enumerate(classes):
+            model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef], shape)
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_' + cls
 
