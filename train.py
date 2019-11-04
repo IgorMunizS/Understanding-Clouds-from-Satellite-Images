@@ -14,7 +14,7 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
 from imblearn.over_sampling import RandomOverSampler
 import itertools
-from config import n_fold_splits,random_seed,epochs, n_classes,classes
+from config import n_fold_splits,random_seed,epochs, n_classes,classes,ft_epochs
 from keras_gradient_accumulation import GradientAccumulation
 from segmentation_models.losses import dice_loss
 
@@ -49,27 +49,27 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 n_channels=3,
                 n_classes=n_classes,
                 backbone=backbone,
-                classes=classes
+                randomcrop=True,
             )
 
             val_generator = DataGenerator(
                 val_indices,
                 df=mask_count_df,
                 target_df=train_df,
-                batch_size=batch_size,
-                reshape=shape,
+                batch_size=1,
+                reshape=(700,1050),
                 augment=False,
                 n_channels=3,
                 n_classes=n_classes,
                 backbone=backbone,
-                classes=classes
+                randomcrop=False,
             )
 
             # opt = RAdam(lr=0.0003)
-            # opt = Nadam(lr=0.0003)
+            opt = Nadam(lr=0.0003)
             # opt = RMSprop(lr=0.0003)
-            accum_iters = 64 // batch_size
-            opt = AdamAccumulate(lr=0.0003, accum_iters=accum_iters)
+            # accum_iters = 64 // batch_size
+            # opt = AdamAccumulate(lr=0.0003, accum_iters=accum_iters)
             # optimizer = GradientAccumulation(opt, accumulation_steps=4)
 
             dice_focal_loss = sm_loss()
@@ -82,14 +82,14 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
 
             ckp = ModelCheckpoint(filepath + '.h5', monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
                                          save_weights_only=True)
-            ckp_fish = ModelCheckpoint(filepath + '_fish.h5', monitor='val_dice_coef_fish', verbose=1, save_best_only=True, mode='max',
-                                  save_weights_only=True)
-            ckp_flower = ModelCheckpoint(filepath + '_flower.h5', monitor='val_dice_coef_flower', verbose=1, save_best_only=True, mode='max',
-                                  save_weights_only=True)
-            ckp_gravel = ModelCheckpoint(filepath + '_gravel.h5', monitor='val_dice_coef_gravel', verbose=1, save_best_only=True, mode='max',
-                                  save_weights_only=True)
-            ckp_sugar = ModelCheckpoint(filepath + '_sugar.h5', monitor='val_dice_coef_sugar', verbose=1, save_best_only=True, mode='max',
-                                  save_weights_only=True)
+            # ckp_fish = ModelCheckpoint(filepath + '_fish.h5', monitor='val_dice_coef_fish', verbose=1, save_best_only=True, mode='max',
+            #                       save_weights_only=True)
+            # ckp_flower = ModelCheckpoint(filepath + '_flower.h5', monitor='val_dice_coef_flower', verbose=1, save_best_only=True, mode='max',
+            #                       save_weights_only=True)
+            # ckp_gravel = ModelCheckpoint(filepath + '_gravel.h5', monitor='val_dice_coef_gravel', verbose=1, save_best_only=True, mode='max',
+            #                       save_weights_only=True)
+            # ckp_sugar = ModelCheckpoint(filepath + '_sugar.h5', monitor='val_dice_coef_sugar', verbose=1, save_best_only=True, mode='max',
+            #                       save_weights_only=True)
 
             es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=5, verbose=1, mode='max')
             rlr = ReduceLROnPlateau(monitor='val_dice_coef', factor=0.2, patience=3, verbose=1, mode='max', min_delta=0.0001)
@@ -97,11 +97,62 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             history = model.fit_generator(
                 train_generator,
                 validation_data=val_generator,
-                callbacks=[ckp, rlr, es,ckp_fish,ckp_flower,ckp_gravel,ckp_sugar],
+                callbacks=[ckp, rlr, es],
                 epochs=epochs,
                 use_multiprocessing=True,
                 workers=42
             )
+
+            train_generator = DataGenerator(
+                train_indices,
+                df=mask_count_df,
+                target_df=train_df,
+                batch_size=batch_size - 2,
+                reshape=(448,448),
+                augment=True,
+                n_channels=3,
+                n_classes=n_classes,
+                backbone=backbone,
+                randomcrop=True,
+            )
+            opt = Nadam(lr=0.00001)
+            model.compile(optimizer=opt, loss=dice_coef_loss_bce, metrics=metrics)
+            es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=3, verbose=1, mode='max')
+
+            history = model.fit_generator(
+                train_generator,
+                validation_data=val_generator,
+                callbacks=[ckp, rlr, es],
+                epochs=ft_epochs,
+                use_multiprocessing=True,
+                workers=42
+            )
+
+            train_generator = DataGenerator(
+                train_indices,
+                df=mask_count_df,
+                target_df=train_df,
+                batch_size=4,
+                reshape=(640, 960),
+                augment=True,
+                n_channels=3,
+                n_classes=n_classes,
+                backbone=backbone,
+                randomcrop=True,
+            )
+            opt = Nadam(lr=0.00001)
+            model.compile(optimizer=opt, loss=dice_coef_loss_bce, metrics=metrics)
+            es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=3, verbose=1, mode='max')
+
+            history = model.fit_generator(
+                train_generator,
+                validation_data=val_generator,
+                callbacks=[ckp, rlr, es],
+                epochs=ft_epochs,
+                use_multiprocessing=True,
+                workers=42
+            )
+
             # vl_postprocess = ValPosprocess(val_generator,batch_size,shape)
             # lookahead = Lookahead(k=5, alpha=0.5)  # Initialize Lookahead
             # lookahead.inject(model)
@@ -151,7 +202,7 @@ def parse_args(args):
     parser.add_argument('--model', help='Segmentation model', default='unet')
     parser.add_argument('--backbone', help='Model backbone', default='resnet34', type=str)
     parser.add_argument('--batch_size', default=32, type=int)
-    parser.add_argument('--shape', help='Shape of resized images', default=(384,576), type=tuple)
+    parser.add_argument('--shape', help='Shape of resized images', default=(320,480), type=tuple)
     parser.add_argument('--n_fold', help='Number of fold to start training', default=0, type=int)
     parser.add_argument('--pseudo_label', help='Add extra data from test', default=None, type=str)
     return parser.parse_args(args)
