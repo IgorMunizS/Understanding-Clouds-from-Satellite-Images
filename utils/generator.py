@@ -165,7 +165,7 @@ class DataGenerator(keras.utils.Sequence):
                         #                                  p=0.5),
                         #       albu.PadIfNeeded(min_height=self.reshape[0], min_width=self.reshape[1], p=0.5)], p=0.3),
 
-                        albu.CLAHE(),
+                        # albu.CLAHE(),
                         albu.OneOf([
                             albu.CropNonEmptyMaskIfExists(self.reshape[0], self.reshape[1]),
                             albu.RandomCrop(self.reshape[0],self.reshape[1]),
