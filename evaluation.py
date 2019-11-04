@@ -42,6 +42,128 @@ def parallel_post_process(y_true,y_pred,class_id,t,ms,shape,fixshape):
 
     return d
 
+def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False,fixshape=True):
+    h,w =shape
+
+
+    train_df, mask_count_df = get_data_preprocessed()
+    opt = Nadam(lr=0.0002)
+
+    skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed, shuffle=True)
+    oof_data = []
+    oof_predicted_data = []
+    # num_cpus = psutil.cpu_count(logical=False)
+    # ray.init(num_cpus=4)
+    oof_dice = []
+    classes=['fish','flower','grovel','sugar']
+
+    for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
+        model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef], shape)
+
+        if n_fold >= nfold and n_fold <= maxfold:
+            print('Evaluating fold number ', str(n_fold))
+
+            val_generator = DataGenerator(
+                val_indices,
+                df=mask_count_df,
+                shuffle=False,
+                target_df=train_df,
+                batch_size=len(val_indices),
+                reshape=shape,
+                augment=False,
+                n_channels=3,
+                n_classes=4,
+                backbone=backbone
+            )
+
+            _, y_true = val_generator.__getitem__(0)
+            val_generator.batch_size = 1
+
+        for i,cls in enumerate(classes):
+
+            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_' + cls
+
+            if swa:
+                filepath += '_swa.h5'
+            else:
+                filepath += '.h5'
+
+
+            model.load_weights(filepath)
+
+            # results = model.evaluate_generator(
+            #     val_generator,
+            #     workers=40,
+            #     verbose=1
+            # )
+            # print(results)
+
+            if tta:
+                model = tta_segmentation(model, h_flip=True,
+                                     input_shape=(h, w, 3), merge='mean')
+
+
+            y_pred = model.predict_generator(
+                val_generator,
+                workers=40,
+                verbose=1
+                )
+
+            if i == 0:
+                final_pred = y_pred[...,i]
+            else:
+                final_pred = np.concatenate((final_pred,y_pred[...,i]), axis=-1)
+
+            del y_pred
+            gc.collect()
+
+        print(y_true.shape)
+        print(final_pred.shape)
+        # print(y_pred)
+        d = np_dice_coef(y_true, final_pred)
+        oof_dice.append(d)
+        print("Dice: ", d)
+
+        oof_data.extend(y_true.astype(np.float16))
+        oof_predicted_data.extend(final_pred.astype(np.float16))
+        del y_true, final_pred
+        gc.collect()
+
+    del val_generator, model
+    gc.collect()
+
+    oof_data = np.asarray(oof_data)
+    oof_predicted_data = np.asarray(oof_predicted_data)
+    print(oof_data.shape)
+    print(oof_predicted_data.shape)
+    print("CV Final Dice: ", np.mean(oof_dice))
+
+    np.save('../validations/y_true_' + str(n_fold_splits) + '.npy', oof_data)
+    np.save('../validations/' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold_splits) + '.npy', oof_predicted_data)
+
+    now = time.time()
+    class_params = {}
+    for class_id in range(4):
+        print(class_id)
+        attempts = []
+        for t in tqdm(range(50, 50, 1)):
+            t /= 100
+            for ms in tqdm(range(10000, 10000, 1000)):
+
+                d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,shape,fixshape)
+
+                # print(t, ms, np.mean(d))
+                attempts.append((t, ms, np.mean(d)))
+
+        attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'dice'])
+
+        attempts_df = attempts_df.sort_values('dice', ascending=False)
+        print(attempts_df.head())
+        print('Time: ', time.time() - now)
+        best_threshold = attempts_df['threshold'].values[0]
+        best_size = attempts_df['size'].values[0]
+        class_params[class_id] = (best_threshold, best_size)
+
 def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False,fixshape=True):
     h,w =shape
 
@@ -240,6 +362,7 @@ def parse_args(args):
     parser.add_argument('--val_file', help='val file to search', default=None, type=str)
     parser.add_argument('--fixshape', help='apply shape convex or not', default=False, type=bool)
     parser.add_argument('--emsemble', help='Validation emsemble of models. val_file must be a path to folder with all models', default=False, type=bool)
+    parser.add_argument('--multimodel', help='Multi class model', default=False, type=bool)
 
     parser.add_argument("--cpu", default=False, type=bool)
 
@@ -257,5 +380,7 @@ if __name__ == '__main__':
 
     if args.search:
         search(args.val_file,args.shape,args.fixshape, args.emsemble)
+    elif args.multimodel:
+        multimodel_eval(args.model,args.backbone,args.nfold,args.maxfold,args.shape,args.swa,args.tta,args.fixshape)
     else:
         evaluate(args.model,args.backbone,args.nfold,args.maxfold,args.shape,args.swa,args.tta,args.fixshape)
