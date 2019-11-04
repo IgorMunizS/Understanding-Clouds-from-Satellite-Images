@@ -116,7 +116,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 randomcrop=True,
             )
             opt = Nadam(lr=0.00001)
-            model.compile(optimizer=opt, loss=dice_coef_loss_bce, metrics=metrics)
+            model.compile(optimizer=opt, loss=dice_coef_loss_bce, metrics=[dice_coef])
             es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=3, verbose=1, mode='max')
 
             history = model.fit_generator(
@@ -141,7 +141,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 randomcrop=True,
             )
             opt = Nadam(lr=0.00001)
-            model.compile(optimizer=opt, loss=dice_coef_loss_bce, metrics=metrics)
+            model.compile(optimizer=opt, loss=dice_coef_loss_bce, metrics=[dice_coef])
             es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=3, verbose=1, mode='max')
 
             history = model.fit_generator(
