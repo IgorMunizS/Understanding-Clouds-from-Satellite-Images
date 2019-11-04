@@ -273,7 +273,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
         class_params[class_id] = (best_threshold, best_size)
 
 
-def search(val_file,shape,fixshape=False, emsemble=False):
+def search(val_file,shape,fixshape=False, emsemble=False, yves=False):
 
     h,w = shape
 
@@ -293,16 +293,17 @@ def search(val_file,shape,fixshape=False, emsemble=False):
     print(oof_data.shape)
     print(oof_predicted_data.shape)
 
-    for x,img in tqdm(enumerate(oof_predicted_data)):
-        for k in range(4):
-            im_layer = img[:,:,k]
-            max_col = np.max(im_layer, axis=1)
-            max_row = np.max(im_layer, axis=0)
-            mat = [max_col[i] + max_row[j] for i in range(h) for j in range(w)]
-            mat = np.reshape(mat, (h,w))
-            im_layer = 0.7*im_layer + 0.3*mat
+    if yves:
+        for x,img in tqdm(enumerate(oof_predicted_data)):
+            for k in range(4):
+                im_layer = img[:,:,k]
+                max_col = np.max(im_layer, axis=1)
+                max_row = np.max(im_layer, axis=0)
+                mat = [max_col[i] + max_row[j] for i in range(h) for j in range(w)]
+                mat = np.reshape(mat, (h,w))
+                im_layer = 0.7*im_layer + 0.3*mat
 
-            oof_predicted_data[x,:,:,k] = im_layer
+                oof_predicted_data[x,:,:,k] = im_layer
 
 
     now = time.time()
@@ -310,9 +311,9 @@ def search(val_file,shape,fixshape=False, emsemble=False):
     for class_id in range(4):
         print(class_id)
         attempts = []
-        for t in tqdm(range(40, 80, 1)):
+        for t in tqdm(range(50, 55, 5)):
             t /= 100
-            for ms in tqdm(range(10000, 35000, 1000)):
+            for ms in tqdm(range(10000, 20000, 5000)):
 
                 d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,shape,fixshape)
 
@@ -358,6 +359,7 @@ def parse_args(args):
     parser.add_argument('--search', help='search post processing values', default=False, type=bool)
     parser.add_argument('--val_file', help='val file to search', default=None, type=str)
     parser.add_argument('--fixshape', help='apply shape convex or not', default=False, type=bool)
+    parser.add_argument('--yves', help='apply shape yves', default=False, type=bool)
     parser.add_argument('--emsemble', help='Validation emsemble of models. val_file must be a path to folder with all models', default=False, type=bool)
     parser.add_argument('--multimodel', help='Multi class model', default=False, type=bool)
 
@@ -376,7 +378,7 @@ if __name__ == '__main__':
         os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
     if args.search:
-        search(args.val_file,args.shape,args.fixshape, args.emsemble)
+        search(args.val_file,args.shape,args.fixshape, args.emsemble, args.yves)
     elif args.multimodel:
         multimodel_eval(args.model,args.backbone,args.nfold,args.maxfold,args.shape,args.swa,args.tta,args.fixshape)
     else:

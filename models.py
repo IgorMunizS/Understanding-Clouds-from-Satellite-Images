@@ -7,7 +7,7 @@ from config import n_classes
 
 
 def get_model(model,BACKBONE,opt,loss,metric,shape):
-    h,w = shape
+    h,w = None, None
 
     if model == 'fpn':
         model = sm.FPN(

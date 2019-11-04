@@ -120,12 +120,30 @@ def predict_fold(fold_number,smmodel, backbone,model,batch_idx,test_imgs,shape,s
 
     return batch_pred_masks
 
+def predict_multimodel(fold_number,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA,swa):
+    classes=['fish','flower','gravel','sugar']
+    batch_pred_masks = np.zeros((len(batch_idx), *shape, 4), dtype=np.float32)
+    for i,cls in enumerate(classes):
+        print('Predicting Fold ', str(fold_number))
+        print('Predicting Fold ', str(fold_number))
+        filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '__' + str(fold_number) + '_' + cls
+        if swa:
+            filepath += '_swa.h5'
+        else:
+            filepath += '.h5'
+        model.load_weights(filepath)
+
+        batch_pred_masks[:,:,:,i] = predict(batch_idx, test_imgs, shape, sub_df, backbone, TTA, model)[:,:,:,i]
+
+    return batch_pred_masks
+
 def save_prediction(prediction, name):
     with open('../predictions/' + name +'_.pickle', 'wb') as handle:
         pickle.dump(prediction, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsizes=None,thresholds=None,fixshape=False):
+def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsizes=None,thresholds=None,fixshape=False,
+                  multimodel=False):
 
     sub_df,test_imgs = get_test_data()
     print(test_imgs.shape[0])
@@ -149,7 +167,10 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsiz
 
             for i in folds:
 
-                batch_pred_masks = predict_fold(i,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA,swa)
+                if multimodel:
+                    batch_pred_masks = predict_multimodel(i,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA,swa)
+                else:
+                    batch_pred_masks = predict_fold(i,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA,swa)
                 # print(np.array(batch_pred_masks).shape)
                 fold_result.append(batch_pred_masks.astype(np.float16))
 
