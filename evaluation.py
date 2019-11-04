@@ -58,7 +58,7 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
     classes=['fish','flower','gravel','sugar']
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
-        final_pred = np.zeros((val_indices,h,w,4), dtype=np.float32)
+        final_pred = np.zeros((len(val_indices),h,w,4), dtype=np.float32)
         if n_fold >= nfold and n_fold <= maxfold:
             print('Evaluating fold number ', str(n_fold))
 
