@@ -57,7 +57,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 df=mask_count_df,
                 target_df=train_df,
                 batch_size=1,
-                reshape=(712,1056),
+                reshape=(704,1056),
                 augment=False,
                 n_channels=3,
                 n_classes=n_classes,
