@@ -109,7 +109,7 @@ def convert_masks_for_submission(batch_idx,test_imgs,sub_df,prediction):
 def predict_fold(fold_number,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA,swa):
 
     print('Predicting Fold ', str(fold_number))
-    filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '__' + str(fold_number)
+    filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(fold_number)
     if swa:
         filepath += '_swa.h5'
     else:
@@ -126,7 +126,7 @@ def predict_multimodel(fold_number,smmodel, backbone,model,batch_idx,test_imgs,s
     for i,cls in enumerate(classes):
         print('Predicting Fold ', str(fold_number))
         print('Predicting Fold ', str(fold_number))
-        filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '__' + str(fold_number) + '_' + cls
+        filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(fold_number) + '_' + cls
         if swa:
             filepath += '_swa.h5'
         else:
