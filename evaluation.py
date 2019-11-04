@@ -55,7 +55,7 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
     # num_cpus = psutil.cpu_count(logical=False)
     # ray.init(num_cpus=4)
     oof_dice = []
-    classes=['fish','flower','grovel','sugar']
+    classes=['fish','flower','gravel','sugar']
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
 
