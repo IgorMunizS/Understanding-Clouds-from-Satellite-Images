@@ -49,7 +49,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 n_channels=3,
                 n_classes=n_classes,
                 backbone=backbone,
-                randomcrop=True,
+                randomcrop=False,
             )
 
             val_generator = DataGenerator(
@@ -113,9 +113,9 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 n_channels=3,
                 n_classes=n_classes,
                 backbone=backbone,
-                randomcrop=True,
+                randomcrop=False,
             )
-            opt = Nadam(lr=0.00001)
+            opt = RAdam(lr=0.00001)
             model.compile(optimizer=opt, loss=dice_coef_loss_bce, metrics=[dice_coef])
             es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=3, verbose=1, mode='max')
 
@@ -132,15 +132,15 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 train_indices,
                 df=mask_count_df,
                 target_df=train_df,
-                batch_size=4,
+                batch_size=2,
                 reshape=(640, 960),
                 augment=True,
                 n_channels=3,
                 n_classes=n_classes,
                 backbone=backbone,
-                randomcrop=True,
+                randomcrop=False,
             )
-            opt = Nadam(lr=0.00001)
+            opt = RAdam(lr=0.00001)
             model.compile(optimizer=opt, loss=dice_coef_loss_bce, metrics=[dice_coef])
             es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=3, verbose=1, mode='max')
 

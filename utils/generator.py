@@ -166,15 +166,15 @@ class DataGenerator(keras.utils.Sequence):
                         #       albu.PadIfNeeded(min_height=self.reshape[0], min_width=self.reshape[1], p=0.5)], p=0.3),
 
                         albu.CLAHE(),
-                        albu.OneOf([
-                            albu.CropNonEmptyMaskIfExists(self.reshape[0], self.reshape[1]),
-                            albu.RandomCrop(self.reshape[0],self.reshape[1]),
-                            albu.Resize(self.reshape[0],self.reshape[1])
-
-                        ], p=1.0),
-                        # albu.RandomSizedCrop(min_max_height=(self.reshape[0] // 2, self.reshape[0]),
-                        #                      height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
-                        #                      p=0.3),
+                        # albu.OneOf([
+                        #     albu.CropNonEmptyMaskIfExists(self.reshape[0], self.reshape[1]),
+                        #     albu.RandomCrop(self.reshape[0],self.reshape[1]),
+                        #     albu.Resize(self.reshape[0],self.reshape[1])
+                        #
+                        # ], p=1.0),
+                        albu.RandomSizedCrop(min_max_height=(self.reshape[0] // 2, self.reshape[0]),
+                                             height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
+                                             p=0.3),
                         albu.HorizontalFlip(),
                         albu.VerticalFlip(),
                         albu.ShiftScaleRotate(rotate_limit=45, shift_limit=0.15, scale_limit=0.15),
@@ -182,7 +182,7 @@ class DataGenerator(keras.utils.Sequence):
                             albu.ElasticTransform(alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
                             albu.GridDistortion(),
                             albu.OpticalDistortion(distort_limit=2, shift_limit=0.5)
-                        ], p=0.5),
+                        ], p=0.3),
                         albu.OneOf([
                             albu.RandomContrast(),
                             albu.RandomGamma(),
