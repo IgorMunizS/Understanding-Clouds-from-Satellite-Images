@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 
-def get_data_preprocessed(pseudo_label=None):
+def get_data_preprocessed(pseudo_label=None, classe=None):
     # remove_image = [
     #     '0031ae9.jpg',
     #     '00b81e1.jpg',
@@ -87,6 +87,9 @@ def get_data_preprocessed(pseudo_label=None):
     train_df['ImageId'] = train_df['Image_Label'].apply(lambda x: x.split('_')[0])
     train_df['ClassId'] = train_df['Image_Label'].apply(lambda x: x.split('_')[1])
     train_df['hasMask'] = ~ train_df['EncodedPixels'].isna()
+
+    if classe is not None:
+        train_df = train_df[train_df['ClassId'] == classe]
 
     # train_df = train_df[~train_df['ImageId'].isin(remove_image)]
 
