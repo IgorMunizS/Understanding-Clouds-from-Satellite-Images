@@ -54,10 +54,10 @@ def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
 
 def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(320,480),minsize=None,threshold=None, bottom_threshold=None,fixshape=False):
     if minsize is None:
-        minsizes = [10000, 10000, 10000, 10000]
+        minsize = [10000, 10000, 10000, 10000]
 
     if threshold is None:
-        thresholds = [0.6, 0.6, 0.6, 0.6]
+        threshold = [0.6, 0.6, 0.6, 0.6]
 
     if bottom_threshold is None:
         bottom_threshold = [None,None,None,None]
@@ -74,7 +74,7 @@ def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(320,480),mi
             # pred_masks = cv2.resize(np.float32(pred_masks), dsize=(w, h), interpolation=cv2.INTER_LINEAR)
             arrt = np.array([])
             for t in range(4):
-                a, num_predict = post_process(pred_masks[:, :, t],thresholds[t], minsizes[t], shape,fixshape)
+                a, num_predict = post_process(pred_masks[:, :, t],threshold[t], minsize[t], shape,fixshape)
                 a = cv2.resize(a,dsize=(w, h), interpolation=cv2.INTER_LINEAR)
                 if (arrt.shape == (0,)):
                     arrt = a.reshape(h, w, 1)
