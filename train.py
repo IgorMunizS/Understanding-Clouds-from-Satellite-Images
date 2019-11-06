@@ -34,9 +34,13 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
         #                                            mask_count_df[mask_count_df.index.isin(train_indices)]['hasMask'])
         #
         # train_indices = list(itertools.chain.from_iterable(train_indices))
+        val_images = mask_count_df[mask_count_df.index.isin(val_indices)]['ImageId'].tolist()
+        train_images = mask_count_df[mask_count_df.index.isin(train_indices)]['ImageId'].tolist()
 
         for classe in ['Fish','Flower','Gravel','Sugar']:
             train_df, mask_count_df = get_data_preprocessed(pseudo_label, classe=classe)
+            val_indices = mask_count_df[mask_count_df['ImageId'].isin(val_images)].index
+            train_indices = mask_count_df[mask_count_df['ImageId'].isin(train_images)].index
             print('Training class ', classe)
             if n_fold >= nfold:
                 print('Training fold number ',str(n_fold))
