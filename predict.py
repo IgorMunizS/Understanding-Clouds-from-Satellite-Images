@@ -52,16 +52,15 @@ def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
 
     return batch_pred_masks
 
-def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(320,480),minsize=None,threshold=None,fixshape=False):
+def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(320,480),minsize=None,threshold=None, bottom_threshold=None,fixshape=False):
     if minsize is None:
         minsizes = [10000, 10000, 10000, 10000]
-    else:
-        minsizes = minsize
 
     if threshold is None:
         thresholds = [0.6, 0.6, 0.6, 0.6]
-    else:
-        thresholds = threshold
+
+    if bottom_threshold is None:
+        bottom_threshold = [None,None,None,None]
 
     h,w = (350,525)
     # sigmoid = lambda x: 1 / (1 + np.exp(-x))
@@ -242,7 +241,7 @@ def postprocess_pickle(pickle_path, emsemble, minsizes, thresholds,fixshape=Fals
     batch_idx = list(range(test_imgs.shape[0]))
     # masks_posprocessed = predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_emsemble)
     pred_emsemble = np.array(predict_postprocess(batch_idx, True, predicted_data, minsize=minsizes,threshold=thresholds,
-                                                 fixshape=fixshape))
+                                                 bottom_threshold=None,fixshape=fixshape))
 
     print(pred_emsemble.shape)
     test_df = convert_masks_for_submission(batch_idx, test_imgs, sub_df, pred_emsemble)
