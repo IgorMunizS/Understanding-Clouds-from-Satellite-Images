@@ -21,7 +21,7 @@ def post_process(probability, threshold, min_size,bottom_threshold,shape=(350, 5
             predictions[p] = 1
             num += 1
 
-    if predictions.sum() > 0:
+    if predictions.sum() > 0 and bottom_threshold is not None:
         predictions = cv2.threshold(probability, bottom_threshold, 1, cv2.THRESH_BINARY)[1]
 
     return predictions, num
