@@ -55,7 +55,7 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
     # num_cpus = psutil.cpu_count(logical=False)
     # ray.init(num_cpus=4)
     oof_dice = []
-    classes=['fish','flower','gravel','sugar']
+    classes=['Fish','Flower','Gravel','Sugar']
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
         final_pred = np.zeros((len(val_indices),h,w,4), dtype=np.float32)
@@ -109,7 +109,7 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
                 verbose=1
                 )
 
-            final_pred[:,:,:,i] = y_pred[:,:,:,i]
+            final_pred[:,:,:,i] = y_pred
 
             del y_pred
             gc.collect()
@@ -254,9 +254,9 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
     for class_id in range(4):
         print(class_id)
         attempts = []
-        for t in tqdm(range(50, 50, 1)):
+        for t in tqdm(range(40, 80, 5)):
             t /= 100
-            for ms in tqdm(range(10000, 10000, 1000)):
+            for ms in tqdm(range(10000, 31000, 5000)):
 
                 d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,shape,fixshape)
 
