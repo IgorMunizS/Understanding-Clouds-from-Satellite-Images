@@ -78,41 +78,41 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
             _, y_true = val_generator.__getitem__(0)
             val_generator.batch_size = 1
 
-        for i,cls in enumerate(classes):
-            model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef], shape)
+            for i,cls in enumerate(classes):
+                model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef], shape)
 
-            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_' + cls
+                filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_' + cls
 
-            if swa:
-                filepath += '_swa.h5'
-            else:
-                filepath += '.h5'
-
-
-            model.load_weights(filepath)
-
-            # results = model.evaluate_generator(
-            #     val_generator,
-            #     workers=40,
-            #     verbose=1
-            # )
-            # print(results)
-
-            if tta:
-                model = tta_segmentation(model, h_flip=True,
-                                     input_shape=(h, w, 3), merge='mean')
+                if swa:
+                    filepath += '_swa.h5'
+                else:
+                    filepath += '.h5'
 
 
-            y_pred = model.predict_generator(
-                val_generator,
-                workers=40,
-                verbose=1
-                )
+                model.load_weights(filepath)
 
-            final_pred[:,:,:,i] = y_pred[:,:,:,0]
+                # results = model.evaluate_generator(
+                #     val_generator,
+                #     workers=40,
+                #     verbose=1
+                # )
+                # print(results)
 
-            del y_pred
-            gc.collect()
+                if tta:
+                    model = tta_segmentation(model, h_flip=True,
+                                         input_shape=(h, w, 3), merge='mean')
+
+
+                y_pred = model.predict_generator(
+                    val_generator,
+                    workers=40,
+                    verbose=1
+                    )
+
+                final_pred[:,:,:,i] = y_pred[:,:,:,0]
+
+                del y_pred
+                gc.collect()
 
         print(y_true.shape)
         print(final_pred.shape)
