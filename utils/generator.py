@@ -164,8 +164,6 @@ class DataGenerator(keras.utils.Sequence):
                         #                                  height=self.reshape[0], width=self.reshape[1], w2h_ratio=1.5,
                         #                                  p=0.5),
                         #       albu.PadIfNeeded(min_height=self.reshape[0], min_width=self.reshape[1], p=0.5)], p=0.3),
-
-                        albu.CLAHE(),
                         # albu.OneOf([
                         #     albu.CropNonEmptyMaskIfExists(self.reshape[0], self.reshape[1]),
                         #     albu.RandomCrop(self.reshape[0],self.reshape[1]),
@@ -184,9 +182,8 @@ class DataGenerator(keras.utils.Sequence):
                             albu.OpticalDistortion(distort_limit=2, shift_limit=0.5)
                         ], p=0.3),
                         albu.OneOf([
-                            albu.RandomContrast(),
+                            albu.RandomBrightnessContrast(),
                             albu.RandomGamma(),
-                            albu.RandomBrightness(),
                             albu.Solarize()
                         ], p=0.5)
         ], p=1)

@@ -307,4 +307,4 @@ if __name__ == '__main__':
         postprocess_pickle(args.prediction, args.emsemble, args.minsizes,args.thresholds, args.fixshape)
     else:
         final_predict(models,folds,(h,w),args.tta,args.posprocess,args.swa,args.minsizes,args.thresholds,
-                      args.multimodel,args.fixshape)
+                      args.fixshape,args.multimodel)
