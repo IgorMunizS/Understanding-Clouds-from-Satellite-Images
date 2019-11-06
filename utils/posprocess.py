@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-def post_process(probability, threshold, min_size,shape=(350, 525), fixshape=False):
+def post_process(probability, threshold, min_size,bottom_threshold,shape=(350, 525), fixshape=False):
     """
     Post processing of each predicted mask, components with lesser number of pixels
     than `min_size` are ignored
@@ -20,6 +20,10 @@ def post_process(probability, threshold, min_size,shape=(350, 525), fixshape=Fal
         if p.sum() > min_size:
             predictions[p] = 1
             num += 1
+
+    if predictions.sum() > 0:
+        predictions = cv2.threshold(probability, bottom_threshold, 1, cv2.THRESH_BINARY)[1]
+
     return predictions, num
 
 

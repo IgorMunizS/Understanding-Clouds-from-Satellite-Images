@@ -22,13 +22,13 @@ from config import n_fold_splits, random_seed
 import os
 
 # @ray.remote
-def parallel_post_process(y_true,y_pred,class_id,t,ms,shape,fixshape):
+def parallel_post_process(y_true,y_pred,class_id,t,ms,bt,shape,fixshape):
     # sigmoid = lambda x: 1 / (1 + np.exp(-x))
 
     masks = []
     for i in range(y_pred.shape[0]):
         probability = y_pred[i, :, :, class_id].astype(np.float32)
-        predict, num_predict = post_process(probability, t, ms, shape,fixshape)
+        predict, num_predict = post_process(probability, t, ms,bt, shape,fixshape)
         masks.append(predict)
 
     d = []
@@ -311,14 +311,15 @@ def search(val_file,shape,fixshape=False, emsemble=False, yves=False):
     for class_id in range(4):
         print(class_id)
         attempts = []
-        for t in tqdm(range(35, 85, 5)):
+        for t in tqdm(range(40, 85, 5)): #threshold post process
             t /= 100
-            for ms in tqdm(range(10000, 31000, 5000)):
+            for ms in tqdm(range(5000, 31000, 5000)): #minsize post process
+                for bt in tqdm(range(30, t - 1, 5)):
+                    bt /= 100
+                    d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,bt,shape,fixshape)
 
-                d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,shape,fixshape)
-
-                # print(t, ms, np.mean(d))
-                attempts.append((t, ms, np.mean(d)))
+                    # print(t, ms, np.mean(d))
+                    attempts.append((t, ms, np.mean(d)))
 
         attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'dice'])
 
