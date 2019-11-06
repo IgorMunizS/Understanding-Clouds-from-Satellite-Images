@@ -109,7 +109,7 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
                 verbose=1
                 )
 
-            final_pred[:,:,:,i] = y_pred
+            final_pred[:,:,:,i] = y_pred[:,:,:,0]
 
             del y_pred
             gc.collect()
