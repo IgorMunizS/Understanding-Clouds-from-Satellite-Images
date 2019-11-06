@@ -37,7 +37,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
 
         for classe in ['Fish','Flower','Gravel','Sugar']:
             train_df, mask_count_df = get_data_preprocessed(pseudo_label, classe=classe)
-
+            print('Training class ', classe)
             if n_fold >= nfold:
                 print('Training fold number ',str(n_fold))
 
