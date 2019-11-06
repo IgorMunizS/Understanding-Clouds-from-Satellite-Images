@@ -201,7 +201,7 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsiz
     submission_name = submission_name + '.csv'
     generate_submission(test_df, submission_name)
 
-def postprocess_pickle(pickle_path, emsemble, minsizes, thresholds,fixshape=False):
+def postprocess_pickle(pickle_path, emsemble, minsizes, thresholds,yves=False,fixshape=False):
 
     sub_df, test_imgs = get_test_data()
     print(test_imgs.shape[0])
@@ -227,16 +227,17 @@ def postprocess_pickle(pickle_path, emsemble, minsizes, thresholds,fixshape=Fals
         except:
             predicted_data = np.load(pickle_path)
 
-    for x,img in tqdm(enumerate(predicted_data)):
-        for k in [0,1,2,3]:
-            im_layer = img[:,:,k]
-            max_col = np.max(im_layer, axis=1)
-            max_row = np.max(im_layer, axis=0)
-            mat = [max_col[i] + max_row[j] for i in range(h) for j in range(w)]
-            mat = np.reshape(mat, (h,w))
-            im_layer = 0.7*im_layer + 0.3*mat
+    if yves:
+        for x,img in tqdm(enumerate(predicted_data)):
+            for k in [0,1,2,3]:
+                im_layer = img[:,:,k]
+                max_col = np.max(im_layer, axis=1)
+                max_row = np.max(im_layer, axis=0)
+                mat = [max_col[i] + max_row[j] for i in range(h) for j in range(w)]
+                mat = np.reshape(mat, (h,w))
+                im_layer = 0.7*im_layer + 0.3*mat
 
-            predicted_data[x,:,:,k] = im_layer
+                predicted_data[x,:,:,k] = im_layer
 
     batch_idx = list(range(test_imgs.shape[0]))
     # masks_posprocessed = predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_emsemble)
@@ -273,6 +274,7 @@ def parse_args(args):
     parser.add_argument('--minsizes', nargs='+', default=None, type=int)
     parser.add_argument('--thresholds', nargs='+', default=None, type=float)
     parser.add_argument('--fixshape', default=False, type=bool)
+    parser.add_argument('--yves', default=False, type=bool)
     parser.add_argument('--multimodel', default=False, type=bool)
 
     parser.add_argument("--cpu", default=False, type=bool)
@@ -303,7 +305,7 @@ if __name__ == '__main__':
 
     h,w = args.shape
     if args.prediction is not None:
-        postprocess_pickle(args.prediction, args.emsemble, args.minsizes,args.thresholds, args.fixshape)
+        postprocess_pickle(args.prediction, args.emsemble, args.minsizes,args.thresholds, args.yves, args.fixshape)
     else:
         final_predict(models,folds,(h,w),args.tta,args.posprocess,args.swa,args.minsizes,args.thresholds,
                       args.fixshape,args.multimodel)
