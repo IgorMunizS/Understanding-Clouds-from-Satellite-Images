@@ -59,6 +59,7 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
         final_pred = np.zeros((len(val_indices),h,w,4), dtype=np.float32)
+
         if n_fold >= nfold and n_fold <= maxfold:
             print('Evaluating fold number ', str(n_fold))
 
@@ -114,17 +115,17 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
                 del y_pred
                 gc.collect()
 
-        print(y_true.shape)
-        print(final_pred.shape)
-        # print(y_pred)
-        d = np_dice_coef(y_true, final_pred)
-        oof_dice.append(d)
-        print("Dice: ", d)
+            print(y_true.shape)
+            print(final_pred.shape)
+            # print(y_pred)
+            d = np_dice_coef(y_true, final_pred)
+            oof_dice.append(d)
+            print("Dice: ", d)
 
-        oof_data.extend(y_true.astype(np.float16))
-        oof_predicted_data.extend(final_pred.astype(np.float16))
-        del y_true, final_pred
-        gc.collect()
+            oof_data.extend(y_true.astype(np.float16))
+            oof_predicted_data.extend(final_pred.astype(np.float16))
+            del y_true, final_pred
+            gc.collect()
 
     del val_generator, model
     gc.collect()

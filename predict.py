@@ -121,7 +121,7 @@ def predict_fold(fold_number,smmodel, backbone,model,batch_idx,test_imgs,shape,s
     return batch_pred_masks
 
 def predict_multimodel(fold_number,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA,swa):
-    classes=['fish','flower','gravel','sugar']
+    classes=['Fish','Flower','Gravel','Sugar']
     batch_pred_masks = np.zeros((len(batch_idx), *shape, 4), dtype=np.float32)
     for i,cls in enumerate(classes):
         print('Predicting Fold ', str(fold_number))
@@ -133,7 +133,7 @@ def predict_multimodel(fold_number,smmodel, backbone,model,batch_idx,test_imgs,s
             filepath += '.h5'
         model.load_weights(filepath)
 
-        batch_pred_masks[:,:,:,i] = predict(batch_idx, test_imgs, shape, sub_df, backbone, TTA, model)[:,:,:,i]
+        batch_pred_masks[:,:,:,i] = predict(batch_idx, test_imgs, shape, sub_df, backbone, TTA, model)[:,:,:,0]
 
     return batch_pred_masks
 
