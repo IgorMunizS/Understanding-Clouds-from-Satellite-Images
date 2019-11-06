@@ -313,10 +313,11 @@ def search(val_file,shape,fixshape=False, emsemble=False, yves=False):
         print(class_id)
         attempts = []
         for t in tqdm(range(40, 85, 5)): #threshold post process
+            t /= 100
             for ms in tqdm(range(5000, 31000, 5000)): #minsize post process
-                for bt in tqdm(range(30, t - 1, 5)): #bottom threshold
+                for bt in tqdm(range(30, int(t*100 - 1), 5)): #bottom threshold
                     bt /= 100
-                    t /= 100
+
                     d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,bt,shape,fixshape)
 
                     # print(t, ms, np.mean(d))
