@@ -74,7 +74,7 @@ def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(320,480),mi
             # pred_masks = cv2.resize(np.float32(pred_masks), dsize=(w, h), interpolation=cv2.INTER_LINEAR)
             arrt = np.array([])
             for t in range(4):
-                a, num_predict = post_process(pred_masks[:, :, t],threshold[t], minsize[t], shape,fixshape)
+                a, num_predict = post_process(pred_masks[:, :, t],threshold[t], minsize[t], bottom_threshold[t],shape,fixshape)
                 a = cv2.resize(a,dsize=(w, h), interpolation=cv2.INTER_LINEAR)
                 if (arrt.shape == (0,)):
                     arrt = a.reshape(h, w, 1)
