@@ -311,9 +311,9 @@ def search(val_file,shape,fixshape=False, emsemble=False, yves=False):
     for class_id in range(4):
         print(class_id)
         attempts = []
-        for t in tqdm(range(50, 55, 5)):
+        for t in tqdm(range(35, 85, 5)):
             t /= 100
-            for ms in tqdm(range(10000, 20000, 5000)):
+            for ms in tqdm(range(10000, 31000, 5000)):
 
                 d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,shape,fixshape)
 
