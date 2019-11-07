@@ -312,7 +312,7 @@ def search(val_file,shape,fixshape=False, emsemble=False, yves=False):
     for class_id in range(4):
         print(class_id)
         attempts = []
-        for t in tqdm(range(55, 85, 5)): #threshold post process
+        for t in tqdm(range(55, 86, 5)): #threshold post process
             t /= 100
             for ms in tqdm(range(2500, 16000, 2500)): #minsize post process
                 for bt in range(30, int(t*100 - 1), 5): #bottom threshold
