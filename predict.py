@@ -201,7 +201,7 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsiz
     submission_name = submission_name + '.csv'
     generate_submission(test_df, submission_name)
 
-def postprocess_pickle(pickle_path, emsemble, minsizes, thresholds,yves=False,fixshape=False):
+def postprocess_pickle(pickle_path, emsemble, minsizes, thresholds, bottom_threshold=None,yves=False,fixshape=False):
 
     sub_df, test_imgs = get_test_data()
     print(test_imgs.shape[0])
@@ -242,7 +242,7 @@ def postprocess_pickle(pickle_path, emsemble, minsizes, thresholds,yves=False,fi
     batch_idx = list(range(test_imgs.shape[0]))
     # masks_posprocessed = predict_postprocess(batch_idx,test_imgs,sub_df,posprocess,batch_pred_emsemble)
     pred_emsemble = np.array(predict_postprocess(batch_idx, True, predicted_data, minsize=minsizes,threshold=thresholds,
-                                                 bottom_threshold=None,fixshape=fixshape))
+                                                 bottom_threshold=bottom_threshold,fixshape=fixshape))
 
     print(pred_emsemble.shape)
     test_df = convert_masks_for_submission(batch_idx, test_imgs, sub_df, pred_emsemble)
@@ -273,6 +273,7 @@ def parse_args(args):
     parser.add_argument('--prediction', help='Pickle path for prediction', default=None, type=str)
     parser.add_argument('--minsizes', nargs='+', default=None, type=int)
     parser.add_argument('--thresholds', nargs='+', default=None, type=float)
+    parser.add_argument('--bottom', nargs='+', default=None, type=float)
     parser.add_argument('--fixshape', default=False, type=bool)
     parser.add_argument('--yves', default=False, type=bool)
     parser.add_argument('--multimodel', default=False, type=bool)
@@ -305,7 +306,7 @@ if __name__ == '__main__':
 
     h,w = args.shape
     if args.prediction is not None:
-        postprocess_pickle(args.prediction, args.emsemble, args.minsizes,args.thresholds, args.yves, args.fixshape)
+        postprocess_pickle(args.prediction, args.emsemble, args.minsizes,args.thresholds, args.bottom,args.yves, args.fixshape)
     else:
         final_predict(models,folds,(h,w),args.tta,args.posprocess,args.swa,args.minsizes,args.thresholds,
                       args.fixshape,args.multimodel)
