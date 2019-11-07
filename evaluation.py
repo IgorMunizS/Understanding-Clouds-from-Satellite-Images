@@ -294,7 +294,20 @@ def search(val_file,shape,fixshape=False, emsemble=False, yves=False):
     print(oof_data.shape)
     print(oof_predicted_data.shape)
 
+    #search range variables
+    min_thre = 55
+    max_thre = 85
+    min_minsize = 2500
+    max_minsize = 16000
+    min_bottom = 30
+
     if yves:
+        min_thre += 15
+        max_thre += 5
+        min_minsize += 7500
+        max_minsize += 7500
+        min_bottom +=25
+
         for x,img in tqdm(enumerate(oof_predicted_data)):
             for k in range(4):
                 im_layer = img[:,:,k]
@@ -312,10 +325,10 @@ def search(val_file,shape,fixshape=False, emsemble=False, yves=False):
     for class_id in range(4):
         print(class_id)
         attempts = []
-        for t in tqdm(range(55, 86, 5)): #threshold post process
+        for t in tqdm(range(min_thre, max_thre, 5)): #threshold post process
             t /= 100
-            for ms in tqdm(range(2500, 16000, 2500)): #minsize post process
-                for bt in range(30, int(t*100 - 1), 5): #bottom threshold
+            for ms in tqdm(range(min_minsize, max_minsize, 2500)): #minsize post process
+                for bt in range(min_bottom, int(t*100 - 1), 5): #bottom threshold
                     bt /= 100
 
                     d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,bt,shape,fixshape)
