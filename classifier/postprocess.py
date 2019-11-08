@@ -68,7 +68,7 @@ def threshold_search(cls_model='b2', shape=(320,320)):
              r , p , auc = get_threshold_for_recall(oof_true, oof_pred, i, recall_threshold=t)
              if auc >= best_auc:
                 recall_thresholds[class_name], precision_thresholds[class_name] = r,p
-                auc = best_auc
+                best_auc = auc
 
         print('Best auc {} for class {}'.format(best_auc,class_name))
 
