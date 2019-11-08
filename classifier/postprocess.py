@@ -12,26 +12,26 @@ import sys
 
 
 
-def get_threshold_for_recall(y_true, y_pred, class_i, recall_threshold=0.90, precision_threshold=0.90):
+def get_threshold_for_recall(y_true, y_pred, class_i, recall_threshold=0.85, precision_threshold=0.90):
     precision, recall, thresholds = precision_recall_curve(y_true[:, class_i], y_pred[:, class_i])
     pr_auc = auc(recall, precision)
     i = len(thresholds) - 1
-    best_precision_threshold = None
-    while best_precision_threshold is None:
+    best_recall_threshold = None
+    while best_recall_threshold is None:
         next_threshold = thresholds[i]
-        next_precision = precision[i]
-        if next_precision >= precision_threshold:
-            best_precision_threshold = next_threshold
+        next_recall = recall[i]
+        if next_recall >= recall_threshold:
+            best_recall_threshold = next_threshold
         i -= 1
 
     # consice, even though unnecessary passing through all the values
-    # best_precision_threshold = [thres for prec, thres in zip(precision, thresholds) if prec >= precision_threshold][0]
+    best_precision_threshold = [thres for prec, thres in zip(precision, thresholds) if prec >= precision_threshold][0]
 
-    return best_precision_threshold, pr_auc
+    return best_recall_threshold, best_precision_threshold, pr_auc
 
 
 def threshold_search(cls_model='b2', shape=(320,320)):
-    max_fold = 4
+    max_fold = 3
     model = get_model(cls_model, shape=shape)
     kfold = StratifiedKFold(n_splits=4, random_state=133, shuffle=True)
     train_df, img_2_vector = preprocess()
@@ -59,11 +59,11 @@ def threshold_search(cls_model='b2', shape=(320,320)):
     oof_pred = np.asarray(oof_pred)
     print(oof_true.shape)
     print(oof_pred.shape)
-    # recall_thresholds = dict()
+    recall_thresholds = dict()
     precision_thresholds = dict()
     threshold_values = np.arange(0,1,0.01)
     for i, class_name in tqdm(enumerate(class_names)):
-        precision_thresholds[class_name], auc = get_threshold_for_recall(oof_true, oof_pred, i)
+        recall_thresholds[class_name], precision_thresholds[class_name], auc = get_threshold_for_recall(oof_true, oof_pred, i)
         # best_auc = 0
         # for t in threshold_values:
         #      r , p , auc = get_threshold_for_recall(oof_true, oof_pred, i, recall_threshold=t)
@@ -73,12 +73,12 @@ def threshold_search(cls_model='b2', shape=(320,320)):
 
         print('Best auc {} for class {}'.format(auc,class_name))
 
-    return precision_thresholds
+    return recall_thresholds
 
 
 def postprocess_submission(cls_model='b2', shape=(320,320), submission_file=None):
-    precision_thresholds = threshold_search(cls_model, shape)
-    print(precision_thresholds)
+    recall_thresholds = threshold_search(cls_model, shape)
+    print(recall_thresholds)
     model = get_model(cls_model, shape=shape)
     data_generator_test = DataGenenerator(folder_imgs='../../dados/test_images', shuffle=False, batch_size=1,
                                           resized_height=shape[0], resized_width=shape[1])
@@ -95,7 +95,7 @@ def postprocess_submission(cls_model='b2', shape=(320,320), submission_file=None
     image_labels_empty = set()
     for i, (img, predictions) in enumerate(zip(os.listdir('../../dados/test_images'), y_pred_test)):
         for class_i, class_name in enumerate(class_names):
-            if predictions[class_i] < precision_thresholds[class_name]:
+            if predictions[class_i] < recall_thresholds[class_name]:
                 image_labels_empty.add(f'{img}_{class_name}')
 
     submission = pd.read_csv(submission_file)
