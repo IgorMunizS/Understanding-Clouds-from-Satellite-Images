@@ -199,56 +199,56 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
             _ ,y_true = val_generator.__getitem__(0)
             val_generator.batch_size = 1
 
-            # filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
-            #
-            # if swa:
-            #     filepath += '_swa.h5'
-            # else:
-            #     filepath += '.h5'
-            #
-            #
-            # model.load_weights(filepath)
-            #
-            # # results = model.evaluate_generator(
-            # #     val_generator,
-            # #     workers=40,
-            # #     verbose=1
-            # # )
-            # # print(results)
-            #
-            # if tta:
-            #     model = tta_segmentation(model, h_flip=True,
-            #                          input_shape=(h, w, 3), merge='mean')
-            #
-            #
-            # y_pred = model.predict_generator(
+            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
+
+            if swa:
+                filepath += '_swa.h5'
+            else:
+                filepath += '.h5'
+
+
+            model.load_weights(filepath)
+
+            # results = model.evaluate_generator(
             #     val_generator,
             #     workers=40,
             #     verbose=1
             # )
-            # print(y_true.shape)
-            # print(y_pred.shape)
-            # # print(y_pred)
-            # d = np_dice_coef(y_true, y_pred)
-            # oof_dice.append(d)
-            # print("Dice: ", d)
+            # print(results)
+
+            if tta:
+                model = tta_segmentation(model, h_flip=True,
+                                     input_shape=(h, w, 3), merge='mean')
+
+
+            y_pred = model.predict_generator(
+                val_generator,
+                workers=40,
+                verbose=1
+            )
+            print(y_true.shape)
+            print(y_pred.shape)
+            # print(y_pred)
+            d = np_dice_coef(y_true, y_pred)
+            oof_dice.append(d)
+            print("Dice: ", d)
 
             oof_data.extend(y_true.astype(np.float16))
-            # oof_predicted_data.extend(y_pred.astype(np.float16))
-            # del y_true, y_pred
-            # gc.collect()
+            oof_predicted_data.extend(y_pred.astype(np.float16))
+            del y_true, y_pred
+            gc.collect()
 
-    # del val_generator, model
-    # gc.collect()
+    del val_generator, model
+    gc.collect()
 
     oof_data = np.asarray(oof_data)
-    # oof_predicted_data = np.asarray(oof_predicted_data)
+    oof_predicted_data = np.asarray(oof_predicted_data)
     print(oof_data.shape)
-    # print(oof_predicted_data.shape)
-    # print("CV Final Dice: ", np.mean(oof_dice))
+    print(oof_predicted_data.shape)
+    print("CV Final Dice: ", np.mean(oof_dice))
 
     np.save('../validations/y_true_' + str(n_fold_splits) + '.npy', oof_data)
-    # np.save('../validations/' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold_splits) + '.npy', oof_predicted_data)
+    np.save('../validations/' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold_splits) + '.npy', oof_predicted_data)
 
     now = time.time()
     class_params = {}
