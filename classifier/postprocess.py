@@ -38,6 +38,7 @@ def threshold_search(cls_model='b2', shape=(320,320)):
     train_df, img_2_vector = preprocess()
     oof_true = []
     oof_pred = []
+
     for n_fold, (train_indices, val_indices) in enumerate(
             kfold.split(train_df['Image'].values, train_df['Class'].map(lambda x: str(sorted(list(x)))))):
         val_imgs = train_df['Image'].values[val_indices]
@@ -48,7 +49,7 @@ def threshold_search(cls_model='b2', shape=(320,320)):
 
         model.load_weights('classifier/checkpoints/' + cls_model + '_' + str(n_fold) + '.h5')
 
-        y_pred = model.predict_generator(data_generator_val, workers=12)
+        y_pred = model.predict_generator(data_generator_val, workers=12, verbose=1)
         y_true = data_generator_val.get_labels()
 
         oof_true.extend(y_true)
