@@ -101,6 +101,8 @@ def parse_args(args):
     parser.add_argument('--batch_size', default=32, type=int)
     parser.add_argument('--shape', help='Shape of resized images', default=(256,256), type=tuple)
     parser.add_argument("--file", default=None, type=str)
+    parser.add_argument("--cpu", default=False, type=bool)
+
     return parser.parse_args(args)
 
 if __name__ == '__main__':
