@@ -15,7 +15,6 @@ import sys
 def get_threshold_for_recall(y_true, y_pred, class_i, recall_threshold=0.64, precision_threshold=0.90):
     precision, recall, thresholds = precision_recall_curve(y_true[:, class_i], y_pred[:, class_i])
     pr_auc = auc(recall, precision)
-    print("Final AUC score: ", pr_auc)
     i = len(thresholds) - 1
     best_recall_threshold = None
     while best_recall_threshold is None:
@@ -62,7 +61,7 @@ def threshold_search(cls_model='b2', shape=(320,320)):
     print(oof_pred.shape)
     recall_thresholds = dict()
     precision_thresholds = dict()
-    threshold_values = [0.5,0.6,0.7,0.8,0.9,0.95]
+    threshold_values = np.arange(0.5,1,0.01)
     for i, class_name in tqdm(enumerate(class_names)):
         best_auc = 0
         for t in threshold_values:
@@ -71,6 +70,7 @@ def threshold_search(cls_model='b2', shape=(320,320)):
                 recall_thresholds[class_name], precision_thresholds[class_name] = r,p
                 auc = best_auc
 
+        print('Best auc {} for class {}'.format(best_auc,class_name))
 
     return recall_thresholds
 
