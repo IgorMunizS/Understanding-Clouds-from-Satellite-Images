@@ -25,7 +25,7 @@ def get_threshold_for_recall(y_true, y_pred, class_i, recall_threshold=0.94, pre
     return best_recall_threshold, best_precision_threshold
 
 
-def postprocess(cls_model='b2', shape=(320,320), submission_file=None):
+def threshold_search(cls_model='b2', shape=(320,320), submission_file=None):
     class_names = ['Fish', 'Flower', 'Sugar', 'Gravel']
     model = get_model(cls_model, shape=shape)
     kfold = StratifiedKFold(n_splits=4, random_state=133, shuffle=True)
@@ -40,6 +40,8 @@ def postprocess(cls_model='b2', shape=(320,320), submission_file=None):
                                              resized_height=shape[0], resized_width=shape[1],
                                              img_2_ohe_vector=img_2_vector)
 
+        model.load_weights('checkpoints/' + cls_model + '_' + str(n_fold) + '.h5')
+
         y_pred = model.predict_generator(data_generator_val, workers=12)
         y_true = data_generator_val.get_labels()
 
@@ -52,6 +54,11 @@ def postprocess(cls_model='b2', shape=(320,320), submission_file=None):
     for i, class_name in tqdm(enumerate(class_names)):
         recall_thresholds[class_name], precision_thresholds[class_name] = get_threshold_for_recall(oof_true, oof_pred, i)
 
+
+    return recall_thresholds
+
+
+def postprocess_submission():
     data_generator_test = DataGenenerator(folder_imgs='../../dados/test_images', shuffle=False, batch_size=1)
     y_pred_test = model.predict_generator(data_generator_test, workers=12)
 

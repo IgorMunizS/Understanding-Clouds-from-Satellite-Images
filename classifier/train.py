@@ -11,7 +11,6 @@ import os
 
 def train(cls_model='b2', shape=(320,320)):
 
-    model = get_model(cls_model,shape=shape)
 
     kfold = StratifiedKFold(n_splits=4, random_state=133, shuffle=True)
     train_df, img_2_vector = preprocess()
@@ -34,6 +33,8 @@ def train(cls_model='b2', shape=(320,320)):
         data_generator_val = DataGenenerator(val_imgs, shuffle=False,
                                              resized_height=shape[0], resized_width=shape[1],
                                              img_2_ohe_vector=img_2_vector)
+
+        model = get_model(cls_model, shape=shape)
 
         model.compile(optimizer=RAdam(), loss='binary_crossentropy',
                       metrics=['accuracy'])
@@ -58,7 +59,7 @@ def parse_args(args):
 
     parser.add_argument('--model', help='Classification model', default='b2')
     parser.add_argument('--batch_size', default=32, type=int)
-    parser.add_argument('--shape', help='Shape of resized images', default=(320,320), type=tuple)
+    parser.add_argument('--shape', help='Shape of resized images', default=(256,256), type=tuple)
     parser.add_argument("--cpu", default=False, type=bool)
     return parser.parse_args(args)
 
