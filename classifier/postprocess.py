@@ -70,7 +70,8 @@ def threshold_search(cls_model='b2', shape=(320,320)):
 def postprocess_submission(cls_model='b2', shape=(320,320), submission_file=None):
     recall_thresholds = threshold_search(cls_model, shape)
     model = get_model(cls_model, shape=shape)
-    data_generator_test = DataGenenerator(folder_imgs='../../dados/test_images', shuffle=False, batch_size=1)
+    data_generator_test = DataGenenerator(folder_imgs='../../dados/test_images', shuffle=False, batch_size=1,
+                                          resized_height=shape[0], resized_width=shape[1])
 
     for i in range(4):
         model.load_weights('classifier/checkpoints/' + cls_model + '_' + str(i) + '.h5')
