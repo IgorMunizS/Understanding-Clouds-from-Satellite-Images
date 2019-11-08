@@ -328,13 +328,13 @@ def search(val_file,shape,fixshape=False, emsemble=False, yves=False):
         for t in tqdm(range(min_thre, max_thre, 5)): #threshold post process
             t /= 100
             for ms in tqdm(range(min_minsize, max_minsize, 2500)): #minsize post process
-                # for bt in range(min_bottom, int(t*100 - 1), 5): #bottom threshold
-                #     bt /= 100
+                for bt in range(min_bottom, int(t*100 - 1), 5): #bottom threshold
+                    bt /= 100
 
-                d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,None,shape,fixshape)
+                    d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,bt,shape,fixshape)
 
-                # print(t, ms, np.mean(d))
-                attempts.append((t, ms, 0, np.mean(d)))
+                    # print(t, ms, np.mean(d))
+                    attempts.append((t, ms, bt, np.mean(d)))
 
         attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'bottom', 'dice'])
 
