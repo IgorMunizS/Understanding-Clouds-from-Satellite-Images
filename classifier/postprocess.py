@@ -28,7 +28,7 @@ def get_threshold_for_recall(y_true, y_pred, class_i, recall_threshold=0.64, pre
     # consice, even though unnecessary passing through all the values
     best_precision_threshold = [thres for prec, thres in zip(precision, thresholds) if prec >= precision_threshold][0]
 
-    return best_recall_threshold, best_precision_threshold
+    return best_recall_threshold, best_precision_threshold, pr_auc
 
 
 def threshold_search(cls_model='b2', shape=(320,320)):
@@ -62,8 +62,14 @@ def threshold_search(cls_model='b2', shape=(320,320)):
     print(oof_pred.shape)
     recall_thresholds = dict()
     precision_thresholds = dict()
+    threshold_values = [0.5,0.6,0.7,0.8,0.9,0.95]
     for i, class_name in tqdm(enumerate(class_names)):
-        recall_thresholds[class_name], precision_thresholds[class_name] = get_threshold_for_recall(oof_true, oof_pred, i)
+        best_auc = 0
+        for t in threshold_values:
+             r , p , auc = get_threshold_for_recall(oof_true, oof_pred, i, recall_threshold=t)
+             if auc >= best_auc:
+                recall_thresholds[class_name], precision_thresholds[class_name] = r,p
+                auc = best_auc
 
 
     return recall_thresholds
@@ -71,6 +77,7 @@ def threshold_search(cls_model='b2', shape=(320,320)):
 
 def postprocess_submission(cls_model='b2', shape=(320,320), submission_file=None):
     recall_thresholds = threshold_search(cls_model, shape)
+    print(recall_thresholds)
     model = get_model(cls_model, shape=shape)
     data_generator_test = DataGenenerator(folder_imgs='../../dados/test_images', shuffle=False, batch_size=1,
                                           resized_height=shape[0], resized_width=shape[1])
