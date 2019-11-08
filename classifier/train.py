@@ -26,18 +26,18 @@ def train(cls_model='b2', shape=(320,320)):
         train_imgs = train_df['Image'].values[train_indices]
         val_imgs = train_df['Image'].values[val_indices]
         data_generator_train = DataGenenerator(train_imgs, augmentation=albumentations_train,
-                                               resized_height=shape[0], resized_width=shape[0],
+                                               resized_height=shape[0], resized_width=shape[1],
                                                img_2_ohe_vector=img_2_vector)
 
         data_generator_train_eval = DataGenenerator(train_imgs, shuffle=False,
-                                                    resized_height=shape[0], resized_width=shape[0],
+                                                    resized_height=shape[0], resized_width=shape[1],
                                                     img_2_ohe_vector=img_2_vector)
 
         data_generator_val = DataGenenerator(val_imgs, shuffle=False,
-                                             resized_height=shape[0], resized_width=shape[0],
+                                             resized_height=shape[0], resized_width=shape[1],
                                              img_2_ohe_vector=img_2_vector)
 
-        model.compile(optimizer=RAdam(warmup_proportion=0.1, min_lr=1e-5), loss='categorical_crossentropy',
+        model.compile(optimizer=RAdam(warmup_proportion=0.1, min_lr=1e-5), loss='binary_crossentropy',
                       metrics=['accuracy'])
 
         train_metric_callback = PrAucCallback(data_generator_train_eval)
