@@ -10,7 +10,6 @@ import numpy as np
 import argparse
 import sys
 
-class_names = ['Fish', 'Flower', 'Sugar', 'Gravel']
 
 
 def get_threshold_for_recall(y_true, y_pred, class_i, recall_threshold=0.94, precision_threshold=0.90):
@@ -59,6 +58,7 @@ def threshold_search(cls_model='b2', shape=(320,320)):
     recall_thresholds = dict()
     precision_thresholds = dict()
     for i, class_name in tqdm(enumerate(class_names)):
+        print(i)
         recall_thresholds[class_name], precision_thresholds[class_name] = get_threshold_for_recall(oof_true, oof_pred, i)
 
 
@@ -73,9 +73,9 @@ def postprocess_submission(cls_model='b2', shape=(320,320), submission_file=None
     for i in range(4):
         model.load_weights('classifier/checkpoints/' + cls_model + '_' + str(i) + '.h5')
         if i == 0:
-            y_pred_test = model.predict_generator(data_generator_test, workers=12)
+            y_pred_test = model.predict_generator(data_generator_test, workers=12, verbose=1)
         else:
-            y_pred_test += model.predict_generator(data_generator_test, workers=12)
+            y_pred_test += model.predict_generator(data_generator_test, workers=12, verbose=1)
 
     y_pred_test /= 4
 
@@ -109,6 +109,7 @@ def parse_args(args):
 if __name__ == '__main__':
     args = sys.argv[1:]
     args = parse_args(args)
+    class_names = ['Fish', 'Flower', 'Sugar', 'Gravel']
 
     if args.cpu:
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
