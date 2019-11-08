@@ -12,8 +12,6 @@ import os
 def train(cls_model='b2', shape=(320,320)):
 
     model = get_model(cls_model,shape=shape)
-    for base_layer in model.layers[:-3]:
-        base_layer.trainable = False
 
     kfold = StratifiedKFold(n_splits=4, random_state=133, shuffle=True)
     train_df, img_2_vector = preprocess()
@@ -37,7 +35,7 @@ def train(cls_model='b2', shape=(320,320)):
                                              resized_height=shape[0], resized_width=shape[1],
                                              img_2_ohe_vector=img_2_vector)
 
-        model.compile(optimizer=RAdam(warmup_proportion=0.1, min_lr=1e-5), loss='binary_crossentropy',
+        model.compile(optimizer=RAdam(), loss='binary_crossentropy',
                       metrics=['accuracy'])
 
         train_metric_callback = PrAucCallback(data_generator_train_eval)
@@ -50,20 +48,6 @@ def train(cls_model='b2', shape=(320,320)):
                                         callbacks=[train_metric_callback, val_callback],
                                         workers=42,
                                         verbose=1
-                                        )
-
-        for base_layer in model.layers[:-3]:
-            base_layer.trainable = True
-
-        model.compile(optimizer=RAdam(warmup_proportion=0.1, min_lr=1e-5), loss='categorical_crossentropy',
-                      metrics=['accuracy'])
-        history_1 = model.fit_generator(generator=data_generator_train,
-                                        validation_data=data_generator_val,
-                                        epochs=20,
-                                        callbacks=[train_metric_callback, val_callback],
-                                        workers=42,
-                                        verbose=1,
-                                        initial_epoch=1
                                         )
 
 def parse_args(args):
