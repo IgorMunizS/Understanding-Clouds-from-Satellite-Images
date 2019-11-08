@@ -61,7 +61,7 @@ def threshold_search(cls_model='b2', shape=(320,320)):
     print(oof_pred.shape)
     recall_thresholds = dict()
     precision_thresholds = dict()
-    threshold_values = np.arange(0.5,1,0.01)
+    threshold_values = np.arange(0,1,0.01)
     for i, class_name in tqdm(enumerate(class_names)):
         best_auc = 0
         for t in threshold_values:
