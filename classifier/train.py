@@ -9,9 +9,9 @@ import sys
 import argparse
 import os
 
-def train(model='b2', shape=(320,320)):
+def train(cls_model='b2', shape=(320,320)):
 
-    model = get_model(model,shape=shape)
+    model = get_model(cls_model,shape=shape)
     for base_layer in model.layers[:-3]:
         base_layer.trainable = False
 
@@ -33,7 +33,7 @@ def train(model='b2', shape=(320,320)):
                       metrics=['accuracy'])
 
         train_metric_callback = PrAucCallback(data_generator_train_eval)
-        checkpoint_name = model + '_' + str(n_fold)
+        checkpoint_name = cls_model + '_' + str(n_fold)
         val_callback = PrAucCallback(data_generator_val, stage='val', checkpoint_name=checkpoint_name)
 
         history_0 = model.fit_generator(generator=data_generator_train,
