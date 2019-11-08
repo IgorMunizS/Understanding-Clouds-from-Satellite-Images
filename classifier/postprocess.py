@@ -46,7 +46,7 @@ def threshold_search(cls_model='b2', shape=(320,320)):
                                              resized_height=shape[0], resized_width=shape[1],
                                              img_2_ohe_vector=img_2_vector)
 
-        model.load_weights('checkpoints/' + cls_model + '_' + str(n_fold) + '.h5')
+        model.load_weights('classifier/checkpoints/' + cls_model + '_' + str(n_fold) + '.h5')
 
         y_pred = model.predict_generator(data_generator_val, workers=12)
         y_true = data_generator_val.get_labels()
@@ -70,7 +70,7 @@ def postprocess_submission(cls_model='b2', shape=(320,320), submission_file=None
     data_generator_test = DataGenenerator(folder_imgs='../../dados/test_images', shuffle=False, batch_size=1)
 
     for i in range(4):
-        model.load_weights('checkpoints/' + cls_model + '_' + str(i) + '.h5')
+        model.load_weights('classifier/checkpoints/' + cls_model + '_' + str(i) + '.h5')
         if i == 0:
             y_pred_test = model.predict_generator(data_generator_test, workers=12)
         else:
