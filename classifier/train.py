@@ -23,7 +23,7 @@ def train(model='b2', shape=(320,320)):
     ], p=1)
 
     for n_fold, (train_imgs, val_imgs) in enumerate(kfold.split(train_df['Image'].values, train_df['Class'].map(lambda x: str(sorted(list(x)))))):
-
+        print(val_imgs)
         data_generator_train = DataGenenerator(train_imgs, augmentation=albumentations_train, img_2_ohe_vector=img_2_vector)
         data_generator_train_eval = DataGenenerator(train_imgs, shuffle=False, img_2_ohe_vector=img_2_vector)
         data_generator_val = DataGenenerator(val_imgs, shuffle=False, img_2_ohe_vector=img_2_vector)
