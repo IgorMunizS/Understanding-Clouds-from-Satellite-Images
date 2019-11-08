@@ -12,7 +12,7 @@ import sys
 
 
 
-def get_threshold_for_recall(y_true, y_pred, class_i, recall_threshold=0.94, precision_threshold=0.90):
+def get_threshold_for_recall(y_true, y_pred, class_i, recall_threshold=0.64, precision_threshold=0.90):
     precision, recall, thresholds = precision_recall_curve(y_true[:, class_i], y_pred[:, class_i])
     pr_auc = auc(recall, precision)
     print("Final AUC score: ", pr_auc)
