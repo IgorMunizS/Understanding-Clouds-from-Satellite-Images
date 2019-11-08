@@ -178,7 +178,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
 
-        # model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef], shape)
+        model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef], shape)
 
         if n_fold >= nfold and n_fold <= maxfold:
             print('Evaluating fold number ',str(n_fold))
