@@ -32,6 +32,7 @@ def get_threshold_for_recall(y_true, y_pred, class_i, recall_threshold=0.94, pre
 
 
 def threshold_search(cls_model='b2', shape=(320,320)):
+    max_fold = 0
     model = get_model(cls_model, shape=shape)
     kfold = StratifiedKFold(n_splits=4, random_state=133, shuffle=True)
     train_df, img_2_vector = preprocess()
@@ -42,17 +43,18 @@ def threshold_search(cls_model='b2', shape=(320,320)):
             kfold.split(train_df['Image'].values, train_df['Class'].map(lambda x: str(sorted(list(x)))))):
         val_imgs = train_df['Image'].values[val_indices]
 
-        data_generator_val = DataGenenerator(val_imgs, shuffle=False,
-                                             resized_height=shape[0], resized_width=shape[1],
-                                             img_2_ohe_vector=img_2_vector)
+        if n_fold <= max_fold:
+            data_generator_val = DataGenenerator(val_imgs, shuffle=False,
+                                                 resized_height=shape[0], resized_width=shape[1],
+                                                 img_2_ohe_vector=img_2_vector)
 
-        model.load_weights('classifier/checkpoints/' + cls_model + '_' + str(n_fold) + '.h5')
+            model.load_weights('classifier/checkpoints/' + cls_model + '_' + str(n_fold) + '.h5')
 
-        y_pred = model.predict_generator(data_generator_val, workers=12, verbose=1)
-        y_true = data_generator_val.get_labels()
+            y_pred = model.predict_generator(data_generator_val, workers=12, verbose=1)
+            y_true = data_generator_val.get_labels()
 
-        oof_true.extend(y_true)
-        oof_pred.extend(y_pred)
+            oof_true.extend(y_true)
+            oof_pred.extend(y_pred)
 
     oof_true = np.asarray(oof_true)
     oof_pred = np.asarray(oof_pred)
@@ -73,14 +75,14 @@ def postprocess_submission(cls_model='b2', shape=(320,320), submission_file=None
     data_generator_test = DataGenenerator(folder_imgs='../../dados/test_images', shuffle=False, batch_size=1,
                                           resized_height=shape[0], resized_width=shape[1])
 
-    for i in range(4):
+    for i in range(1):
         model.load_weights('classifier/checkpoints/' + cls_model + '_' + str(i) + '.h5')
         if i == 0:
             y_pred_test = model.predict_generator(data_generator_test, workers=12, verbose=1)
         else:
             y_pred_test += model.predict_generator(data_generator_test, workers=12, verbose=1)
 
-    y_pred_test /= 4
+    # y_pred_test /= 4
 
     image_labels_empty = set()
     for i, (img, predictions) in enumerate(zip(os.listdir('../../dados/test_images'), y_pred_test)):
