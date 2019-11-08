@@ -54,11 +54,13 @@ def threshold_search(cls_model='b2', shape=(320,320)):
         oof_true.extend(y_true)
         oof_pred.extend(y_pred)
 
-
+    oof_true = np.asarray(oof_true)
+    oof_pred = np.asarray(oof_pred)
+    print(oof_true.shape)
+    print(oof_pred.shape)
     recall_thresholds = dict()
     precision_thresholds = dict()
     for i, class_name in tqdm(enumerate(class_names)):
-        print(i)
         recall_thresholds[class_name], precision_thresholds[class_name] = get_threshold_for_recall(oof_true, oof_pred, i)
 
 
