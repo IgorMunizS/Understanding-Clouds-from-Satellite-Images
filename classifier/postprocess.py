@@ -1,4 +1,4 @@
-from sklearn.metrics import precision_recall_curve
+from sklearn.metrics import precision_recall_curve, auc
 from tqdm import tqdm
 from classifier.model import get_model
 from sklearn.model_selection import StratifiedKFold
@@ -7,9 +7,16 @@ from classifier.generator import DataGenenerator
 import os
 import pandas as pd
 import numpy as np
+import argparse
+import sys
+
+class_names = ['Fish', 'Flower', 'Sugar', 'Gravel']
+
 
 def get_threshold_for_recall(y_true, y_pred, class_i, recall_threshold=0.94, precision_threshold=0.90):
     precision, recall, thresholds = precision_recall_curve(y_true[:, class_i], y_pred[:, class_i])
+    pr_auc = auc(recall, precision)
+    print("Final AUC score: ", pr_auc)
     i = len(thresholds) - 1
     best_recall_threshold = None
     while best_recall_threshold is None:
@@ -25,8 +32,7 @@ def get_threshold_for_recall(y_true, y_pred, class_i, recall_threshold=0.94, pre
     return best_recall_threshold, best_precision_threshold
 
 
-def threshold_search(cls_model='b2', shape=(320,320), submission_file=None):
-    class_names = ['Fish', 'Flower', 'Sugar', 'Gravel']
+def threshold_search(cls_model='b2', shape=(320,320)):
     model = get_model(cls_model, shape=shape)
     kfold = StratifiedKFold(n_splits=4, random_state=133, shuffle=True)
     train_df, img_2_vector = preprocess()
@@ -58,9 +64,19 @@ def threshold_search(cls_model='b2', shape=(320,320), submission_file=None):
     return recall_thresholds
 
 
-def postprocess_submission():
+def postprocess_submission(cls_model='b2', shape=(320,320), submission_file=None):
+    recall_thresholds = threshold_search(cls_model, shape)
+    model = get_model(cls_model, shape=shape)
     data_generator_test = DataGenenerator(folder_imgs='../../dados/test_images', shuffle=False, batch_size=1)
-    y_pred_test = model.predict_generator(data_generator_test, workers=12)
+
+    for i in range(4):
+        model.load_weights('checkpoints/' + cls_model + '_' + str(i) + '.h5')
+        if i == 0:
+            y_pred_test = model.predict_generator(data_generator_test, workers=12)
+        else:
+            y_pred_test += model.predict_generator(data_generator_test, workers=12)
+
+    y_pred_test /= 4
 
     image_labels_empty = set()
     for i, (img, predictions) in enumerate(zip(os.listdir('../../dados/test_images'), y_pred_test)):
@@ -75,3 +91,25 @@ def postprocess_submission():
     submission.loc[submission['Image_Label'].isin(image_labels_empty), 'EncodedPixels'] = np.nan
     submission.to_csv('../submissions/submission_segmentation_and_classifier.csv', index=None)
 
+def parse_args(args):
+    """ Parse the arguments.
+    """
+    parser = argparse.ArgumentParser(description='Predict script')
+
+
+    parser.add_argument('--model', help='Classification model', default='b2')
+    parser.add_argument('--batch_size', default=32, type=int)
+    parser.add_argument('--shape', help='Shape of resized images', default=(256,256), type=tuple)
+    parser.add_argument("--file", default=None, type=str)
+    return parser.parse_args(args)
+
+if __name__ == '__main__':
+    args = sys.argv[1:]
+    args = parse_args(args)
+
+    if args.cpu:
+        os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
+
+    postprocess_submission(args.model,args.shape, args.file)

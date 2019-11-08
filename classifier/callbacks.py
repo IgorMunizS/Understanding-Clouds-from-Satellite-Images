@@ -11,7 +11,7 @@ class PrAucCallback(Callback):
     def __init__(self, data_generator, num_workers=num_cores,
                  early_stopping_patience=5,
                  plateau_patience=3, reduction_rate=0.5,
-                 stage='train', checkpoints_path='checkpoints/',
+                 stage='train', checkpoints_path='classifier/checkpoints/',
                  checkpoint_name=''):
         super(Callback, self).__init__()
         self.data_generator = data_generator
