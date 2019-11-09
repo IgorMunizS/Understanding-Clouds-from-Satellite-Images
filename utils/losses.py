@@ -322,7 +322,7 @@ def combo_loss_init(y_true, y_pred):
     ce_w = 0.2 # < 0.5 penalises FP more, > 0.5 penalises FN more
     ce_d_w = 0.7 # weighted contribution of modified CE loss compared to Dice loss
     e = K.epsilon()
-    smooth = 1
+    smooth = 1e-6
     y_true_f = K.flatten(y_true)
     y_pred_f = K.flatten(y_pred)
     intersection = K.sum(y_true_f * y_pred_f)
@@ -337,7 +337,7 @@ def combo_loss_ft(y_true, y_pred):
     ce_w = 0.5 # < 0.5 penalises FP more, > 0.5 penalises FN more
     ce_d_w = 0.3 # weighted contribution of modified CE loss compared to Dice loss
     e = K.epsilon()
-    smooth = 1
+    smooth = 1e-6
     y_true_f = K.flatten(y_true)
     y_pred_f = K.flatten(y_pred)
     intersection = K.sum(y_true_f * y_pred_f)
