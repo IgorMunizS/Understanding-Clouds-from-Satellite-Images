@@ -318,9 +318,24 @@ def flatten_probas(probas, labels, ignore=None, order='BHWC'):
     return vprobas, vlabels
 
 
-def combo_loss_2(y_true, y_pred):
-    ce_w = 0.3
-    ce_d_w = 0.5
+def combo_loss_init(y_true, y_pred):
+    ce_w = 0.2 # < 0.5 penalises FP more, > 0.5 penalises FN more
+    ce_d_w = 0.7 # weighted contribution of modified CE loss compared to Dice loss
+    e = K.epsilon()
+    smooth = 1
+    y_true_f = K.flatten(y_true)
+    y_pred_f = K.flatten(y_pred)
+    intersection = K.sum(y_true_f * y_pred_f)
+    d = (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
+    y_pred_f = K.clip(y_pred_f, e, 1.0 - e)
+    out = - (ce_w * ((y_true_f * K.log(y_pred_f)) + ((1 - ce_w) * (1.0 - y_true_f) * K.log(1.0 - y_pred_f))))
+    weighted_ce = K.mean(out, axis=-1)
+    combo = (ce_d_w * weighted_ce) - ((1 - ce_d_w) * d)
+    return combo
+
+def combo_loss_ft(y_true, y_pred):
+    ce_w = 0.5 # < 0.5 penalises FP more, > 0.5 penalises FN more
+    ce_d_w = 0.3 # weighted contribution of modified CE loss compared to Dice loss
     e = K.epsilon()
     smooth = 1
     y_true_f = K.flatten(y_true)
