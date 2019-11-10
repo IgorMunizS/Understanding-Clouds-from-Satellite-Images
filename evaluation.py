@@ -262,7 +262,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
             t /= 100
             for ms in tqdm(range(10000, 31000, 5000)):
 
-                d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,shape,fixshape)
+                d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,None,shape,fixshape)
 
                 # print(t, ms, np.mean(d))
                 attempts.append((t, ms, np.mean(d)))
@@ -277,7 +277,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
         class_params[class_id] = (best_threshold, best_size)
 
 
-def search(val_file,shape,fixshape=False, emsemble=False, yves=False):
+def search(val_file,shape,classid=0,fixshape=False, emsemble=False, yves=False):
 
     h,w = shape
 
@@ -327,27 +327,28 @@ def search(val_file,shape,fixshape=False, emsemble=False, yves=False):
     class_params = {}
     for class_id in range(4):
         print(class_id)
-        attempts = []
-        for t in tqdm(range(min_thre, max_thre, 5)): #threshold post process
-            t /= 100
-            for ms in tqdm(range(min_minsize, max_minsize, 1000)): #minsize post process
-                for bt in range(min_bottom, int(t*100 - 1), 5): #bottom threshold
-                    bt /= 100
+        if class_id >= classid:
+            attempts = []
+            for t in tqdm(range(min_thre, max_thre, 5)): #threshold post process
+                t /= 100
+                for ms in tqdm(range(min_minsize, max_minsize, 1000)): #minsize post process
+                    for bt in range(min_bottom, int(t*100 - 1), 5): #bottom threshold
+                        bt /= 100
 
-                    d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,bt,shape,fixshape)
+                        d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,bt,shape,fixshape)
 
-                    # print(t, ms, np.mean(d))
-                    attempts.append((t, ms, bt, np.mean(d)))
+                        # print(t, ms, np.mean(d))
+                        attempts.append((t, ms, bt, np.mean(d)))
 
-        attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'bottom', 'dice'])
+            attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'bottom', 'dice'])
 
-        attempts_df = attempts_df.sort_values('dice', ascending=False)
-        print(attempts_df.head())
-        print('Time: ', time.time() - now)
-        best_threshold = attempts_df['threshold'].values[0]
-        best_size = attempts_df['size'].values[0]
-        best_bottom = attempts_df['bottom'].values[0]
-        class_params[class_id] = (best_threshold, best_size, best_bottom)
+            attempts_df = attempts_df.sort_values('dice', ascending=False)
+            print(attempts_df.head())
+            print('Time: ', time.time() - now)
+            best_threshold = attempts_df['threshold'].values[0]
+            best_size = attempts_df['size'].values[0]
+            best_bottom = attempts_df['bottom'].values[0]
+            class_params[class_id] = (best_threshold, best_size, best_bottom)
 
     print(class_params)
         # ray.shutdown()
@@ -379,6 +380,7 @@ def parse_args(args):
     parser.add_argument('--tta', help='apply TTA', default=False, type=bool)
     parser.add_argument('--swa', help='apply SWA', default=False, type=bool)
     parser.add_argument('--search', help='search post processing values', default=False, type=bool)
+    parser.add_argument('--classid', help='class id to start search', default=0, type=int)
     parser.add_argument('--val_file', help='val file to search', default=None, type=str)
     parser.add_argument('--fixshape', help='apply shape convex or not', default=False, type=bool)
     parser.add_argument('--yves', help='apply shape yves', default=False, type=bool)
@@ -400,7 +402,7 @@ if __name__ == '__main__':
         os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
     if args.search:
-        search(args.val_file,args.shape,args.fixshape, args.emsemble, args.yves)
+        search(args.val_file,args.shape,args.classid,args.fixshape, args.emsemble, args.yves)
     elif args.multimodel:
         multimodel_eval(args.model,args.backbone,args.nfold,args.maxfold,args.shape,args.swa,args.tta,args.fixshape)
     else:
