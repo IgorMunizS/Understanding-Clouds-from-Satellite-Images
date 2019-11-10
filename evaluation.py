@@ -172,6 +172,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
     skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed, shuffle=True)
     oof_data = []
     oof_predicted_data = []
+    oof_imgname = []
     # num_cpus = psutil.cpu_count(logical=False)
     # ray.init(num_cpus=4)
     oof_dice = []
@@ -235,6 +236,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
 
             oof_data.extend(y_true.astype(np.float16))
             oof_predicted_data.extend(y_pred.astype(np.float16))
+            oof_imgname.extend(val_generator.image_name)
             del y_true, y_pred
             gc.collect()
 
@@ -247,6 +249,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
     print(oof_predicted_data.shape)
     print("CV Final Dice: ", np.mean(oof_dice))
 
+    np.save('../validations/img_name_' + str(n_fold_splits) + '.npy', oof_imgname)
     np.save('../validations/y_true_' + str(n_fold_splits) + '.npy', oof_data)
     np.save('../validations/' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold_splits) + '.npy', oof_predicted_data)
 

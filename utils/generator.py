@@ -32,6 +32,7 @@ class DataGenerator(keras.utils.Sequence):
         self.TTA = TTA
         self.randomcrop = randomcrop
         self.classes = classes
+        self.image_name = []
 
         self.on_epoch_end()
         np.random.seed(self.random_state)
@@ -97,6 +98,7 @@ class DataGenerator(keras.utils.Sequence):
 
             # Store samples
             X[i,] = img
+            self.image_name.append(im_name)
 
         return X
 

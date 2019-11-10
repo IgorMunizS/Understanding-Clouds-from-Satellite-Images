@@ -6,7 +6,7 @@ from tensorflow.keras.optimizers import Nadam
 from config import n_classes
 
 
-def get_model(model,BACKBONE,opt,loss,metric,freeze_encoder=False,batchnormalization=True):
+def get_model(model,BACKBONE,opt,loss,metric,freeze_encoder=False,batchnormalization=True,dropout=None):
     h,w = None, None
 
     if model == 'fpn':
@@ -16,8 +16,8 @@ def get_model(model,BACKBONE,opt,loss,metric,freeze_encoder=False,batchnormaliza
             input_shape=(h, w, 3),
             activation='sigmoid',
             encoder_freeze=freeze_encoder,
-            pyramid_use_batchnorm=batchnormalization
-
+            pyramid_use_batchnorm=batchnormalization,
+            pyramid_dropout = dropout
         )
         model.compile(optimizer=opt, loss=loss, metrics=metric)
 
