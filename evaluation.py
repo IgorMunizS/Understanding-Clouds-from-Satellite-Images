@@ -300,8 +300,8 @@ def search(val_file,shape,classid=0,fixshape=False, emsemble=False, yves=False):
     #search range variables
     min_thre = 55
     max_thre = 85
-    min_minsize = 1000
-    max_minsize = 11000
+    min_minsize = 0
+    max_minsize = 6000
     min_bottom = 30
 
     if yves:
