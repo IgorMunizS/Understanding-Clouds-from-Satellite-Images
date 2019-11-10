@@ -205,7 +205,7 @@ def lovasz_loss(y_true, y_pred):
     return lovasz_hinge(y_pred, y_true, per_image=True, ignore=None)
 
 def bce_lovasz_loss(y_true, y_pred):
-    return binary_crossentropy(y_true,y_pred)*0.7 + lovasz_hinge(y_pred, y_true, per_image=True, ignore=None)*0.3
+    return binary_crossentropy(y_true,y_pred)*0.5 + lovasz_hinge(y_pred, y_true, per_image=False, ignore=None)*0.5
 
 def np_dice_coef(y_true, y_pred):
     y_true_f = y_true.flatten()
