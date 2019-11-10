@@ -104,7 +104,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             opt = RAdam(min_lr=1e-6, lr=1e-5)
             # model.compile(optimizer=opt, loss=combo_loss_ft, metrics=[dice_coef])
             model2 = get_model(smmodel,backbone,opt,lovasz_loss,[dice_coef],freeze_encoder=True,batchnormalization=False)
-            model2.set_weights(model.weights)
+            model2.set_weights(model.get_weights())
             es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=3, verbose=1, mode='max')
             del model
             gc.collect()
