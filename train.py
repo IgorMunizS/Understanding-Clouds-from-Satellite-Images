@@ -96,7 +96,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 train_generator,
                 validation_data=val_generator,
                 callbacks=[ckp, rlr, es],
-                epochs=1,
+                epochs=epochs,
                 use_multiprocessing=True,
                 workers=42
             )
