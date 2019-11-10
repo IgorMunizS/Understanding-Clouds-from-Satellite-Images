@@ -39,10 +39,18 @@ def get_model(model,BACKBONE,opt,loss,metric,freeze_encoder=False,batchnormaliza
         )
         model.compile(optimizer=opt, loss=loss, metrics=metric)
 
+    elif model == 'linknet':
+        model = sm.Linknet(
+            BACKBONE,
+            classes=n_classes,
+            input_shape=(h, w, 3),
+            activation='sigmoid'
+        )
+        model.compile(optimizer=opt, loss=loss, metrics=metric)
+
     elif model == 'xnet':
         model = smx.Xnet(
             BACKBONE,
-            decoder_block_type='transpose',
             classes=n_classes,
             input_shape=(h, w, 3),
             activation='sigmoid'
