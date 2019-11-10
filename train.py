@@ -8,7 +8,7 @@ from keras.optimizers import Adam, Nadam, SGD, RMSprop
 from utils.lr import CyclicLR, Lookahead, AdamAccumulate
 from models import get_model
 from utils.losses import dice_coef, dice_coef_loss_bce, dice_coef_fish,dice_coef_flower,dice_coef_gravel,dice_coef_sugar
-from utils.losses import jaccard, sm_loss, combo_loss_init, combo_loss_ft
+from utils.losses import jaccard, sm_loss, combo_loss_init, combo_loss_ft, lovasz_loss
 from utils.callbacks import ValPosprocess, SnapshotCallbackBuilder, SWA
 from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
@@ -83,7 +83,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             dice_metric = jaccard()
 
             metrics = [dice_coef,dice_coef_fish,dice_coef_flower,dice_coef_gravel,dice_coef_sugar]
-            model = get_model(smmodel,backbone,opt,combo_loss_init,[dice_coef],freeze_encoder=False,batchnormalization=False, dropout=0.3)
+            model = get_model(smmodel,backbone,opt,combo_loss_init,[dice_coef],freeze_encoder=False,batchnormalization=False)
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + 'test'
 
             ckp = ModelCheckpoint(filepath + '.h5', monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
@@ -96,16 +96,19 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
                 train_generator,
                 validation_data=val_generator,
                 callbacks=[ckp, rlr, es],
-                epochs=epochs,
+                epochs=1,
                 use_multiprocessing=True,
                 workers=42
             )
 
             opt = RAdam(min_lr=1e-6, lr=1e-5)
-            model.compile(optimizer=opt, loss=combo_loss_ft, metrics=[dice_coef])
+            # model.compile(optimizer=opt, loss=combo_loss_ft, metrics=[dice_coef])
+            model2 = get_model(smmodel,backbone,opt,lovasz_loss,[dice_coef],freeze_encoder=True,batchnormalization=False)
+            model2.set_weights(model.weights)
             es = EarlyStopping(monitor='val_dice_coef', min_delta=0.0001, patience=3, verbose=1, mode='max')
-
-            history = model.fit_generator(
+            del model
+            gc.collect()
+            history = model2.fit_generator(
                 train_generator,
                 validation_data=val_generator,
                 callbacks=[ckp, es],
