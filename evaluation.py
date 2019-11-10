@@ -300,8 +300,8 @@ def search(val_file,shape,fixshape=False, emsemble=False, yves=False):
     #search range variables
     min_thre = 55
     max_thre = 85
-    min_minsize = 2500
-    max_minsize = 16000
+    min_minsize = 1000
+    max_minsize = 11000
     min_bottom = 30
 
     if yves:
@@ -330,7 +330,7 @@ def search(val_file,shape,fixshape=False, emsemble=False, yves=False):
         attempts = []
         for t in tqdm(range(min_thre, max_thre, 5)): #threshold post process
             t /= 100
-            for ms in tqdm(range(min_minsize, max_minsize, 2500)): #minsize post process
+            for ms in tqdm(range(min_minsize, max_minsize, 1000)): #minsize post process
                 for bt in range(min_bottom, int(t*100 - 1), 5): #bottom threshold
                     bt /= 100
 
