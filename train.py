@@ -83,7 +83,7 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
             dice_metric = jaccard()
 
             metrics = [dice_coef,dice_coef_fish,dice_coef_flower,dice_coef_gravel,dice_coef_sugar]
-            model = get_model(smmodel,backbone,opt,bce_surface_dice_loss,[dice_coef])
+            model = get_model(smmodel,backbone,opt,bce_lovasz_loss,[dice_coef])
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + 'test'
 
             ckp = ModelCheckpoint(filepath + '.h5', monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
