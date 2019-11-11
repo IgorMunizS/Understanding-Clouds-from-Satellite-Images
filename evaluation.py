@@ -118,7 +118,7 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
                 # print(results)
 
                 if tta:
-                    model = tta_segmentation(model, h_flip=True,
+                    model = tta_segmentation(model, h_flip=True, v_flip=True,
                                          input_shape=(h, w, 3), merge='mean')
 
 
@@ -238,8 +238,8 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
             # print(results)
 
             if tta:
-                model = tta_segmentation(model, h_flip=True,
-                                     input_shape=(h, w, 3), merge='mean')
+                model = tta_segmentation(model, h_flip=True, v_flip=True,
+                                         input_shape=(h, w, 3), merge='mean')
 
 
             y_pred = model.predict_generator(
