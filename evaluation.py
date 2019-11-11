@@ -31,6 +31,14 @@ def resize_oof(folder):
             new_oof_data[i,:,:,:] = np_resize(oof_data[i,:,:,:].astype(np.float32), (350,525)).astype(np.float16)
         np.save(folder + file, new_oof_data)
 
+def convert_to_int(folder):
+    files = os.listdir(folder)
+    for file in files:
+        print("Resizing file: ", file)
+        oof_data = np.load(folder + file)
+        new_oof_data = (oof_data*100).astype(np.int8)
+        np.save(folder + file, new_oof_data)
+
 # @ray.remote
 def parallel_post_process(y_true,y_pred,class_id,t,ms,bt,shape,fixshape):
     # sigmoid = lambda x: 1 / (1 + np.exp(-x))
