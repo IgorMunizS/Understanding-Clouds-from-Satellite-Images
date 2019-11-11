@@ -198,83 +198,86 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
             )
 
             _ ,y_true = val_generator.__getitem__(0)
-            val_generator.batch_size = 1
+            img_true = val_generator.image_name
 
-            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
-
-            if swa:
-                filepath += '_swa.h5'
-            else:
-                filepath += '.h5'
-
-
-            model.load_weights(filepath)
-
-            # results = model.evaluate_generator(
+            # val_generator.batch_size = 1
+            #
+            # filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
+            #
+            # if swa:
+            #     filepath += '_swa.h5'
+            # else:
+            #     filepath += '.h5'
+            #
+            #
+            # model.load_weights(filepath)
+            #
+            # # results = model.evaluate_generator(
+            # #     val_generator,
+            # #     workers=40,
+            # #     verbose=1
+            # # )
+            # # print(results)
+            #
+            # if tta:
+            #     model = tta_segmentation(model, h_flip=True,
+            #                          input_shape=(h, w, 3), merge='mean')
+            #
+            #
+            # y_pred = model.predict_generator(
             #     val_generator,
             #     workers=40,
             #     verbose=1
             # )
-            # print(results)
-
-            if tta:
-                model = tta_segmentation(model, h_flip=True,
-                                     input_shape=(h, w, 3), merge='mean')
-
-
-            y_pred = model.predict_generator(
-                val_generator,
-                workers=40,
-                verbose=1
-            )
             print(y_true.shape)
-            print(y_pred.shape)
-            # print(y_pred)
-            d = np_dice_coef(y_true, y_pred)
-            oof_dice.append(d)
-            print("Dice: ", d)
+            # print(y_pred.shape)
+            print(len(img_true))
+            # d = np_dice_coef(y_true, y_pred)
+            # oof_dice.append(d)
+            # print("Dice: ", d)
 
             oof_data.extend(y_true.astype(np.float16))
-            oof_predicted_data.extend(y_pred.astype(np.float16))
-            oof_imgname.extend(val_generator.image_name)
-            del y_true, y_pred
-            gc.collect()
+            # oof_predicted_data.extend(y_pred.astype(np.float16))
+            # del y_true, y_pred
+            # gc.collect()
 
-    del val_generator, model
-    gc.collect()
+    # del val_generator, model
+    # gc.collect()
 
     oof_data = np.asarray(oof_data)
-    oof_predicted_data = np.asarray(oof_predicted_data)
+    # oof_predicted_data = np.asarray(oof_predicted_data)
+    oof_imgname = np.asarray(oof_imgname)
     print(oof_data.shape)
-    print(oof_predicted_data.shape)
-    print("CV Final Dice: ", np.mean(oof_dice))
+    # print(oof_predicted_data.shape)
+    print(oof_imgname.shape)
+    # print("CV Final Dice: ", np.mean(oof_dice))
 
     np.save('../validations/img_name_' + str(n_fold_splits) + '.npy', oof_imgname)
-    np.save('../validations/y_true_' + str(n_fold_splits) + '.npy', oof_data)
-    np.save('../validations/' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold_splits) + '.npy', oof_predicted_data)
+    # np.save('../validations/y_true_' + str(n_fold_splits) + '.npy', oof_data)
+    # np.save('../validations/' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold_splits) + '.npy', oof_predicted_data)
 
-    now = time.time()
-    class_params = {}
-    for class_id in range(4):
-        print(class_id)
-        attempts = []
-        for t in tqdm(range(40, 80, 5)):
-            t /= 100
-            for ms in tqdm(range(10000, 31000, 5000)):
-
-                d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,None,shape,fixshape)
-
-                # print(t, ms, np.mean(d))
-                attempts.append((t, ms, np.mean(d)))
-
-        attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'dice'])
-
-        attempts_df = attempts_df.sort_values('dice', ascending=False)
-        print(attempts_df.head())
-        print('Time: ', time.time() - now)
-        best_threshold = attempts_df['threshold'].values[0]
-        best_size = attempts_df['size'].values[0]
-        class_params[class_id] = (best_threshold, best_size)
+    # now = time.time()
+    # class_params = {}
+    # for class_id in range(4):
+    #     print(class_id)
+    #     attempts = []
+    #     for t in tqdm(range(40, 80, 5)):
+    #         t /= 100
+    #         for ms in tqdm(range(10000, 31000, 5000)):
+    #
+    #             d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,None,shape,fixshape)
+    #
+    #             # print(t, ms, np.mean(d))
+    #             attempts.append((t, ms, np.mean(d)))
+    #
+    #     attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'dice'])
+    #
+    #     attempts_df = attempts_df.sort_values('dice', ascending=False)
+    #     print(attempts_df.head())
+    #     print('Time: ', time.time() - now)
+    #     best_threshold = attempts_df['threshold'].values[0]
+    #     best_size = attempts_df['size'].values[0]
+    #     class_params[class_id] = (best_threshold, best_size)
 
 
 def search(val_file,shape,classid=0,fixshape=False, emsemble=False, yves=False):
