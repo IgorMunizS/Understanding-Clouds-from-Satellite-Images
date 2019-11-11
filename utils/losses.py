@@ -97,9 +97,11 @@ def sm_loss(d=1., f=1.):
 
 
 def lovasz_loss(y_true, y_pred):
-    y_true, y_pred = K.cast(K.squeeze(y_true, -1), 'int32'), K.cast(K.squeeze(y_pred, -1), 'float32')
-    logits = K.log(y_pred / (1. - y_pred))
-    loss = lovasz_hinge(logits, y_true, per_image=True, ignore=None)
+    loss = 0
+    for i in range(4):
+        y_true, y_pred = K.cast(K.squeeze(y_true[...,i], -1), 'float32'), K.cast(K.squeeze(y_pred[...,i], -1), 'float32')
+        logits = K.log(y_pred / (1. - y_pred))
+        loss += lovasz_hinge(logits, y_true, per_image=True, ignore=None) / 4
     return loss
 
 def focal_loss(y_true, y_pred):
@@ -203,11 +205,11 @@ def flatten_binary_scores(scores, labels, ignore=None):
     vlabels = tf.boolean_mask(labels, valid, name='valid_labels')
     return vscores, vlabels
 
-# def lovasz_loss(y_true, y_pred):
-#     return lovasz_hinge(y_pred, y_true, per_image=True, ignore=None)
+def lovasz_loss(y_true, y_pred):
+    return lovasz_hinge(y_pred, y_true, per_image=True, ignore=None)
 
 def bce_lovasz_loss(y_true, y_pred):
-    return binary_crossentropy(y_true,y_pred) + lovasz_loss(y_pred, y_true)
+    return binary_crossentropy(y_true,y_pred) + lovasz_loss(y_true, y_pred)
 
 def np_dice_coef(y_true, y_pred):
     y_true_f = y_true.flatten()
