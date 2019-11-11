@@ -319,8 +319,8 @@ def flatten_probas(probas, labels, ignore=None, order='BHWC'):
 
 
 def combo_loss_init(y_true, y_pred):
-    ce_w = 0.2 # < 0.5 penalises FP more, > 0.5 penalises FN more
-    ce_d_w = 0.7 # weighted contribution of modified CE loss compared to Dice loss
+    ce_w = 0.5 # < 0.5 penalises FP more, > 0.5 penalises FN more
+    ce_d_w = 0.5 # weighted contribution of modified CE loss compared to Dice loss
     e = K.epsilon()
     smooth = 1e-6
     y_true_f = K.flatten(y_true)
