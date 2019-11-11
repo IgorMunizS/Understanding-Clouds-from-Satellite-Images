@@ -402,6 +402,8 @@ def parse_args(args):
     parser.add_argument('--yves', help='apply shape yves', default=False, type=bool)
     parser.add_argument('--emsemble', help='Validation emsemble of models. val_file must be a path to folder with all models', default=False, type=bool)
     parser.add_argument('--multimodel', help='Multi class model', default=False, type=bool)
+    parser.add_argument('--resize', help='Resize oof datal', default=False, type=bool)
+    parser.add_argument('--folder', help='folder to resize data', default=None, type=str)
 
     parser.add_argument("--cpu", default=False, type=bool)
 
@@ -421,5 +423,7 @@ if __name__ == '__main__':
         search(args.val_file,args.shape,args.classid,args.fixshape, args.emsemble, args.yves)
     elif args.multimodel:
         multimodel_eval(args.model,args.backbone,args.nfold,args.maxfold,args.shape,args.swa,args.tta,args.fixshape)
+    elif args.resize:
+        resize_oof(args.folder)
     else:
         evaluate(args.model,args.backbone,args.nfold,args.maxfold,args.shape,args.swa,args.tta,args.fixshape)
