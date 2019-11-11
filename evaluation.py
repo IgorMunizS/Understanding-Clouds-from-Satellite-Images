@@ -29,7 +29,7 @@ def resize_oof(folder):
         new_oof_data = np.zeros((oof_data.shape[0], 350,525,4), dtype=np.float16)
         for i in range(oof_data.shape[0]):
             new_oof_data[i,:,:,:] = np_resize(oof_data[i,:,:,:].astype(np.float32), (350,525)).astype(np.float16)
-        np.save(folder + '_' + file, new_oof_data)
+        np.save(folder + file, new_oof_data)
 
 # @ray.remote
 def parallel_post_process(y_true,y_pred,class_id,t,ms,bt,shape,fixshape):
