@@ -235,6 +235,8 @@ def lovasz_softmax_loss(y_true,y_pred):
 def lovasz_softmax_ce(y_true,y_pred):
     return lovasz_softmax(y_pred,y_true) + categorical_crossentropy(y_true,y_pred)
 
+def bce_lovasz_softmax(y_true,y_pred):
+    return lovasz_softmax(y_pred,y_true) + binary_crossentropy(y_true,y_pred)
 
 def lovasz_softmax(probas, labels, classes='all', per_image=False, ignore=None, order='BHWC'):
     """
