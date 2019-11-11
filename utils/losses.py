@@ -96,13 +96,13 @@ def sm_loss(d=1., f=1.):
     return total_loss
 
 
-def lovasz_loss(y_true, y_pred):
-    loss = 0
-    # for i in range(4):
-    y_true, y_pred = K.cast(K.squeeze(y_true, -1), 'float32'), K.cast(K.squeeze(y_pred, -1), 'float32')
-    logits = K.log(y_pred / (1. - y_pred))
-    loss = lovasz_hinge(logits, y_true, per_image=True, ignore=None)
-    return loss
+# def lovasz_loss(y_true, y_pred):
+#     loss = 0
+#     # for i in range(4):
+#     y_true, y_pred = K.cast(K.squeeze(y_true, -1), 'float32'), K.cast(K.squeeze(y_pred, -1), 'float32')
+#     logits = K.log(y_pred / (1. - y_pred))
+#     loss = lovasz_hinge(logits, y_true, per_image=True, ignore=None)
+#     return loss
 
 def focal_loss(y_true, y_pred):
     gamma = 2.0
