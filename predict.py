@@ -3,7 +3,7 @@ from utils.losses import dice_coef, dice_coef_loss_bce
 from keras.optimizers import Adam, Nadam
 from utils.preprocess import get_test_data
 from utils.generator import DataGenerator
-from utils.utils import build_rles
+from utils.utils import build_rles, np_resize
 from utils.posprocess import post_process
 import numpy as np
 import pandas as pd
@@ -52,7 +52,7 @@ def predict(batch_idx,test_imgs,shape,sub_df,backbone,TTA,model):
 
     return batch_pred_masks
 
-def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(320,480),minsize=None,threshold=None, bottom_threshold=None,fixshape=False):
+def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(350,525),minsize=None,threshold=None, bottom_threshold=None,fixshape=False):
     if minsize is None:
         minsize = [10000, 10000, 10000, 10000]
 
@@ -63,6 +63,7 @@ def predict_postprocess(batch_idx,posprocess,batch_pred_masks,shape=(320,480),mi
         bottom_threshold = [None,None,None,None]
 
     h,w = (350,525)
+    resize = False if shape == (350,525) else True
     # sigmoid = lambda x: 1 / (1 + np.exp(-x))
 
     all_masks =[]
@@ -137,8 +138,12 @@ def predict_multimodel(fold_number,smmodel, backbone,model,batch_idx,test_imgs,s
     return batch_pred_masks
 
 def save_prediction(prediction, name):
+    resize_prediction = np.zeros((prediction.shape[0], 350,525,4), dtype=np.float16)
+    for i in range(prediction.shape[0]):
+        resize_prediction[i, :, :, :] = np_resize(prediction[i, :, :, :].astype(np.float32), (350, 525)).astype(np.float16)
+
     with open('../predictions/' + name +'_.pickle', 'wb') as handle:
-        pickle.dump(prediction, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump(resize_prediction, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsizes=None,thresholds=None,fixshape=False,

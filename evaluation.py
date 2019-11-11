@@ -304,7 +304,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
 
 def search(val_file,shape,classid=0,fixshape=False, emsemble=False, yves=False):
 
-    h,w = shape
+    h,w = (350,525)
 
     oof_data = np.load('../validations/y_true_' + str(n_fold_splits) + '.npy')
 
@@ -360,7 +360,7 @@ def search(val_file,shape,classid=0,fixshape=False, emsemble=False, yves=False):
                     for bt in range(min_bottom, int(t*100 - 1), 5): #bottom threshold
                         bt /= 100
 
-                        d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,bt,shape,fixshape)
+                        d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,bt,(350,525),fixshape)
 
                         # print(t, ms, np.mean(d))
                         attempts.append((t, ms, bt, np.mean(d)))
