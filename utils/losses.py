@@ -96,37 +96,11 @@ def sm_loss(d=1., f=1.):
     return total_loss
 
 
-def calc_dist_map(seg):
-    res = np.zeros_like(seg)
-    posmask = seg.astype(np.bool)
-
-    if posmask.any():
-        negmask = ~posmask
-        res = distance(negmask) * negmask - (distance(posmask) - 1) * posmask
-
-    return res
-
-def calc_dist_map_batch(y_true):
-    y_true_numpy = y_true.numpy()
-    return np.array([calc_dist_map(y)
-                     for y in y_true_numpy]).astype(np.float32)
-
-def surface_loss(y_true, y_pred):
-    y_true_dist_map = tf.py_function(func=calc_dist_map_batch,
-                                     inp=[y_true],
-                                     Tout=tf.float32)
-    multipled = y_pred * y_true_dist_map
-    return K.mean(multipled)
-
-def bce_surface_dice_loss(y_true, y_pred, dice=1., bce=1.):
-    return binary_crossentropy_smoothed(y_true, y_pred) * bce + \
-           dice_coef_loss(y_true, y_pred) *dice + surface_loss(y_true,y_pred)
-
-# def lovasz_loss(y_true, y_pred):
-#     y_true, y_pred = K.cast(K.squeeze(y_true, -1), 'int32'), K.cast(K.squeeze(y_pred, -1), 'float32')
-#     logits = K.log(y_pred / (1. - y_pred))
-#     loss = lovasz_hinge(logits, y_true, per_image=True, ignore=None)
-#     return loss
+def lovasz_loss(y_true, y_pred):
+    y_true, y_pred = K.cast(K.squeeze(y_true, -1), 'int32'), K.cast(K.squeeze(y_pred, -1), 'float32')
+    logits = K.log(y_pred / (1. - y_pred))
+    loss = lovasz_hinge(logits, y_true, per_image=True, ignore=None)
+    return loss
 
 def focal_loss(y_true, y_pred):
     gamma = 2.0
@@ -229,11 +203,11 @@ def flatten_binary_scores(scores, labels, ignore=None):
     vlabels = tf.boolean_mask(labels, valid, name='valid_labels')
     return vscores, vlabels
 
-def lovasz_loss(y_true, y_pred):
-    return lovasz_hinge(y_pred, y_true, per_image=True, ignore=None)
+# def lovasz_loss(y_true, y_pred):
+#     return lovasz_hinge(y_pred, y_true, per_image=True, ignore=None)
 
 def bce_lovasz_loss(y_true, y_pred):
-    return binary_crossentropy(y_true,y_pred)*0.5 + lovasz_hinge(y_pred, y_true, per_image=False, ignore=None)*0.5
+    return binary_crossentropy(y_true,y_pred) + lovasz_loss(y_pred, y_true)
 
 def np_dice_coef(y_true, y_pred):
     y_true_f = y_true.flatten()
