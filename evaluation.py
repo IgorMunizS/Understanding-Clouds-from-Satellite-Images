@@ -237,6 +237,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
             # print("Dice: ", d)
 
             oof_data.extend(y_true.astype(np.float16))
+            oof_imgname.extend(img_true)
             # oof_predicted_data.extend(y_pred.astype(np.float16))
             # del y_true, y_pred
             # gc.collect()
