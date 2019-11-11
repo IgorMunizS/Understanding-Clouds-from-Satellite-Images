@@ -12,7 +12,7 @@ import ray
 import psutil
 import numpy as np
 from utils.posprocess import draw_convex_hull, post_process_minsize
-from utils.utils import mask2rle
+from utils.utils import mask2rle, np_resize
 import os
 import pandas as pd
 import time
@@ -20,6 +20,15 @@ from tqdm import tqdm
 from tta_wrapper import tta_segmentation
 from config import n_fold_splits, random_seed
 import os
+
+def resize_oof(folder):
+    files = os.listdir(folder)
+    for file in files:
+        oof_data = np.load(folder + file)
+        new_oof_data = np.zeros((len(oof_data.shape[0]), 350,525,4), dtype=np.float16)
+        for i in range(oof_data.shape[0]):
+            new_oof_data[i,:,:,:] = np_resize(oof_data[i,:,:,:].astype(np.float32), (350,525)).astype(np.float16)
+        np.save(folder + '_' + file, new_oof_data)
 
 # @ray.remote
 def parallel_post_process(y_true,y_pred,class_id,t,ms,bt,shape,fixshape):
@@ -170,13 +179,13 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
     opt = Nadam(lr=0.0002)
 
     skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed, shuffle=True)
-    oof_data = []
-    oof_predicted_data = []
+    oof_data = np.zeros((len(mask_count_df.index), 350,525,4), dtype=np.float16)
+    oof_predicted_data = np.zeros((len(mask_count_df.index), 350,525,4), dtype=np.float16)
     oof_imgname = []
     # num_cpus = psutil.cpu_count(logical=False)
     # ray.init(num_cpus=4)
     oof_dice = []
-
+    cnt_position=0
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
 
         model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef], shape)
@@ -200,62 +209,65 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
             _ ,y_true = val_generator.__getitem__(0)
             img_true = val_generator.image_name
 
-            # val_generator.batch_size = 1
-            #
-            # filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
-            #
-            # if swa:
-            #     filepath += '_swa.h5'
-            # else:
-            #     filepath += '.h5'
-            #
-            #
-            # model.load_weights(filepath)
-            #
-            # # results = model.evaluate_generator(
-            # #     val_generator,
-            # #     workers=40,
-            # #     verbose=1
-            # # )
-            # # print(results)
-            #
-            # if tta:
-            #     model = tta_segmentation(model, h_flip=True,
-            #                          input_shape=(h, w, 3), merge='mean')
-            #
-            #
-            # y_pred = model.predict_generator(
+            val_generator.batch_size = 1
+
+            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
+
+            if swa:
+                filepath += '_swa.h5'
+            else:
+                filepath += '.h5'
+
+
+            model.load_weights(filepath)
+
+            # results = model.evaluate_generator(
             #     val_generator,
             #     workers=40,
             #     verbose=1
             # )
+            # print(results)
+
+            if tta:
+                model = tta_segmentation(model, h_flip=True,
+                                     input_shape=(h, w, 3), merge='mean')
+
+
+            y_pred = model.predict_generator(
+                val_generator,
+                workers=40,
+                verbose=1
+            )
             print(y_true.shape)
-            # print(y_pred.shape)
+            print(y_pred.shape)
             print(len(img_true))
-            # d = np_dice_coef(y_true, y_pred)
-            # oof_dice.append(d)
-            # print("Dice: ", d)
+            d = np_dice_coef(y_true, y_pred)
+            oof_dice.append(d)
+            print("Dice: ", d)
 
-            oof_data.extend(y_true.astype(np.float16))
-            oof_imgname.extend(img_true)
-            # oof_predicted_data.extend(y_pred.astype(np.float16))
-            # del y_true, y_pred
-            # gc.collect()
+            for i in range(y_true.shape[0]):
+                oof_data[cnt_position,:,:,:] = np_resize(y_true[i,:,:,:].astype(np.float32), (350,525)).astype(np.float16)
+                oof_predicted_data[cnt_position,:,:,:] = np.resize(y_pred[i,:,:,:].astype(np.float32), (350,525)).astype(np.float16)
+                cnt_position +=1
 
-    # del val_generator, model
-    # gc.collect()
+            del y_true, y_pred
+            gc.collect()
 
-    oof_data = np.asarray(oof_data)
+    del val_generator, model
+    gc.collect()
+    print(cnt_position)
+
+    # oof_data = np.asarray(oof_data)
     # oof_predicted_data = np.asarray(oof_predicted_data)
     oof_imgname = np.asarray(oof_imgname)
     print(oof_data.shape)
-    # print(oof_predicted_data.shape)
+    print(oof_predicted_data.shape)
     print(oof_imgname.shape)
-    # print("CV Final Dice: ", np.mean(oof_dice))
+    print("CV Final Dice: ", np.mean(oof_dice))
 
     np.save('../validations/img_name_' + str(n_fold_splits) + '.npy', oof_imgname)
-    # np.save('../validations/y_true_' + str(n_fold_splits) + '.npy', oof_data)
-    # np.save('../validations/' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold_splits) + '.npy', oof_predicted_data)
+    np.save('../validations/y_true_' + str(n_fold_splits) + '.npy', oof_data)
+    np.save('../validations/' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold_splits) + '.npy', oof_predicted_data)
 
     # now = time.time()
     # class_params = {}
