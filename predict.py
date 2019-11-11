@@ -216,11 +216,9 @@ def postprocess_pickle(pickle_path, emsemble, minsizes, thresholds, bottom_thres
         submission_name = 'emsemble_submission'
         for i,file in enumerate(os.listdir(models_emsemble_path)):
             if i == 0:
-                with open(models_emsemble_path + file, 'rb') as handle:
-                    predicted_data = pickle.load(handle)
+                predicted_data = np.load(models_emsemble_path + file)
             else:
-                with open(models_emsemble_path + file, 'rb') as handle:
-                    predicted_data += pickle.load(handle)
+                predicted_data += np.load(models_emsemble_path + file)
 
         predicted_data /= len(os.listdir(models_emsemble_path))
     else:
