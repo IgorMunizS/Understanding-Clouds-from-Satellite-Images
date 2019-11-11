@@ -8,7 +8,7 @@ from keras.optimizers import Adam, Nadam, SGD, RMSprop
 from utils.lr import CyclicLR, Lookahead, AdamAccumulate
 from models import get_model
 from utils.losses import dice_coef, dice_coef_loss_bce, dice_coef_fish,dice_coef_flower,dice_coef_gravel,dice_coef_sugar
-from utils.losses import jaccard, sm_loss, combo_loss_init, combo_loss_ft, lovasz_loss,bce_lovasz_loss, bce_surface_dice_loss
+from utils.losses import jaccard, sm_loss, combo_loss_init, combo_loss_ft, lovasz_loss,bce_lovasz_loss
 from utils.callbacks import ValPosprocess, SnapshotCallbackBuilder, SWA
 from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 import gc
