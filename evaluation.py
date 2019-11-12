@@ -217,7 +217,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
 
             _ ,y_true = val_generator.__getitem__(0)
             img_true = val_generator.image_name
-
+            oof_imgname.extend(img_true)
             val_generator.batch_size = 1
 
             filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
@@ -249,7 +249,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
             )
             print(y_true.shape)
             print(y_pred.shape)
-            print(len(img_true))
+            print(len(oof_imgname))
             d = np_dice_coef(y_true, y_pred)
             oof_dice.append(d)
             print("Dice: ", d)
