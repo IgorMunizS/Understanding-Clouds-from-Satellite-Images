@@ -127,7 +127,7 @@ def parse_args(args):
     parser.add_argument('--model', help='Segmentation model', default='unet')
     parser.add_argument('--backbone', help='Model backbone', default='resnet34', type=str)
     parser.add_argument('--batch_size', default=32, type=int)
-    parser.add_argument('--shape', help='Shape of resized images', default=(448,448), type=tuple)
+    parser.add_argument('--shape', help='Shape of resized images', default=(320,480), type=tuple)
     parser.add_argument('--n_fold', help='Number of fold to start training', default=0, type=int)
     parser.add_argument('--pseudo_label', help='Add extra data from test', default=None, type=str)
     return parser.parse_args(args)
