@@ -256,7 +256,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
 
             for i in range(y_true.shape[0]):
                 oof_data[cnt_position,:,:,:] = np_resize(y_true[i,:,:,:].astype(np.float32), (350,525)).astype(np.float16)
-                oof_predicted_data[cnt_position,:,:,:] = np.resize(y_pred[i,:,:,:].astype(np.float32), (350,525)).astype(np.float16)
+                oof_predicted_data[cnt_position,:,:,:] = np_resize(y_pred[i,:,:,:].astype(np.float32), (350,525)).astype(np.float16)
                 cnt_position +=1
 
             del y_true, y_pred
