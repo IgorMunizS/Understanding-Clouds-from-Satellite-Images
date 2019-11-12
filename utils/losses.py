@@ -121,8 +121,27 @@ def tversky(y_true, y_pred):
     alpha = 0.7
     return (true_pos + smooth)/(true_pos + alpha*false_neg + (1-alpha)*false_pos + smooth)
 
+# def tversky_loss(y_true, y_pred):
+#     return 1 - tversky(y_true,y_pred)
+
+
 def tversky_loss(y_true, y_pred):
-    return 1 - tversky(y_true,y_pred)
+    alpha = 0.5
+    beta = 0.5
+
+    ones = K.ones(K.shape(y_true))
+    p0 = y_pred  # proba that voxels are class i
+    p1 = ones - y_pred  # proba that voxels are not class i
+    g0 = y_true
+    g1 = ones - y_true
+
+    num = K.sum(p0 * g0, (0, 1, 2, 3))
+    den = num + alpha * K.sum(p0 * g1, (0, 1, 2, 3)) + beta * K.sum(p1 * g0, (0, 1, 2, 3))
+
+    T = K.sum(num / den)  # when summing over classes, T has dynamic range [0 Ncl]
+
+    Ncl = K.cast(K.shape(y_true)[-1], 'float32')
+    return Ncl - T
 
 def focal_tversky(y_true,y_pred):
     pt_1 = tversky(y_true, y_pred)
