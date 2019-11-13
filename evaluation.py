@@ -323,11 +323,11 @@ def search(val_file,shape,classid=0,fixshape=False, emsemble=False, yves=False):
     print(oof_predicted_data.shape)
 
     #search range variables
-    min_thre = 55
-    max_thre = 85
+    min_thre = 75
+    max_thre = 81
     min_minsize = 0
-    max_minsize = 6000
-    min_bottom = 30
+    max_minsize = 1100
+    min_bottom = 40
 
     if yves:
         min_thre += 15
