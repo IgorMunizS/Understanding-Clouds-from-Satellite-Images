@@ -323,10 +323,10 @@ def search(val_file,shape,classid=0,fixshape=False, emsemble=False, yves=False):
     print(oof_predicted_data.shape)
 
     #search range variables
-    min_thre = 75
-    max_thre = 81
-    min_minsize = 0
-    max_minsize = 1100
+    min_thre = 55
+    max_thre = 71
+    min_minsize = 10000
+    max_minsize = 21000
     min_bottom = 40
 
     if yves:
@@ -356,7 +356,7 @@ def search(val_file,shape,classid=0,fixshape=False, emsemble=False, yves=False):
             attempts = []
             for t in tqdm(range(min_thre, max_thre, 5)): #threshold post process
                 t /= 100
-                for ms in tqdm(range(min_minsize, max_minsize, 1000)): #minsize post process
+                for ms in tqdm(range(min_minsize, max_minsize, 5000)): #minsize post process
                     for bt in range(min_bottom, int(t*100 - 1), 5): #bottom threshold
                         bt /= 100
 
