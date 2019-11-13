@@ -142,9 +142,9 @@ def save_prediction(prediction, name):
     for i in range(prediction.shape[0]):
         resize_prediction[i, :, :, :] = np_resize(prediction[i, :, :, :].astype(np.float32), (350, 525)).astype(np.float16)
 
-    with open('../predictions/' + name +'_.pickle', 'wb') as handle:
-        pickle.dump(resize_prediction, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
+    # with open('../predictions/' + name +'_.pickle', 'wb') as handle:
+    #     pickle.dump(resize_prediction, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    np.save('../predictions/' + name +'_.npy', resize_prediction)
 
 def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsizes=None,thresholds=None,fixshape=False,
                   multimodel=False):
