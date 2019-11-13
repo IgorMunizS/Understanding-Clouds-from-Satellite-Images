@@ -324,8 +324,8 @@ def search(val_file,shape,classid=0,fixshape=False, emsemble=False, yves=False):
 
     #search range variables
     min_thre = 55
-    max_thre = 71
-    min_minsize = 10000
+    max_thre = 81
+    min_minsize = 0
     max_minsize = 21000
     min_bottom = 40
 
@@ -373,7 +373,8 @@ def search(val_file,shape,classid=0,fixshape=False, emsemble=False, yves=False):
             best_threshold = attempts_df['threshold'].values[0]
             best_size = attempts_df['size'].values[0]
             best_bottom = attempts_df['bottom'].values[0]
-            class_params[class_id] = (best_threshold, best_size, best_bottom)
+            best_dice = attempts_df['dice'].values[0]
+            class_params[class_id] = (best_threshold, best_size, best_bottom,best_dice)
 
     print(class_params)
         # ray.shutdown()
