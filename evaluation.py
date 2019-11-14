@@ -136,19 +136,19 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
                 del y_pred
                 gc.collect()
 
-                print(y_true.shape)
-                print(final_pred.shape)
-                print(len(oof_imgname))
-                d = np_dice_coef(y_true, final_pred)
-                oof_dice.append(d)
-                print("Dice: ", d)
+            print(y_true.shape)
+            print(final_pred.shape)
+            print(len(oof_imgname))
+            d = np_dice_coef(y_true, final_pred)
+            oof_dice.append(d)
+            print("Dice: ", d)
 
-                for i in range(y_true.shape[0]):
-                    oof_data[cnt_position, :, :, :] = np_resize(y_true[i, :, :, :].astype(np.float32), (350, 525)).astype(
-                        np.float16)
-                    oof_predicted_data[cnt_position, :, :, :] = np_resize(final_pred[i, :, :, :].astype(np.float32),
-                                                                          (350, 525)).astype(np.float16)
-                    cnt_position += 1
+            for i in range(y_true.shape[0]):
+                oof_data[cnt_position, :, :, :] = np_resize(y_true[i, :, :, :].astype(np.float32), (350, 525)).astype(
+                    np.float16)
+                oof_predicted_data[cnt_position, :, :, :] = np_resize(final_pred[i, :, :, :].astype(np.float32),
+                                                                      (350, 525)).astype(np.float16)
+                cnt_position += 1
 
         del y_true, final_pred
         gc.collect()
