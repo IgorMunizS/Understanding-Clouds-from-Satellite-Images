@@ -6,8 +6,10 @@ from tensorflow.keras.optimizers import Nadam
 from config import n_classes
 
 
-def get_model(model,BACKBONE,opt,loss,metric,freeze_encoder=False,batchnormalization=True,dropout=None):
+def get_model(model,BACKBONE,opt,loss,metric,nclass=None,freeze_encoder=False,batchnormalization=True,dropout=None):
     h,w = None, None
+    if nclass is not None:
+        n_classes = nclass
 
     if model == 'fpn':
         model = sm.FPN(

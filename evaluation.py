@@ -101,7 +101,11 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
             val_generator.batch_size = 1
 
             for i,cls in enumerate(classes):
-                model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef], shape)
+                if n_fold >=2:
+                    model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef], nclass=4)
+                else:
+                    model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef])
+
 
                 filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_' + cls
 
