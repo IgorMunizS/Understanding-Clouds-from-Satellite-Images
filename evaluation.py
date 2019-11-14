@@ -96,7 +96,7 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
                 reshape=shape,
                 augment=False,
                 n_channels=3,
-                n_classes=nclass,
+                n_classes=4,
                 backbone=backbone
             )
 
