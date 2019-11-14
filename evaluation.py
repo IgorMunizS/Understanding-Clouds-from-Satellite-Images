@@ -82,6 +82,7 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
         if n_fold >= nfold and n_fold <= maxfold:
             if n_fold >= 2:
                 nclass = 4
+                print(nclass)
             else:
                 nclass = n_classes
 

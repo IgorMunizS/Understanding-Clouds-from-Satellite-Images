@@ -28,7 +28,7 @@ def get_model(model,BACKBONE,opt,loss,metric,nclass=None,freeze_encoder=False,ba
     elif model == 'unet':
         model = sm.Unet(
             BACKBONE,
-            classes=n_classes,
+            classes=nclass,
             input_shape=(h, w, 3),
             activation='sigmoid'
         )
@@ -37,7 +37,7 @@ def get_model(model,BACKBONE,opt,loss,metric,nclass=None,freeze_encoder=False,ba
     elif model == 'psp':
         model = sm.PSPNet(
             BACKBONE,
-            classes=n_classes,
+            classes=nclass,
             input_shape=(h, w, 3),
             activation='sigmoid'
         )
@@ -46,7 +46,7 @@ def get_model(model,BACKBONE,opt,loss,metric,nclass=None,freeze_encoder=False,ba
     elif model == 'linknet':
         model = sm.Linknet(
             BACKBONE,
-            classes=n_classes,
+            classes=nclass,
             input_shape=(h, w, 3),
             activation='sigmoid'
         )
@@ -55,13 +55,13 @@ def get_model(model,BACKBONE,opt,loss,metric,nclass=None,freeze_encoder=False,ba
     elif model == 'xnet':
         model = smx.Xnet(
             BACKBONE,
-            classes=n_classes,
+            classes=nclass,
             input_shape=(h, w, 3),
             activation='sigmoid'
         )
         model.compile(optimizer=opt, loss=loss, metrics=metric)
     elif model == 'jpu':
-        model = JPU_DeepLab(h,w,n_classes)
+        model = JPU_DeepLab(h,w,nclass)
         model.compile(optimizer=opt, loss=loss, metrics=metric)
 
     elif model == 'deeplab':
