@@ -75,10 +75,10 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
     oof_dice = []
     classes=['Fish','Flower','Gravel','Sugar']
     cnt_position = 0
-    y_true = []
+
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
         final_pred = np.zeros((len(val_indices),h,w,4), dtype=np.float32)
-
+        y_true = []
         if n_fold >= nfold and n_fold <= maxfold:
             print('Evaluating fold number ', str(n_fold))
 
@@ -136,19 +136,19 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
                 del y_pred
                 gc.collect()
 
-            print(y_true.shape)
-            print(final_pred.shape)
-            print(len(oof_imgname))
-            d = np_dice_coef(y_true, final_pred)
-            oof_dice.append(d)
-            print("Dice: ", d)
+                print(y_true.shape)
+                print(final_pred.shape)
+                print(len(oof_imgname))
+                d = np_dice_coef(y_true, final_pred)
+                oof_dice.append(d)
+                print("Dice: ", d)
 
-            for i in range(y_true.shape[0]):
-                oof_data[cnt_position, :, :, :] = np_resize(y_true[i, :, :, :].astype(np.float32), (350, 525)).astype(
-                    np.float16)
-                oof_predicted_data[cnt_position, :, :, :] = np_resize(final_pred[i, :, :, :].astype(np.float32),
-                                                                      (350, 525)).astype(np.float16)
-                cnt_position += 1
+                for i in range(y_true.shape[0]):
+                    oof_data[cnt_position, :, :, :] = np_resize(y_true[i, :, :, :].astype(np.float32), (350, 525)).astype(
+                        np.float16)
+                    oof_predicted_data[cnt_position, :, :, :] = np_resize(final_pred[i, :, :, :].astype(np.float32),
+                                                                          (350, 525)).astype(np.float16)
+                    cnt_position += 1
 
         del y_true, final_pred
         gc.collect()
