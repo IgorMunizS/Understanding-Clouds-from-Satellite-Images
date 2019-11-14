@@ -386,7 +386,7 @@ def parse_args(args):
 
     parser.add_argument('--model', help='Segmentation model', default='unet')
     parser.add_argument('--backbone', help='Model backbone', default='resnet34', type=str)
-    parser.add_argument('--shape', help='Shape of resized images', default=(320, 480), type=tuple)
+    parser.add_argument('--shape', help='Shape of resized images', nargs='+', default=[320, 480], type=int)
     parser.add_argument('--nfold', help='number of fold to evaluate', default=0, type=int)
     parser.add_argument('--maxfold', help='number of fold to evaluate', default=5, type=int)
     parser.add_argument('--tta', help='apply TTA', default=False, type=bool)
@@ -411,15 +411,18 @@ if __name__ == '__main__':
     args = sys.argv[1:]
     args = parse_args(args)
 
+    h,w = args.shape
+    newshape = (h,w)
+
     if args.cpu:
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
         os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
     if args.search:
-        search(args.val_file,args.shape,args.classid,args.fixshape, args.emsemble, args.yves)
+        search(args.val_file,newshape,args.classid,args.fixshape, args.emsemble, args.yves)
     elif args.multimodel:
-        multimodel_eval(args.model,args.backbone,args.nfold,args.maxfold,args.shape,args.swa,args.tta,args.fixshape)
+        multimodel_eval(args.model,args.backbone,args.nfold,args.maxfold,newshape,args.swa,args.tta,args.fixshape)
     elif args.resize:
         resize_oof(args.folder)
     else:
-        evaluate(args.model,args.backbone,args.nfold,args.maxfold,args.shape,args.swa,args.tta,args.fixshape)
+        evaluate(args.model,args.backbone,args.nfold,args.maxfold,newshape,args.swa,args.tta,args.fixshape)
