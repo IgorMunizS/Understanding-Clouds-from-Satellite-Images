@@ -9,12 +9,14 @@ from config import n_classes
 def get_model(model,BACKBONE,opt,loss,metric,nclass=None,freeze_encoder=False,batchnormalization=True,dropout=None):
     h,w = None, None
     if nclass is not None:
-        n_classes = nclass
+        nclass = nclass
+    else:
+        nclass = n_classes
 
     if model == 'fpn':
         model = sm.FPN(
             BACKBONE,
-            classes=n_classes,
+            classes=nclass,
             input_shape=(h, w, 3),
             activation='sigmoid',
             encoder_freeze=freeze_encoder,
