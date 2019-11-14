@@ -68,12 +68,13 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
     opt = Nadam(lr=0.0002)
 
     skf = StratifiedKFold(n_splits=n_fold_splits, random_state=random_seed, shuffle=True)
-    oof_data = []
-    oof_predicted_data = []
-    # num_cpus = psutil.cpu_count(logical=False)
-    # ray.init(num_cpus=4)
+    oof_data = np.zeros((len(mask_count_df.index), 350, 525, 4), dtype=np.float16)
+    oof_predicted_data = np.zeros((len(mask_count_df.index), 350, 525, 4), dtype=np.float16)
+    oof_imgname = []
+
     oof_dice = []
     classes=['Fish','Flower','Gravel','Sugar']
+    cnt_position = 0
 
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
         final_pred = np.zeros((len(val_indices),h,w,4), dtype=np.float32)
@@ -95,6 +96,8 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
             )
 
             _, y_true = val_generator.__getitem__(0)
+            img_true = val_generator.image_name
+            oof_imgname.extend(img_true)
             val_generator.batch_size = 1
 
             for i,cls in enumerate(classes):
@@ -134,51 +137,34 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
                 gc.collect()
 
             print(y_true.shape)
-            print(final_pred.shape)
-            # print(y_pred)
-            d = np_dice_coef(y_true, final_pred)
+            print(y_pred.shape)
+            print(len(oof_imgname))
+            d = np_dice_coef(y_true, y_pred)
             oof_dice.append(d)
             print("Dice: ", d)
 
-            oof_data.extend(y_true.astype(np.float16))
-            oof_predicted_data.extend(final_pred.astype(np.float16))
-            del y_true, final_pred
-            gc.collect()
+            for i in range(y_true.shape[0]):
+                oof_data[cnt_position, :, :, :] = np_resize(y_true[i, :, :, :].astype(np.float32), (350, 525)).astype(
+                    np.float16)
+                oof_predicted_data[cnt_position, :, :, :] = np_resize(y_pred[i, :, :, :].astype(np.float32),
+                                                                      (350, 525)).astype(np.float16)
+                cnt_position += 1
+
+        del y_true, final_pred
+        gc.collect()
 
     del val_generator, model
     gc.collect()
 
-    oof_data = np.asarray(oof_data)
-    oof_predicted_data = np.asarray(oof_predicted_data)
     print(oof_data.shape)
     print(oof_predicted_data.shape)
+    print(oof_imgname.shape)
     print("CV Final Dice: ", np.mean(oof_dice))
 
+    np.save('../validations/img_name_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold_splits) + '.npy', oof_imgname)
     np.save('../validations/y_true_' + str(n_fold_splits) + '.npy', oof_data)
     np.save('../validations/' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold_splits) + '.npy', oof_predicted_data)
 
-    now = time.time()
-    class_params = {}
-    for class_id in range(4):
-        print(class_id)
-        attempts = []
-        for t in tqdm(range(45, 85, 5)):
-            t /= 100
-            for ms in tqdm(range(10000, 31000, 5000)):
-
-                d = parallel_post_process(oof_data,oof_predicted_data,class_id,t,ms,None,shape,fixshape)
-
-                # print(t, ms, np.mean(d))
-                attempts.append((t, ms, np.mean(d)))
-
-        attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'dice'])
-
-        attempts_df = attempts_df.sort_values('dice', ascending=False)
-        print(attempts_df.head())
-        print('Time: ', time.time() - now)
-        best_threshold = attempts_df['threshold'].values[0]
-        best_size = attempts_df['size'].values[0]
-        class_params[class_id] = (best_threshold, best_size)
 
 def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False,fixshape=True):
     h,w =shape
