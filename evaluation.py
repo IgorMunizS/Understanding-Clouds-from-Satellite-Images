@@ -18,7 +18,7 @@ import pandas as pd
 import time
 from tqdm import tqdm
 from tta_wrapper import tta_segmentation
-from config import n_fold_splits, random_seed
+from config import n_fold_splits, random_seed, n_classes
 import os
 
 def resize_oof(folder):
@@ -80,6 +80,11 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
         final_pred = np.zeros((len(val_indices),h,w,4), dtype=np.float32)
         y_true = []
         if n_fold >= nfold and n_fold <= maxfold:
+            if n_fold >= 2:
+                nclass = 4
+            else:
+                nclass = n_classes
+
             print('Evaluating fold number ', str(n_fold))
 
             val_generator = DataGenerator(
@@ -91,7 +96,7 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
                 reshape=shape,
                 augment=False,
                 n_channels=3,
-                n_classes=4,
+                n_classes=nclass,
                 backbone=backbone
             )
 
@@ -101,11 +106,8 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
             val_generator.batch_size = 1
 
             for i,cls in enumerate(classes):
-                if n_fold >=2:
-                    model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef], nclass=4)
-                else:
-                    model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef])
 
+                model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef], nclass=nclass)
 
                 filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_' + cls
 
