@@ -75,7 +75,7 @@ def multimodel_eval(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tt
     oof_dice = []
     classes=['Fish','Flower','Gravel','Sugar']
     cnt_position = 0
-
+    y_true = []
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
         final_pred = np.zeros((len(val_indices),h,w,4), dtype=np.float32)
 
