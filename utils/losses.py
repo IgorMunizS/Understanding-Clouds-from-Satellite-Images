@@ -278,9 +278,7 @@ def flatten_binary_scores(scores, labels, ignore=None):
     return vscores, vlabels
 
 def lovasz_loss(y_true, y_pred):
-    loss = 0
-    for i in range(4):
-        loss += lovasz_hinge(y_pred[...,i], y_true[...,i], per_image=True, ignore=None) / 4
+    loss = lovasz_hinge(y_pred, y_true, per_image=True, ignore=None)
     return loss
 
 def bce_lovasz_loss(y_true, y_pred):
