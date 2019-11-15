@@ -215,7 +215,7 @@ def postprocess_pickle(pickle_path, emsemble, minsizes, thresholds, bottom_thres
     print(test_imgs.shape[0])
 
     if emsemble:
-        models_emsemble_path = '../predictions/emsemble/'
+        models_emsemble_path = pickle_path
         submission_name = 'emsemble_submission'
         for i,file in enumerate(os.listdir(models_emsemble_path)):
             if i == 0:
