@@ -84,8 +84,8 @@ def train(smmodel,backbone,batch_size,shape=(320,480),nfold=0,pseudo_label=None)
 
             metrics = [dice_coef,dice_coef_fish,dice_coef_flower,dice_coef_gravel,dice_coef_sugar]
             model = get_model(smmodel,backbone,opt,dice_coef_loss_bce,[dice_coef])
-            # filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
-            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_' + classe
+            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
+            # filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold) + '_' + classe
 
             ckp = ModelCheckpoint(filepath + '.h5', monitor='val_dice_coef', verbose=1, save_best_only=True, mode='max',
                                          save_weights_only=True)
