@@ -6,10 +6,12 @@ import sys
 def save_blend_int(val_file,type='oof'):
 
     for i, file in enumerate(os.listdir(val_file)):
+        matrix = np.load(val_file + file)
+        print(file, matrix.max())
         if i == 0:
-            oof_predicted_data = np.load(val_file + file)
+            oof_predicted_data = matrix
         else:
-            oof_predicted_data += np.load(val_file + file)
+            oof_predicted_data += matrix
 
     oof_predicted_data /= len(os.listdir(val_file))
     # oof_predicted_data = (oof_predicted_data*100).astype(np.int8)
