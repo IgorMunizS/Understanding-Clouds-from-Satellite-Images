@@ -248,8 +248,8 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
 
             f=[]
             for i in range(y_true.shape[0]):
-                for i in range(4):
-                    d1 = np_dice_coef(y_true[i,:,:,i], y_pred[i,:,:,i])
+                for j in range(4):
+                    d1 = np_dice_coef(y_true[i,:,:,j], y_pred[i,:,:,j])
                     f.append(d1)
 
                 oof_data[cnt_position,:,:,:] = np_resize(y_true[i,:,:,:].astype(np.float32), (350,525)).astype(np.float16)
