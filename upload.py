@@ -11,7 +11,7 @@ def save_blend_int(val_file,type='oof'):
         else:
             oof_predicted_data += np.load(val_file + file)
 
-    oof_predicted_data = (oof_predicted_data*100).astype(np.int8)
+    # oof_predicted_data = (oof_predicted_data*100).astype(np.int8)
     np.save(val_file + '_blend_' + type +'.npy', oof_predicted_data)
 
 def parse_args(args):
