@@ -244,15 +244,18 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
             print(y_true.shape)
             print(y_pred.shape)
             print(len(oof_imgname))
-            d = np_dice_coef(y_true, y_pred)
-            oof_dice.append(d)
-            print("Dice: ", d)
 
+
+            f=[]
             for i in range(y_true.shape[0]):
+                d1 = np_dice_coef(y_true[i,:,:,:], y_pred[i,:,:,:])
+                f.append(d1)
+
                 oof_data[cnt_position,:,:,:] = np_resize(y_true[i,:,:,:].astype(np.float32), (350,525)).astype(np.float16)
                 oof_predicted_data[cnt_position,:,:,:] = np_resize(y_pred[i,:,:,:].astype(np.float32), (350,525)).astype(np.float16)
                 cnt_position +=1
-
+            print("Dice: ", np.mean(f))
+            oof_dice.append(np.mean(f))
             del y_true, y_pred
             gc.collect()
 
