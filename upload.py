@@ -14,6 +14,9 @@ def save_blend_int(val_file,type='oof'):
             oof_predicted_data += matrix
 
     oof_predicted_data /= len(os.listdir(val_file))
+    print(oof_predicted_data.max())
+    print(oof_predicted_data.min())
+
     # oof_predicted_data = (oof_predicted_data*100).astype(np.int8)
     np.save(val_file + '_blend_' + type +'.npy', oof_predicted_data)
 
