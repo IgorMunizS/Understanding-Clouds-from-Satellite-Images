@@ -162,9 +162,9 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsiz
         model_masks=[]
         submission_name = submission_name + str(smmodel) + '_' + str(backbone) + '_'
 
-        for i in range(0, test_imgs.shape[0], 1500):
+        for i in range(0, test_imgs.shape[0], 860):
             batch_idx = list(
-                range(i, min(test_imgs.shape[0], i + 1500))
+                range(i, min(test_imgs.shape[0], i + 860))
             )
             fold_result = []
 
