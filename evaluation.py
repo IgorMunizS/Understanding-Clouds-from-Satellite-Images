@@ -193,76 +193,76 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
 
         model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef])
 
-        if n_fold >= nfold and n_fold <= maxfold:
-            print('Evaluating fold number ',str(n_fold))
-
-            val_generator = DataGenerator(
-                val_indices,
-                df=mask_count_df,
-                shuffle=False,
-                target_df=train_df,
-                batch_size=len(val_indices),
-                reshape=shape,
-                augment=False,
-                n_channels=3,
-                n_classes=4,
-                backbone=backbone
+        for i in range(0, len(val_indices), 480):
+            batch_idx = list(
+                range(i, min(len(val_indices), i + 480))
             )
+            if n_fold >= nfold and n_fold <= maxfold:
+                print('Evaluating fold number ',str(n_fold))
 
-            _ ,y_true = val_generator.__getitem__(0)
-            img_true = val_generator.image_name
-            oof_imgname.extend(img_true)
-            val_generator.batch_size = 1
+                val_generator = DataGenerator(
+                    val_indices[batch_idx],
+                    df=mask_count_df,
+                    shuffle=False,
+                    target_df=train_df,
+                    batch_size=len(val_indices),
+                    reshape=shape,
+                    augment=False,
+                    n_channels=3,
+                    n_classes=4,
+                    backbone=backbone
+                )
 
-            filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
+                _ ,y_true = val_generator.__getitem__(0)
+                img_true = val_generator.image_name
+                oof_imgname.extend(img_true)
+                val_generator.batch_size = 1
 
-            if swa:
-                filepath += '_swa.h5'
-            else:
-                filepath += '.h5'
+                filepath = '../models/best_' + str(smmodel) + '_' + str(backbone) + '_' + str(n_fold)
 
-
-            model.load_weights(filepath)
-
-            # results = model.evaluate_generator(
-            #     val_generator,
-            #     workers=40,
-            #     verbose=1
-            # )
-            # print(results)
-
-            if tta:
-                model = tta_segmentation(model, h_flip=True, v_flip=True,
-                                         input_shape=(h, w, 3), merge='mean')
-
-
-            y_pred = model.predict_generator(
-                val_generator,
-                workers=40,
-                verbose=1
-            )
-            print(y_true.shape)
-            print(y_pred.shape)
-            print(len(oof_imgname))
+                if swa:
+                    filepath += '_swa.h5'
+                else:
+                    filepath += '.h5'
 
 
-            f=[]
-            for i in range(y_true.shape[0]):
-                for j in range(4):
-                    d1 = np_dice_coef(y_true[i,:,:,j], y_pred[i,:,:,j])
-                    f.append(d1)
+                model.load_weights(filepath)
 
-                oof_data[cnt_position,:,:,:] = np_resize(y_true[i,:,:,:].astype(np.float32), (350,525)).astype(np.float16)
-                oof_predicted_data[cnt_position,:,:,:] = np_resize(y_pred[i,:,:,:].astype(np.float32), (350,525)).astype(np.float16)
-                cnt_position +=1
-            print("Dice: ", np.mean(f))
-            oof_dice.append(np.mean(f))
-            del y_true, y_pred
-            gc.collect()
+                # results = model.evaluate_generator(
+                #     val_generator,
+                #     workers=40,
+                #     verbose=1
+                # )
+                # print(results)
 
-    del val_generator, model
-    gc.collect()
-    print(cnt_position)
+                if tta:
+                    model = tta_segmentation(model, h_flip=True, v_flip=True,
+                                             input_shape=(h, w, 3), merge='mean')
+
+
+                y_pred = model.predict_generator(
+                    val_generator,
+                    workers=40,
+                    verbose=1
+                )
+                print(y_true.shape)
+                print(y_pred.shape)
+                print(len(oof_imgname))
+
+
+                f=[]
+                for i in range(y_true.shape[0]):
+                    for j in range(4):
+                        d1 = np_dice_coef(y_true[i,:,:,j], y_pred[i,:,:,j])
+                        f.append(d1)
+
+                    oof_data[cnt_position,:,:,:] = np_resize(y_true[i,:,:,:].astype(np.float32), (350,525)).astype(np.float16)
+                    oof_predicted_data[cnt_position,:,:,:] = np_resize(y_pred[i,:,:,:].astype(np.float32), (350,525)).astype(np.float16)
+                    cnt_position +=1
+                print("Dice: ", np.mean(f))
+                oof_dice.append(np.mean(f))
+                del y_true, y_pred, val_generator, model
+                gc.collect()
 
     # oof_data = np.asarray(oof_data)
     # oof_predicted_data = np.asarray(oof_predicted_data)
