@@ -191,12 +191,12 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
     cnt_position=0
     for n_fold, (train_indices, val_indices) in enumerate(skf.split(mask_count_df.index, mask_count_df.hasMask)):
 
-        model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef])
 
         for i in range(0, len(val_indices), 480):
             batch_idx = list(
                 range(i, min(len(val_indices), i + 480))
             )
+            model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef])
             if n_fold >= nfold and n_fold <= maxfold:
                 print('Evaluating fold number ',str(n_fold))
 
