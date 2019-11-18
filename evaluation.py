@@ -205,7 +205,7 @@ def evaluate(smmodel,backbone,nfold,maxfold,shape=(320,480),swa=False, tta=False
                     df=mask_count_df,
                     shuffle=False,
                     target_df=train_df,
-                    batch_size=len(val_indices),
+                    batch_size=len(val_indices[batch_idx]),
                     reshape=shape,
                     augment=False,
                     n_channels=3,
