@@ -169,10 +169,7 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsiz
             fold_result = []
 
             for i in folds:
-                if i >= 2:
-                    model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef],nclass=4)
-                else:
-                    model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef],nclass=1)
+                model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef])
 
                 if multimodel:
                     batch_pred_masks = predict_multimodel(i,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA,swa)
