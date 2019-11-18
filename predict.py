@@ -162,11 +162,12 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsiz
         model_masks=[]
         submission_name = submission_name + str(smmodel) + '_' + str(backbone) + '_'
 
-        for i in range(0, test_imgs.shape[0], 240):
+        for i in range(0, test_imgs.shape[0], 860):
             batch_idx = list(
-                range(i, min(test_imgs.shape[0], i + 240))
+                range(i, min(test_imgs.shape[0], i + 860))
             )
             fold_result = []
+            batch_pred_resized = np.zeros((len(batch_idx), 350,525,4), dtype=np.float16)
 
             for i in folds:
                 model = get_model(smmodel, backbone, opt, dice_coef_loss_bce, [dice_coef])
@@ -176,7 +177,13 @@ def final_predict(models,folds,shape,TTA=False,posprocess=False,swa=False,minsiz
                 else:
                     batch_pred_masks = predict_fold(i,smmodel, backbone,model,batch_idx,test_imgs,shape,sub_df,TTA,swa)
                 # print(np.array(batch_pred_masks).shape)
-                fold_result.append(batch_pred_masks.astype(np.float16))
+
+                for i in range(batch_pred_masks.shape[0]):
+                    batch_pred_resized[i,:,:,:] = np_resize(batch_pred_masks[i,:,:,:], (350,525)).astype(np.float16)
+
+                del batch_pred_masks
+                gc.collect()
+                fold_result.append(batch_pred_resized.astype(np.float16))
 
             batch_pred_masks = np.mean(fold_result, axis=0, dtype=np.float16)
             del fold_result
